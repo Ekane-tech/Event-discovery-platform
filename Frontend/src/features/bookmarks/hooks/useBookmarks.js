@@ -1,0 +1,86 @@
+import { useCallback, useEffect, useState } from 'react'
+import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
+import { extractCollection, normalizeEvents } from '../../events/utils/normalizeEvent.js'
+import { bookmarkService } from '../services/bookmarkService.js'
+
+const BOOKMARKS_UPDATED_EVENT = 'bookmarks-updated'
+
+function normalizeBookmarks(apiBookmarks = []) {
+  return apiBookmarks.map((bookmark) => ({
+    id: bookmark.id,
+    eventId: Number(bookmark.event_id),
+    event: bookmark.event,
+    createdAt: bookmark.created_at,
+  }))
+}
+
+export function useBookmarks() {
+  const [bookmarks, setBookmarks] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  const fetchBookmarks = useCallback(async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const response = await bookmarkService.getBookmarks({ per_page: 50 })
+      setBookmarks(normalizeBookmarks(extractCollection(response.data, 'bookmarks')))
+    } catch (fetchError) {
+      setError(getApiErrorMessage(fetchError, 'Unable to load bookmarks.'))
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchBookmarks()
+
+    function handleBookmarksUpdated() {
+      fetchBookmarks()
+    }
+
+    window.addEventListener(BOOKMARKS_UPDATED_EVENT, handleBookmarksUpdated)
+    return () => window.removeEventListener(BOOKMARKS_UPDATED_EVENT, handleBookmarksUpdated)
+  }, [fetchBookmarks])
+
+  function isBookmarked(eventId) {
+    return bookmarks.some((bookmark) => Number(bookmark.eventId) === Number(eventId))
+  }
+
+  async function addBookmark(eventId) {
+    await bookmarkService.addBookmark(eventId)
+    window.dispatchEvent(new CustomEvent(BOOKMARKS_UPDATED_EVENT))
+    await fetchBookmarks()
+  }
+
+  async function removeBookmark(eventId) {
+    await bookmarkService.removeBookmark(eventId)
+    window.dispatchEvent(new CustomEvent(BOOKMARKS_UPDATED_EVENT))
+    await fetchBookmarks()
+  }
+
+  async function toggleBookmark(eventId) {
+    if (isBookmarked(eventId)) {
+      await removeBookmark(eventId)
+      return false
+    }
+    await addBookmark(eventId)
+    return true
+  }
+
+  const bookmarkedEvents = normalizeEvents(bookmarks.map((bookmark) => bookmark.event).filter(Boolean))
+
+  return {
+    bookmarks,
+    bookmarkedEventIds: bookmarks.map((bookmark) => bookmark.eventId),
+    bookmarkedEvents,
+    bookmarkCount: bookmarks.length,
+    loading,
+    error,
+    isBookmarked,
+    addBookmark,
+    removeBookmark,
+    toggleBookmark,
+    refetch: fetchBookmarks,
+  }
+}

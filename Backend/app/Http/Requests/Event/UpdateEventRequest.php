@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Http\Requests\Event;
+
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class UpdateEventRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        $event = $this->route('event');
+        $user = $this->user();
+
+        if (! $user || ! $event) {
+            return false;
+        }
+
+        return $user->hasRole('admin') || ($user->hasRole('organizer') && (int) $event->organizer_id === (int) $user->id);
+    }
+
+    public function rules(): array
+    {
+        return [
+            'title' => ['required', 'string', 'max:191'],
+            'description' => ['required', 'string', 'max:10000'],
+            'category_id' => ['required', 'integer', 'exists:categories,id'],
+            'category_ids' => ['nullable', 'array'],
+            'category_ids.*' => ['integer', 'exists:categories,id'],
+            'region_id' => ['nullable', 'integer', 'exists:regions,id'],
+            'division_id' => ['nullable', 'integer', 'exists:divisions,id'],
+            'city_id' => ['nullable', 'integer', 'exists:cities,id'],
+            'venue' => ['nullable', 'string', 'max:191'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'start_date' => ['required', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'registration_deadline' => ['nullable', 'date', 'before_or_equal:start_date'],
+            'price' => ['nullable', 'numeric', 'min:0'],
+            'maximum_participants' => ['nullable', 'integer', 'min:1'],
+            'status' => ['nullable', Rule::in(['draft', 'pending', 'published', 'rejected', 'cancelled'])],
+            'visibility' => ['nullable', Rule::in(['public', 'private'])],
+            'images' => ['nullable', 'array'],
+            'images.*.path' => ['required_with:images', 'string', 'max:2048'],
+            'images.*.type' => ['nullable', 'string', 'max:50'],
+            'images.*.is_cover' => ['nullable', 'boolean'],
+        ];
+    }
+}

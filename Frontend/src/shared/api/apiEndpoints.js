@@ -1,0 +1,18 @@
+export const API_ENDPOINTS = {
+  login: '/auth/login',
+  register: '/auth/register',
+  logout: '/auth/logout',
+  me: '/auth/me',
+  forgotPassword: '/auth/forgot-password',
+  resetPassword: '/auth/reset-password',
+  changePassword: '/auth/change-password',
+  profile: '/profile',
+  events: '/events',
+  categories: '/categories',
+  interests: '/interests',
+  notifications: '/notifications',
+  bookmarks: '/bookmarks',
+  registrations: '/registrations',
+  dashboard: '/dashboard',
+  notificationPreferences: '/notification-preferences',
+}

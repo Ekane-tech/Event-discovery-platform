@@ -1,0 +1,3 @@
+import { Skeleton, TextSkeleton } from '../../../shared/components/feedback/Skeleton.jsx'
+export default function EventCardSkeleton(){return <div className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200"><Skeleton className="h-56 rounded-none"/><div className="p-5"><div className="mb-4 flex justify-between"><Skeleton className="h-7 w-24 rounded-full"/><Skeleton className="h-4 w-16"/></div><Skeleton className="mb-3 h-5 w-3/4"/><TextSkeleton lines={3}/><Skeleton className="mt-5 h-10 w-full"/></div></div>}
+export function EventGridSkeleton({count=6}){return <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">{Array.from({length:count}).map((_,i)=><EventCardSkeleton key={i}/>)}</div>}
