@@ -21,6 +21,7 @@ class UserResource extends JsonResource
                 'label' => $this->role?->label,
             ]),
             'profile' => $this->whenLoaded('profile', fn () => [
+                'organization_name' => $this->profile?->organization_name,
                 'phone' => $this->profile?->phone,
                 'city' => $this->profile?->city,
                 'region' => $this->profile?->region,

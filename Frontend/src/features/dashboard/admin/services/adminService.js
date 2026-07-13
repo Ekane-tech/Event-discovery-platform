@@ -13,6 +13,8 @@ export const adminService = {
   getPayments: (params = {}) => axiosClient.get('/admin/payments', { params }),
   getPaymentSummary: () => axiosClient.get('/admin/payments/summary'),
   getAuditLogs: (params = {}) => axiosClient.get('/admin/audit-logs', { params }),
+  getEmailLogs: (params = {}) => axiosClient.get('/admin/email-logs', { params }),
+  sendTestEmail: (payload) => axiosClient.post('/admin/test-email', payload),
   updateEventStatus: (eventId, status, moderationReason = '') => axiosClient.patch(`/admin/events/${eventId}/status`, { status, moderation_reason: moderationReason || null }),
 
   getReports: (params = {}) => axiosClient.get('/admin/reports', { params }),

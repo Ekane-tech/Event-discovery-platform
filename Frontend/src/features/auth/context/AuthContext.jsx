@@ -27,7 +27,6 @@ function toApiProfilePayload(currentUser, payload) {
     phone: merged.phone || null,
     city: merged.city || null,
     region: merged.region || null,
-    avatar: merged.avatar || null,
     bio: merged.bio || null,
     preferred_language: merged.preferredLanguage === 'French' ? 'fr' : 'en',
   }
@@ -103,8 +102,8 @@ export default function AuthProvider({ children }) {
         email: payload.email,
         phone: payload.phone || null,
         city: payload.city || null,
-        region: payload.region || null,
-        preferred_language: payload.preferredLanguage === 'French' ? 'fr' : 'en',
+        organizer_name: payload.organizerName || null,
+        terms_accepted: Boolean(payload.termsAccepted),
         account_type: payload.accountType || 'user',
         password: payload.password,
         password_confirmation: payload.passwordConfirmation,

@@ -39,7 +39,7 @@ export default function RecommendedEventCard({ event }) {
         </div>
       </div>
 
-      <div className="p-5">
+      <div className="flex flex-col p-5">
         <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-teal-700"><Sparkles className="h-4 w-4" /> Recommended for you</div>
         <h3 className="text-xl font-black leading-tight text-slate-950">{event.title}</h3>
         <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{event.description}</p>
@@ -49,7 +49,7 @@ export default function RecommendedEventCard({ event }) {
           <p className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-teal-700" /> {formatDate(event.startDate)}</p>
           <p className="font-semibold text-slate-900">{formatPrice(event.price)} • {event.organizer}</p>
         </div>
-        <Link to={`/events/${event.id}`} state={{ from: `${location.pathname}${location.search}` }} className="mt-5 block">
+        <Link to={`/events/${event.id}`} state={{ from: `${location.pathname}${location.search}` }} className="mt-auto pt-5 block">
           <Button className="w-full rounded-full">View Details</Button>
         </Link>
       </div>

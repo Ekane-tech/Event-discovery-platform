@@ -16,7 +16,7 @@ class ProfileController extends Controller
         return response()->json([
             'profile' => new ProfileResource($request->user()->load(['role', 'profile'])),
         ]);
-    } // <-- FIX: Fermeture de la méthode show()
+    }
 
     public function update(UpdateProfileRequest $request): JsonResponse
     {
@@ -26,6 +26,7 @@ class ProfileController extends Controller
         $user->update(['name' => $validated['name']]);
 
         $profileData = [
+            'organization_name' => $validated['organization_name'] ?? null,
             'phone' => $validated['phone'] ?? null,
             'city' => $validated['city'] ?? null,
             'region' => $validated['region'] ?? null,
@@ -35,7 +36,7 @@ class ProfileController extends Controller
 
         if (array_key_exists('avatar', $validated)) {
             $profileData['avatar'] = $validated['avatar'];
-        } // <-- FIX: Fermeture de la condition IF
+        }
 
         $user->profile()->updateOrCreate(['user_id' => $user->id], $profileData);
 
@@ -43,7 +44,7 @@ class ProfileController extends Controller
             'message' => 'Profile updated successfully.',
             'profile' => new ProfileResource($user->fresh()->load(['role', 'profile'])),
         ]);
-    } // <-- FIX: Fermeture de la méthode update()
+    }
 
     public function uploadAvatar(Request $request): JsonResponse
     {
@@ -56,7 +57,7 @@ class ProfileController extends Controller
 
         if ($profile->avatar && ! str_starts_with($profile->avatar, 'http')) {
             Storage::disk('public')->delete($profile->avatar);
-        } // <-- FIX: Fermeture de la condition IF
+        }
 
         $path = $request->file('avatar')->store('avatars/'.$user->id, 'public');
         $profile->update(['avatar' => $path]);
@@ -65,7 +66,7 @@ class ProfileController extends Controller
             'message' => 'Profile photo updated successfully.',
             'profile' => new ProfileResource($user->fresh()->load(['role', 'profile'])),
         ]);
-    } // <-- FIX: Fermeture de la méthode uploadAvatar()
+    }
 
     public function removeAvatar(Request $request): JsonResponse
     {
@@ -82,5 +83,5 @@ class ProfileController extends Controller
             'message' => 'Profile photo removed successfully.',
             'profile' => new ProfileResource($user->fresh()->load(['role', 'profile'])),
         ]);
-    } // <-- Reste une seule instance propre de removeAvatar()
+    }
 }

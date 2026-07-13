@@ -19,6 +19,7 @@ class ProfileResource extends JsonResource
                 'name' => $this->role?->name,
                 'label' => $this->role?->label,
             ]),
+            'organization_name' => $this->profile?->organization_name,
             'phone' => $this->profile?->phone,
             'city' => $this->profile?->city,
             'region' => $this->profile?->region,

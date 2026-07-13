@@ -39,7 +39,9 @@ export const ADMIN_NAV_LINKS = [
   { label: 'Categories', labelKey: 'nav.categories', to: '/admin/categories', icon: 'boxes' },
   { label: 'Locations', labelKey: 'nav.locations', to: '/admin/locations', icon: 'mapPin' },
   { label: 'Reports', labelKey: 'nav.adminReports', to: '/admin/reports', icon: 'barChart3' },
+  { label: 'Notifications', labelKey: 'nav.notifications', to: '/admin/notifications', badge: 'notifications', icon: 'bell' },
   { label: 'Announcements', labelKey: 'nav.announcements', to: '/admin/announcements', icon: 'send' },
+  { label: 'Email', labelKey: 'nav.email', to: '/admin/email', icon: 'mail' },
   { label: 'Feedback', labelKey: 'nav.adminFeedback', to: '/admin/feedback', badge: 'feedback', icon: 'heart' },
   { label: 'Audit Logs', labelKey: 'nav.auditLogs', to: '/admin/audit-logs', icon: 'history' },
 ]

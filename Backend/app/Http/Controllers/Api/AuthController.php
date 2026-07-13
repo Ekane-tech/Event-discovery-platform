@@ -3,16 +3,19 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ChangePasswordRequest;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
-use App\Http\Requests\Auth\ChangePasswordRequest;
 use App\Http\Resources\UserResource;
+use App\Models\AuditLog;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -35,6 +38,7 @@ class AuthController extends Controller
         ]);
 
         $user->profile()->create([
+            'organization_name' => $validated['organizer_name'] ?? null,
             'phone' => $validated['phone'] ?? null,
             'city' => $validated['city'] ?? null,
             'region' => $validated['region'] ?? null,
@@ -43,10 +47,17 @@ class AuthController extends Controller
             'avatar' => null,
         ]);
 
+        $user->notificationPreference()->firstOrCreate([]);
+        $user->sendEmailVerificationNotification();
+        AuditLog::record($user, 'auth.registered', $user, 'Account registered.', [
+            'account_type' => $roleName,
+            'terms_accepted' => true,
+        ]);
+
         $token = $user->createToken($request->input('device_name', 'web'))->plainTextToken;
 
         return response()->json([
-            'message' => 'Account created successfully.',
+            'message' => 'Account created successfully. Please check your email to verify your account.',
             'token_type' => 'Bearer',
             'token' => $token,
             'user' => new UserResource($user->load(['role', 'profile'])),
@@ -99,7 +110,6 @@ class AuthController extends Controller
         ]);
     }
 
-
     public function changePassword(ChangePasswordRequest $request): JsonResponse
     {
         $request->user()->update([
@@ -145,6 +155,49 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => __($status),
+        ]);
+    }
+
+    public function verifyEmail(Request $request, int $id, string $hash): JsonResponse|RedirectResponse
+    {
+        $user = User::findOrFail($id);
+
+        if (! hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
+            abort(403, 'Invalid verification link.');
+        }
+
+        if (! $user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+            AuditLog::record($user, 'auth.email_verified', $user, 'Email address verified.');
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Email verified successfully.',
+                'user' => new UserResource($user->fresh()->load(['role', 'profile'])),
+            ]);
+        }
+
+        $frontendUrl = rtrim((string) env('FRONTEND_URL', config('app.url')), '/');
+        return redirect()->away($frontendUrl.'/verify-email?status=verified');
+    }
+
+    public function resendVerificationEmail(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if ($user->hasVerifiedEmail()) {
+            return response()->json([
+                'message' => 'Email address is already verified.',
+                'user' => new UserResource($user->load(['role', 'profile'])),
+            ]);
+        }
+
+        $user->sendEmailVerificationNotification();
+        AuditLog::record($user, 'auth.verification_email_resent', $user, 'Verification email resent.');
+
+        return response()->json([
+            'message' => 'Verification email sent successfully.',
         ]);
     }
 }

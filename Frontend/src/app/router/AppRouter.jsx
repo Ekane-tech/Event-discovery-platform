@@ -35,6 +35,7 @@ import AdminNotificationsPage from '../../features/dashboard/admin/pages/AdminNo
 import AdminFeedbackPage from '../../features/dashboard/admin/pages/AdminFeedbackPage.jsx'
 import AdminPaymentsPage from '../../features/dashboard/admin/pages/AdminPaymentsPage.jsx'
 import AdminAuditLogsPage from '../../features/dashboard/admin/pages/AdminAuditLogsPage.jsx'
+import AdminEmailPage from '../../features/dashboard/admin/pages/AdminEmailPage.jsx'
 
 import ProfilePage from '../../features/profile/pages/ProfilePage.jsx'
 import EditProfilePage from '../../features/profile/pages/EditProfilePage.jsx'
@@ -143,6 +144,7 @@ export default function AppRouter() {
               <Route path="/admin/announcements" element={<AdminNotificationsPage />} />
               <Route path="/admin/feedback" element={<AdminFeedbackPage />} />
               <Route path="/admin/audit-logs" element={<AdminAuditLogsPage />} />
+              <Route path="/admin/email" element={<AdminEmailPage />} />
             </Route>
           </Route>
         </Route>

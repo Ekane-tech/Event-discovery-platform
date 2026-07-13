@@ -3,12 +3,14 @@
 namespace App\Notifications;
 
 use App\Models\AppFeedback;
+use App\Notifications\Concerns\UsesNotificationPreferences;
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class AppFeedbackSubmittedNotification extends Notification
 {
-    use Queueable;
+    use Queueable, UsesNotificationPreferences;
 
     public function __construct(public AppFeedback $feedback)
     {
@@ -17,7 +19,17 @@ class AppFeedbackSubmittedNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return $this->channelsFor($notifiable, 'admin_messages');
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject('New platform feedback')
+            ->greeting('Hello '.$notifiable->name.',')
+            ->line(($this->feedback->name ?: 'A visitor').' submitted '.$this->feedback->rating.'/5 feedback.')
+            ->line($this->feedback->message)
+            ->action('Review feedback', $this->frontendUrl('/admin/feedback'));
     }
 
     public function toArray(object $notifiable): array

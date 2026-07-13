@@ -5,17 +5,20 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateReportStatusRequest;
 use App\Notifications\AdminAnnouncementNotification;
+use App\Notifications\TestEmailNotification;
 use App\Models\AdminAnnouncement;
 use App\Http\Resources\AdminAnnouncementResource;
 use App\Http\Requests\Admin\StoreAnnouncementRequest;
 use App\Http\Requests\Admin\UpdateUserRoleRequest;
 use App\Http\Requests\Admin\UpdateUserStatusRequest;
+use App\Http\Resources\EmailLogResource;
 use App\Http\Resources\EventResource;
 use App\Http\Resources\PaymentResource;
 use App\Http\Resources\AuditLogResource;
 use App\Http\Resources\AppFeedbackResource;
 use App\Http\Resources\ReportResource;
 use App\Http\Resources\UserResource;
+use App\Models\EmailLog;
 use App\Models\Event;
 use App\Models\Payment;
 use App\Models\AuditLog;
@@ -26,6 +29,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 
 class AdminController extends Controller
 {
@@ -353,6 +357,85 @@ class AdminController extends Controller
         return response()->json([
             'audit_logs' => AuditLogResource::collection($query->paginate(min((int) $request->input('per_page', 20), 100))),
         ]);
+    }
+
+
+    public function emailLogs(Request $request): JsonResponse
+    {
+        $query = EmailLog::query()->with(['user.role', 'user.profile'])->latest();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->input('type'));
+        }
+
+        if ($request->filled('keyword')) {
+            $keyword = $request->input('keyword');
+            $query->where(function ($subQuery) use ($keyword) {
+                $subQuery->where('recipient', 'like', "%{$keyword}%")
+                    ->orWhere('subject', 'like', "%{$keyword}%")
+                    ->orWhere('error_message', 'like', "%{$keyword}%");
+            });
+        }
+
+        return response()->json([
+            'email_logs' => EmailLogResource::collection($query->paginate(min((int) $request->input('per_page', 20), 100))),
+        ]);
+    }
+
+    public function sendTestEmail(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'recipient' => ['required', 'email', 'max:191'],
+            'subject' => ['nullable', 'string', 'max:191'],
+            'message' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $subject = $validated['subject'] ?? 'Email delivery test';
+        $message = $validated['message'] ?? 'This is a production email delivery test.';
+
+        try {
+            Notification::route('mail', $validated['recipient'])->notify(new TestEmailNotification($subject, $message));
+
+            EmailLog::create([
+                'user_id' => $request->user()->id,
+                'recipient' => $validated['recipient'],
+                'subject' => $subject,
+                'type' => 'admin_test_email',
+                'status' => 'sent',
+                'sent_at' => now(),
+                'metadata' => ['triggered_by' => $request->user()->email],
+            ]);
+
+            AuditLog::record($request->user(), 'email.test.sent', null, 'Admin test email sent.', [
+                'recipient' => $validated['recipient'],
+            ]);
+
+            return response()->json(['message' => 'Test email sent successfully.']);
+        } catch (\Throwable $exception) {
+            EmailLog::create([
+                'user_id' => $request->user()->id,
+                'recipient' => $validated['recipient'],
+                'subject' => $subject,
+                'type' => 'admin_test_email',
+                'status' => 'failed',
+                'error_message' => $exception->getMessage(),
+                'metadata' => ['triggered_by' => $request->user()->email],
+            ]);
+
+            AuditLog::record($request->user(), 'email.test.failed', null, 'Admin test email failed.', [
+                'recipient' => $validated['recipient'],
+                'error' => $exception->getMessage(),
+            ]);
+
+            return response()->json([
+                'message' => 'Unable to send test email.',
+                'error' => $exception->getMessage(),
+            ], 422);
+        }
     }
 
 }

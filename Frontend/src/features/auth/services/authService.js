@@ -9,4 +9,5 @@ export const authService = {
   forgotPassword: (payload) => axiosClient.post(API_ENDPOINTS.forgotPassword, payload),
   resetPassword: (payload) => axiosClient.post(API_ENDPOINTS.resetPassword, payload),
   changePassword: (payload) => axiosClient.put(API_ENDPOINTS.changePassword, payload),
+  resendVerificationEmail: () => axiosClient.post('/auth/email/verification-notification'),
 }

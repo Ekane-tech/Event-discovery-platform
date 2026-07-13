@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Notifications\ResetPasswordNotification;
+use App\Notifications\VerifyEmailNotification;
+use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmailContract
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -17,6 +20,7 @@ class User extends Authenticatable
         'password',
         'role_id',
         'status',
+        'email_verified_at',
     ];
 
     protected $hidden = [
@@ -77,6 +81,17 @@ class User extends Authenticatable
     public function notificationPreferences()
     {
         return $this->notificationPreference()->firstOrCreate([]);
+    }
+
+
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new VerifyEmailNotification());
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 
     public function hasRole(string $role): bool

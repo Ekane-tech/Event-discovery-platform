@@ -21,7 +21,15 @@ axiosClient.interceptors.request.use((config) => {
 
 axiosClient.interceptors.response.use(
   (response) => response,
-  (error) => Promise.reject(error),
+  (error) => {
+    if (error?.response?.status === 403 && error?.response?.data?.email_verification_required) {
+      if (typeof window !== 'undefined' && !window.location.pathname.includes('/verify-email')) {
+        window.location.assign('/verify-email?status=required')
+      }
+    }
+
+    return Promise.reject(error)
+  },
 )
 
 export default axiosClient

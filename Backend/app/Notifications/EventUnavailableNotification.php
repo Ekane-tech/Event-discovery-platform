@@ -3,13 +3,15 @@
 namespace App\Notifications;
 
 use App\Models\Event;
+use App\Notifications\Concerns\UsesNotificationPreferences;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class EventUnavailableNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, UsesNotificationPreferences;
 
     public function __construct(public Event $event, public string $reason = 'updated')
     {
@@ -18,7 +20,27 @@ class EventUnavailableNotification extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return $this->channelsFor($notifiable, 'event_reminders');
+    }
+
+    private function reasonText(): string
+    {
+        return match ($this->reason) {
+            'cancelled' => 'has been cancelled',
+            'private' => 'is no longer public',
+            'unpublished' => 'is no longer published',
+            'rejected' => 'has been rejected',
+            default => 'is no longer available',
+        };
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject('Event update')
+            ->greeting('Hello '.$notifiable->name.',')
+            ->line($this->event->title.' '.$this->reasonText().'.')
+            ->action('Browse events', $this->frontendUrl('/events'));
     }
 
     public function toArray(object $notifiable): array

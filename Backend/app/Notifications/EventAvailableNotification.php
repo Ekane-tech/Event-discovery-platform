@@ -3,13 +3,15 @@
 namespace App\Notifications;
 
 use App\Models\Event;
+use App\Notifications\Concerns\UsesNotificationPreferences;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class EventAvailableNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, UsesNotificationPreferences;
 
     public function __construct(public Event $event)
     {
@@ -18,7 +20,16 @@ class EventAvailableNotification extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return $this->channelsFor($notifiable, 'event_reminders');
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject('Event is available again')
+            ->greeting('Hello '.$notifiable->name.',')
+            ->line($this->event->title.' is available again. Your registration has been reactivated.')
+            ->action('View event', $this->frontendUrl('/events/'.$this->event->id));
     }
 
     public function toArray(object $notifiable): array
