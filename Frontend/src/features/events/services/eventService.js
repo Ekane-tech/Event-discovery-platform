@@ -15,4 +15,8 @@ export const eventService = {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
   deleteImage: (eventId, imageId) => axiosClient.delete(`/events/${eventId}/images/${imageId}`),
+  setCoverImage: (eventId, imageId) => axiosClient.patch(`/events/${eventId}/images/${imageId}/cover`),
+  duplicateEvent: (eventId) => axiosClient.post(`/organizer/events/${eventId}/duplicate`),
+  exportOrganizerEventAttendees: (id) => axiosClient.get(`/organizer/events/${id}/attendees/export`, { responseType: 'blob' }),
+  checkInRegistration: (registrationId) => axiosClient.patch(`/organizer/registrations/${registrationId}/check-in`),
 }

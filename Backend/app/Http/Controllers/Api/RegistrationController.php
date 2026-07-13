@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\PaymentResource;
 use App\Http\Resources\RegistrationResource;
 use App\Models\Event;
 use App\Models\Payment;
 use App\Models\Registration;
+use App\Models\AuditLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -18,16 +18,7 @@ class RegistrationController extends Controller
     {
         $registrations = Registration::query()
             ->where('user_id', $request->user()->id)
-            ->with([
-                'event.organizer.role',
-                'event.organizer.profile',
-                'event.category',
-                'event.region',
-                'event.division',
-                'event.city',
-                'event.images',
-                'payment',
-            ])
+            ->with(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'checkedInBy.role', 'checkedInBy.profile'])
             ->latest()
             ->paginate(min((int) $request->input('per_page', 12), 50));
 
@@ -44,16 +35,7 @@ class RegistrationController extends Controller
 
         return response()->json([
             'registration' => new RegistrationResource(
-                $registration->load([
-                    'event.organizer.role',
-                    'event.organizer.profile',
-                    'event.category',
-                    'event.region',
-                    'event.division',
-                    'event.city',
-                    'event.images',
-                    'payment',
-                ])
+                $registration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'checkedInBy.role', 'checkedInBy.profile'])
             ),
         ]);
     }
@@ -71,20 +53,9 @@ class RegistrationController extends Controller
         if ($registration && $registration->status === 'confirmed') {
             return response()->json([
                 'message' => 'You are already registered for this event.',
-                'payment_required' => false,
                 'registration' => new RegistrationResource(
-                    $registration->load([
-                        'event.organizer.role',
-                        'event.organizer.profile',
-                        'event.category',
-                        'event.region',
-                        'event.division',
-                        'event.city',
-                        'event.images',
-                        'payment',
-                    ])
+                    $registration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'checkedInBy.role', 'checkedInBy.profile'])
                 ),
-                'payment' => null,
             ]);
         }
 
@@ -121,34 +92,115 @@ class RegistrationController extends Controller
                     'currency' => 'XAF',
                     'provider' => 'mock',
                     'reference' => $this->generatePaymentReference($event),
-                    'metadata' => [
-                        'mode' => 'mock_payment',
-                    ],
+                    'metadata' => ['mode' => 'mock_payment'],
                 ]
             );
         }
 
         return response()->json([
-            'message' => $isPaidEvent
-                ? 'Payment is required to complete this registration.'
-                : 'Registered for event successfully.',
+            'message' => $isPaidEvent ? 'Payment is required to complete this registration.' : 'Registered for event successfully.',
             'payment_required' => $isPaidEvent,
             'registration' => new RegistrationResource(
-                $registration->fresh()->load([
-                    'event.organizer.role',
-                    'event.organizer.profile',
-                    'event.category',
-                    'event.region',
-                    'event.division',
-                    'event.city',
-                    'event.images',
-                    'payment',
-                ])
+                $registration->fresh()->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'checkedInBy.role', 'checkedInBy.profile'])
             ),
-            'payment' => $payment ? new PaymentResource(
-                $payment->load(['event', 'registration'])
-            ) : null,
+            'payment' => $payment ? new \App\Http\Resources\PaymentResource($payment->load(['event', 'registration'])) : null,
         ], $isPaidEvent ? 202 : 201);
+    }
+
+
+    public function verifyTicket(string $ticketNumber): JsonResponse
+    {
+        $registration = Registration::query()
+            ->where('ticket_number', $ticketNumber)
+            ->with(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'user.profile', 'checkedInBy.profile'])
+            ->first();
+
+        if (! $registration) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Ticket not found.',
+            ], 404);
+        }
+
+        $event = $registration->event;
+        $eventIsAvailable = $event
+            && $event->status === 'published'
+            && $event->visibility === 'public';
+
+        $registrationIsValid = $registration->status === 'confirmed' && $eventIsAvailable;
+
+        return response()->json([
+            'valid' => $registrationIsValid,
+            'message' => $registrationIsValid
+                ? 'Ticket is valid.'
+                : 'Ticket is not currently valid.',
+            'ticket' => [
+                'registration_id' => $registration->id,
+                'ticket_number' => $registration->ticket_number,
+                'status' => $registration->status,
+                'registered_at' => $registration->registered_at,
+                'checked_in_at' => $registration->checked_in_at,
+                'checked_in_by' => $registration->checkedInBy?->name,
+                'attendee' => [
+                    'name' => $registration->user?->name,
+                    'email' => $registration->user?->email,
+                    'city' => $registration->user?->profile?->city,
+                ],
+                'event' => $event ? [
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'status' => $event->status,
+                    'visibility' => $event->visibility,
+                    'start_date' => $event->start_date,
+                    'venue' => $event->venue,
+                    'city' => $event->city?->name,
+                    'region' => $event->region?->name,
+                    'category' => $event->category?->name,
+                    'organizer' => $event->organizer?->name,
+                ] : null,
+            ],
+        ]);
+    }
+
+
+    public function checkIn(Request $request, Registration $registration): JsonResponse
+    {
+        $registration->load(['event', 'user.profile', 'checkedInBy.role', 'checkedInBy.profile']);
+        $event = $registration->event;
+        $user = $request->user();
+
+        if (! $user->hasRole('admin') && ! ($user->hasRole('organizer') && (int) $event->organizer_id === (int) $user->id)) {
+            abort(403, 'You do not have permission to check in attendees for this event.');
+        }
+
+        if ($registration->status !== 'confirmed') {
+            return response()->json([
+                'message' => 'Only confirmed registrations can be checked in.',
+                'registration' => new RegistrationResource($registration),
+            ], 422);
+        }
+
+        if ($registration->checked_in_at) {
+            return response()->json([
+                'message' => 'Attendee is already checked in.',
+                'registration' => new RegistrationResource($registration),
+            ]);
+        }
+
+        $registration->update([
+            'checked_in_at' => now(),
+            'checked_in_by' => $user->id,
+        ]);
+
+        AuditLog::record($user, 'attendee.checked_in', $registration, 'Attendee checked in.', [
+            'event_id' => $event->id,
+            'ticket_number' => $registration->ticket_number,
+        ]);
+
+        return response()->json([
+            'message' => 'Attendee checked in successfully.',
+            'registration' => new RegistrationResource($registration->fresh()->load(['event', 'user.profile', 'checkedInBy.role', 'checkedInBy.profile'])),
+        ]);
     }
 
     public function destroy(Request $request, Event $event): JsonResponse
@@ -178,9 +230,7 @@ class RegistrationController extends Controller
             ], 422);
         }
 
-        $registration->update([
-            'status' => 'cancelled_by_user',
-        ]);
+        $registration->update(['status' => 'cancelled_by_user']);
 
         return response()->json([
             'message' => 'Event registration cancelled successfully.',
@@ -209,14 +259,13 @@ class RegistrationController extends Controller
             return;
         }
 
-        $confirmedRegistrations = $event->registrations()
-            ->where('status', 'confirmed')
-            ->count();
+        $confirmedRegistrations = $event->registrations()->where('status', 'confirmed')->count();
 
         if ($confirmedRegistrations >= $event->maximum_participants) {
             abort(422, 'This event is already full.');
         }
     }
+
 
     private function generatePaymentReference(Event $event): string
     {

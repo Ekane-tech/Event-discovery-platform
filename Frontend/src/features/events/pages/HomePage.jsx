@@ -1,10 +1,10 @@
+import { CalendarSearch, Search, Sparkles } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import Button from '../../../shared/components/ui/Button.jsx'
 import Select from '../../../shared/components/ui/Select.jsx'
 import PageContainer from '../../../shared/components/layout/PageContainer.jsx'
 import SectionHeader from '../../../shared/components/layout/SectionHeader.jsx'
-import Loader from '../../../shared/components/feedback/Loader.jsx'
 import EventGrid from '../components/EventGrid.jsx'
 import { EventGridSkeleton } from '../components/EventCardSkeleton.jsx'
 import { eventService } from '../services/eventService.js'
@@ -12,23 +12,25 @@ import { extractCollection, normalizeEvents } from '../utils/normalizeEvent.js'
 import { categoryService } from '../../categories/services/categoryService.js'
 import { locationService } from '../../locations/services/locationService.js'
 import SearchSuggestInput from '../../search/components/SearchSuggestInput.jsx'
-
-const WHEN_OPTIONS = [
-  { value: '', label: 'Any time' },
-  { value: 'today', label: 'Today' },
-  { value: 'week', label: 'This week' },
-  { value: 'month', label: 'This month' },
-  { value: 'upcoming', label: 'Upcoming' },
-]
+import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
 export default function HomePage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [categories, setCategories] = useState([])
   const [regions, setRegions] = useState([])
   const [cities, setCities] = useState([])
   const [searchForm, setSearchForm] = useState({ what: '', where: '', when: '' })
+
+  const whenOptions = [
+    { value: '', label: t('home.anyTime') },
+    { value: 'today', label: t('home.today') },
+    { value: 'week', label: t('home.thisWeek') },
+    { value: 'month', label: t('home.thisMonth') },
+    { value: 'upcoming', label: t('home.upcoming') },
+  ]
 
   useEffect(() => {
     async function fetchInitialData() {
@@ -39,7 +41,6 @@ export default function HomePage() {
           locationService.getRegions(),
           locationService.getCities(),
         ])
-
         setEvents(normalizeEvents(extractCollection(eventsResponse.data, 'events')))
         setCategories(extractCollection(categoriesResponse.data, 'categories'))
         setRegions(extractCollection(regionsResponse.data, 'regions'))
@@ -75,67 +76,64 @@ export default function HomePage() {
     const whatMatch = findExactSuggestion(whatSuggestions, searchForm.what)
     const whereMatch = findExactSuggestion(whereSuggestions, searchForm.where)
 
-    if (whatMatch?.type === 'category') {
-      params.set('category_id', whatMatch.value)
-    } else if (searchForm.what.trim()) {
-      params.set('keyword', searchForm.what.trim())
-    }
+    if (whatMatch?.type === 'category') params.set('category_id', whatMatch.value)
+    else if (searchForm.what.trim()) params.set('keyword', searchForm.what.trim())
 
-    if (whereMatch?.type === 'city') {
-      params.set('city_id', whereMatch.value)
-    } else if (whereMatch?.type === 'region') {
-      params.set('region_id', whereMatch.value)
-    }
+    if (whereMatch?.type === 'city') params.set('city_id', whereMatch.value)
+    else if (whereMatch?.type === 'region') params.set('region_id', whereMatch.value)
 
-    if (searchForm.when) {
-      params.set('date', searchForm.when)
-    }
+    if (searchForm.when) params.set('date', searchForm.when)
 
     navigate(`/events${params.toString() ? `?${params.toString()}` : ''}`)
   }
 
   return (
-    <PageContainer>
-      <section className="overflow-visible rounded-3xl bg-cover bg-center px-6 py-20 text-white md:px-12" style={{ backgroundImage: 'linear-gradient(90deg, rgba(15,23,42,.82), rgba(15,118,110,.58)), url(/hero-events.svg)' }}>
-        <p className="font-semibold text-teal-100">Discover events that match your interests</p>
-        <h1 className="mt-4 max-w-3xl text-4xl font-bold md:text-6xl">Find the right events and get notified when they matter.</h1>
-        <p className="mt-5 max-w-2xl text-slate-100">Browse conferences, concerts, workshops, business forums, sports, culture, and more across Cameroon.</p>
+    <div>
+      <section className="relative min-h-[680px] overflow-visible bg-cover bg-center text-white" style={{ backgroundImage: 'linear-gradient(90deg, rgba(2,6,23,.90), rgba(15,118,110,.62)), url(/hero-events.svg)' }}>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(255,255,255,.22),transparent_35%)]" />
+        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
+          <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100 backdrop-blur"><Sparkles className="h-4 w-4" /> {t('home.badge')}</p>
+          <h1 className="mt-6 max-w-4xl text-5xl font-black leading-tight md:text-7xl">{t('home.title')}</h1>
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-100">{t('home.subtitle')}</p>
 
-        <form onSubmit={handleSearch} className="mt-8 grid max-w-5xl gap-4 rounded-3xl bg-white/95 p-5 text-slate-950 shadow-xl lg:grid-cols-[1fr_1fr_220px_auto] lg:items-end">
-          <SearchSuggestInput
-            label="Looking for"
-            placeholder="Any event, category, or keyword"
-            value={searchForm.what}
-            onChange={(value) => updateSearchField('what', value)}
-            suggestions={whatSuggestions}
-          />
-          <SearchSuggestInput
-            label="Where"
-            placeholder="Any city or region"
-            value={searchForm.where}
-            onChange={(value) => updateSearchField('where', value)}
-            suggestions={whereSuggestions}
-          />
-          <label className="block">
-            <span className="mb-2 block text-sm font-bold text-slate-800">When</span>
-            <Select value={searchForm.when} onChange={(event) => updateSearchField('when', event.target.value)} className="h-12">
-              {WHEN_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-            </Select>
-          </label>
-          <Button type="submit" className="h-12 bg-pink-600 px-8 hover:bg-pink-700">Search</Button>
-        </form>
+          <form onSubmit={handleSearch} className="mt-10 grid max-w-6xl gap-4 rounded-3xl bg-white p-5 text-slate-950 shadow-2xl lg:grid-cols-[1fr_1fr_220px_auto] lg:items-end">
+            <SearchSuggestInput label={t('home.lookingFor')} placeholder={t('home.lookingForPlaceholder')} value={searchForm.what} onChange={(value) => updateSearchField('what', value)} suggestions={whatSuggestions} />
+            <SearchSuggestInput label={t('home.where')} placeholder={t('home.wherePlaceholder')} value={searchForm.where} onChange={(value) => updateSearchField('where', value)} suggestions={whereSuggestions} />
+            <label className="block"><span className="mb-2 block text-sm font-bold text-slate-800">{t('home.when')}</span><Select value={searchForm.when} onChange={(event) => updateSearchField('when', event.target.value)} className="h-12">{whenOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</Select></label>
+            <Button type="submit" variant="pink" className="h-12 px-8"><Search className="mr-2 h-4 w-4" /> {t('common.search')}</Button>
+          </form>
 
-        <div className="mt-5 flex flex-wrap gap-3">
-          <Link to="/events"><Button className="bg-white text-slate-950 hover:bg-slate-100">Browse Events</Button></Link>
-          <Link to="/register"><Button variant="secondary">Create Account</Button></Link>
-          <Link to="/organizer/events/create"><Button className="bg-teal-500 text-white hover:bg-teal-600">Become a service provider</Button></Link>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <Link to="/events"><Button variant="light"><CalendarSearch className="mr-2 h-4 w-4" /> {t('common.browseEvents')}</Button></Link>
+            <Link to="/register"><Button variant="secondary">{t('common.createAccount')}</Button></Link>
+            <Link to="/organizer/events/create"><Button className="bg-teal-500 text-white hover:bg-teal-600">{t('common.becomeProvider')}</Button></Link>
+          </div>
         </div>
       </section>
 
-      <section className="mt-10">
-        <SectionHeader title="Upcoming events" description="Explore published events from the platform." />
-        {loading ? <EventGridSkeleton count={6} /> : <EventGrid events={events} />}
-      </section>
-    </PageContainer>
+      <PageContainer>
+        <section>
+          <SectionHeader title={t('home.featuredCategories')} description={t('home.featuredCategoriesDescription')} />
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {categories.slice(0, 8).map((category, index) => (
+              <Link key={category.id} to={`/events?category_id=${category.id}`} className="group relative min-h-[180px] overflow-hidden rounded-3xl bg-gradient-to-br from-teal-600 to-slate-950 p-5 text-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
+                <div className="absolute inset-0 bg-cover bg-center opacity-35 transition group-hover:scale-110" style={{ backgroundImage: `url(${category.image_url || '/hero-events.svg'})` }} />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 to-transparent" />
+                <div className="relative flex h-full flex-col justify-end"><h3 className="text-xl font-black">{category.name}</h3><p className="mt-1 line-clamp-2 text-sm text-slate-100">{category.description}</p></div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-12">
+          <SectionHeader title={t('home.upcomingEvents')} description={t('home.upcomingEventsDescription')} />
+          {loading ? <EventGridSkeleton count={6} /> : <EventGrid events={events} />}
+        </section>
+
+        <section className="mt-12 overflow-hidden rounded-3xl bg-slate-950 p-8 text-white md:p-10">
+          <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center"><div><h2 className="text-3xl font-black">{t('home.providerTitle')}</h2><p className="mt-3 max-w-2xl text-slate-300">{t('home.providerText')}</p></div><Link to="/register"><Button variant="pink">{t('common.becomeProvider')}</Button></Link></div>
+        </section>
+      </PageContainer>
+    </div>
   )
 }

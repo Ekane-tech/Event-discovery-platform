@@ -33,6 +33,8 @@ import AdminLocationsPage from '../../features/dashboard/admin/pages/AdminLocati
 import AdminReportsPage from '../../features/dashboard/admin/pages/AdminReportsPage.jsx'
 import AdminNotificationsPage from '../../features/dashboard/admin/pages/AdminNotificationsPage.jsx'
 import AdminFeedbackPage from '../../features/dashboard/admin/pages/AdminFeedbackPage.jsx'
+import AdminPaymentsPage from '../../features/dashboard/admin/pages/AdminPaymentsPage.jsx'
+import AdminAuditLogsPage from '../../features/dashboard/admin/pages/AdminAuditLogsPage.jsx'
 
 import ProfilePage from '../../features/profile/pages/ProfilePage.jsx'
 import EditProfilePage from '../../features/profile/pages/EditProfilePage.jsx'
@@ -42,6 +44,8 @@ import BookmarksPage from '../../features/bookmarks/pages/BookmarksPage.jsx'
 import MyRegistrationsPage from '../../features/registrations/pages/MyRegistrationsPage.jsx'
 import RegistrationDetailsPage from '../../features/registrations/pages/RegistrationDetailsPage.jsx'
 import TicketPage from '../../features/registrations/pages/TicketPage.jsx'
+import TicketVerificationPage from '../../features/tickets/pages/TicketVerificationPage.jsx'
+import TicketScannerPage from '../../features/tickets/pages/TicketScannerPage.jsx'
 import PaymentPage from '../../features/payments/pages/PaymentPage.jsx'
 import MyReportsPage from '../../features/reports/pages/MyReportsPage.jsx'
 import NotificationsPage from '../../features/notifications/pages/NotificationsPage.jsx'
@@ -70,6 +74,7 @@ export default function AppRouter() {
           <Route path="/feedback" element={<FeedbackPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/public-notifications" element={<PublicNotificationsPage />} />
+          <Route path="/tickets/verify/:ticketNumber" element={<TicketVerificationPage />} />
         </Route>
 
         <Route element={<AuthLayout />}>
@@ -117,6 +122,7 @@ export default function AppRouter() {
               <Route path="/organizer/events/:id/edit" element={<EditEventPage />} />
               <Route path="/organizer/events/:id/details" element={<OrganizerEventDetailsPage />} />
               <Route path="/organizer/events/:id/attendees" element={<OrganizerAttendeesPage />} />
+              <Route path="/organizer/events/:id/scanner" element={<TicketScannerPage />} />
               <Route path="/organizer/statistics" element={<OrganizerStatisticsPage />} />
             </Route>
           </Route>
@@ -126,13 +132,17 @@ export default function AppRouter() {
               <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
               <Route path="/admin/users" element={<AdminUsersPage />} />
               <Route path="/admin/events" element={<AdminEventsPage />} />
+              <Route path="/admin/payments" element={<AdminPaymentsPage />} />
               <Route path="/admin/events/:id/details" element={<OrganizerEventDetailsPage />} />
               <Route path="/admin/events/:id/attendees" element={<OrganizerAttendeesPage />} />
+              <Route path="/admin/events/:id/scanner" element={<TicketScannerPage />} />
               <Route path="/admin/categories" element={<AdminCategoriesPage />} />
               <Route path="/admin/locations" element={<AdminLocationsPage />} />
               <Route path="/admin/reports" element={<AdminReportsPage />} />
-              <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
+              <Route path="/admin/notifications" element={<NotificationsPage />} />
+              <Route path="/admin/announcements" element={<AdminNotificationsPage />} />
               <Route path="/admin/feedback" element={<AdminFeedbackPage />} />
+              <Route path="/admin/audit-logs" element={<AdminAuditLogsPage />} />
             </Route>
           </Route>
         </Route>

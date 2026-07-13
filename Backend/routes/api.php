@@ -45,6 +45,7 @@ Route::get('/cities/{city}', [LocationController::class, 'showCity']);
 
 Route::get('/events', [EventController::class, 'index']);
 Route::get('/events/{event}', [EventController::class, 'show']);
+Route::get('/tickets/verify/{ticketNumber}', [RegistrationController::class, 'verifyTicket']);
 
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
@@ -100,11 +101,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/organizer/events', [EventController::class, 'myEvents'])->middleware('role:organizer');
     Route::get('/organizer/events/{event}', [EventController::class, 'organizerShow'])->middleware('role:organizer,admin');
     Route::get('/organizer/events/{event}/attendees', [EventController::class, 'attendees'])->middleware('role:organizer,admin');
+    Route::get('/organizer/events/{event}/attendees/export', [EventController::class, 'exportAttendees'])->middleware('role:organizer,admin');
+    Route::post('/organizer/events/{event}/duplicate', [EventController::class, 'duplicate'])->middleware('role:organizer,admin');
+    Route::patch('/organizer/registrations/{registration}/check-in', [RegistrationController::class, 'checkIn'])->middleware('role:organizer,admin');
     Route::post('/events', [EventController::class, 'store'])->middleware('role:organizer,admin');
     Route::put('/events/{event}', [EventController::class, 'update'])->middleware('role:organizer,admin');
     Route::delete('/events/{event}', [EventController::class, 'destroy'])->middleware('role:organizer,admin');
     Route::post('/events/{event}/images', [EventController::class, 'uploadImages'])->middleware('role:organizer,admin');
     Route::delete('/events/{event}/images/{image}', [EventController::class, 'deleteImage'])->middleware('role:organizer,admin');
+    Route::patch('/events/{event}/images/{image}/cover', [EventController::class, 'setCoverImage'])->middleware('role:organizer,admin');
     Route::patch('/admin/events/{event}/status', [EventController::class, 'updateStatus'])->middleware('role:admin');
 
     Route::get('/me/interests', [InterestController::class, 'myInterests'])->middleware('role:user');
@@ -125,10 +130,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/admin/events', [AdminController::class, 'events']);
 
+        Route::get('/admin/payments', [AdminController::class, 'payments']);
+        Route::get('/admin/payments/summary', [AdminController::class, 'paymentSummary']);
+        Route::get('/admin/audit-logs', [AdminController::class, 'auditLogs']);
+
         Route::get('/admin/reports', [AdminController::class, 'reports']);
         Route::patch('/admin/reports/{report}/status', [AdminController::class, 'updateReportStatus']);
         Route::post('/categories', [CategoryController::class, 'store']);
         Route::put('/categories/{category}', [CategoryController::class, 'update']);
+        Route::post('/categories/{category}', [CategoryController::class, 'update']);
         Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
 
         Route::post('/interests', [InterestController::class, 'store']);

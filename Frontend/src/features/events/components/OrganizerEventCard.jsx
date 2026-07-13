@@ -1,12 +1,12 @@
-import { CalendarDays, Eye, MapPin, Ticket, Trash2 } from 'lucide-react'
+import { CalendarDays, Copy, Eye, MapPin, Ticket, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Button from '../../../shared/components/ui/Button.jsx'
 import { formatDate } from '../../../shared/utils/formatDate.js'
 import { formatPrice } from '../../../shared/utils/currency.js'
 import OrganizerEventStatusBadge from './OrganizerEventStatusBadge.jsx'
 
-export default function OrganizerEventCard({ event, onDelete }) {
-  const cover = event.coverImage?.url || '/hero-events.svg'
+export default function OrganizerEventCard({ event, onDelete, onDuplicate }) {
+  const cover = event.coverImage?.url || event.categoryImageUrl || '/hero-events.svg'
 
   return (
     <article className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
@@ -37,7 +37,9 @@ export default function OrganizerEventCard({ event, onDelete }) {
             <div className="flex shrink-0 flex-wrap gap-2">
               <Link to={`/organizer/events/${event.id}/details`}><Button variant="secondary">Details</Button></Link>
               <Link to={`/organizer/events/${event.id}/attendees`}><Button variant="secondary">Attendees</Button></Link>
+              <Link to={`/organizer/events/${event.id}/scanner`}><Button variant="secondary">Scanner</Button></Link>
               <Link to={`/organizer/events/${event.id}/edit`}><Button>Edit</Button></Link>
+              <Button type="button" variant="outline" onClick={() => onDuplicate(event.id)}><Copy className="mr-2 h-4 w-4" />Duplicate</Button>
               <Button type="button" variant="danger" onClick={() => onDelete(event.id)}><Trash2 className="mr-2 h-4 w-4" />Delete</Button>
             </div>
           </div>

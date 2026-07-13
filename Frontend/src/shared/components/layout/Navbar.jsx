@@ -9,29 +9,26 @@ import Button from '../ui/Button.jsx'
 import Avatar from '../ui/Avatar.jsx'
 import MobileNavigation from '../navigation/MobileNavigation.jsx'
 import NavigationBadge from '../navigation/NavigationBadge.jsx'
-
+import LanguageSwitcher from '../language/LanguageSwitcher.jsx'
+import { useTranslation } from '../../i18n/useTranslation.js'
 const navLinkClass = ({ isActive }) =>
   `inline-flex items-center rounded-full px-3 py-2 text-sm font-semibold transition ${isActive ? 'bg-teal-50 text-teal-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950'}`
-
 export default function Navbar() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { isAuthenticated, user, role, logout } = useAuth()
   const { unreadCount } = useNotifications()
-
   const desktopLinks = getDesktopNavbarLinks(role, isAuthenticated)
   const mobileGroups = getMobileNavigationGroups(role, isAuthenticated)
-
   async function handleLogout() {
     setMobileMenuOpen(false)
     await logout()
     navigate('/', { replace: true })
   }
-
   function getBadgeCount(link) {
     return link.badge === 'notifications' ? unreadCount : 0
   }
-
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
@@ -39,16 +36,14 @@ export default function Navbar() {
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-600 text-white shadow-lg shadow-teal-100"><ShieldCheck className="h-5 w-5" /></span>
           <span className="hidden sm:inline">{APP_NAME}</span>
         </Link>
-
         <nav className="hidden items-center gap-1 lg:flex">
           {desktopLinks.map((link) => (
             <NavLink key={link.to} to={link.to} className={navLinkClass}>
-              {link.label}
+              {t(link.labelKey, link.label)}
               <NavigationBadge count={getBadgeCount(link)} />
             </NavLink>
           ))}
         </nav>
-
         <div className="hidden items-center gap-2 lg:flex">
           {isAuthenticated ? (
             <>
@@ -60,19 +55,18 @@ export default function Navbar() {
           ) : (
             <>
               <Link to="/public-notifications" className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700"><Bell className="h-5 w-5" /></Link>
+              <LanguageSwitcher compact />
               <Link to="/feedback"><Button variant="secondary">Feedback</Button></Link>
               <Link to="/login"><Button variant="secondary">Login</Button></Link>
               <Link to="/register"><Button>Register</Button></Link>
             </>
           )}
         </div>
-
         <button type="button" onClick={() => setMobileMenuOpen((current) => !current)} className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold text-slate-700 lg:hidden" aria-label="Toggle navigation menu">
           {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           {isAuthenticated && <NavigationBadge count={unreadCount} />}
         </button>
       </div>
-
       <MobileNavigation open={mobileMenuOpen} groups={mobileGroups} unreadCount={unreadCount} isAuthenticated={isAuthenticated} user={user} onLogout={handleLogout} onClose={() => setMobileMenuOpen(false)} />
     </header>
   )

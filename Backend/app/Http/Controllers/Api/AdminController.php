@@ -11,14 +11,19 @@ use App\Http\Requests\Admin\StoreAnnouncementRequest;
 use App\Http\Requests\Admin\UpdateUserRoleRequest;
 use App\Http\Requests\Admin\UpdateUserStatusRequest;
 use App\Http\Resources\EventResource;
+use App\Http\Resources\PaymentResource;
+use App\Http\Resources\AuditLogResource;
 use App\Http\Resources\AppFeedbackResource;
 use App\Http\Resources\ReportResource;
 use App\Http\Resources\UserResource;
 use App\Models\Event;
+use App\Models\Payment;
+use App\Models\AuditLog;
 use App\Models\AppFeedback;
 use App\Models\Report;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -63,6 +68,7 @@ class AdminController extends Controller
         ]);
 
         $feedback->update(['status' => $validated['status']]);
+        AuditLog::record($request->user(), 'feedback.status.updated', $feedback, 'Feedback status updated.', ['status' => $validated['status']]);
 
         return response()->json([
             'message' => 'Feedback status updated successfully.',
@@ -187,6 +193,7 @@ class AdminController extends Controller
     {
         $role = Role::where('name', $request->validated('role'))->firstOrFail();
         $user->update(['role_id' => $role->id]);
+        AuditLog::record($request->user(), 'user.role.updated', $user, 'User role updated.', ['role' => $role->name]);
 
         return response()->json([
             'message' => 'User role updated successfully.',
@@ -203,6 +210,7 @@ class AdminController extends Controller
         }
 
         $user->update(['status' => $request->validated('status')]);
+        AuditLog::record($request->user(), 'user.status.updated', $user, 'User status updated.', ['status' => $user->status]);
 
         if ($user->status === 'suspended') {
             $user->tokens()->delete();
@@ -259,10 +267,92 @@ class AdminController extends Controller
     public function updateReportStatus(UpdateReportStatusRequest $request, Report $report): JsonResponse
     {
         $report->update(['status' => $request->validated('status')]);
+        AuditLog::record($request->user(), 'report.status.updated', $report, 'Report status updated.', ['status' => $report->status]);
 
         return response()->json([
             'message' => 'Report status updated successfully.',
             'report' => new ReportResource($report->fresh()->load(['event.category', 'reporter.role', 'reporter.profile'])),
         ]);
     }
+
+    public function payments(Request $request): JsonResponse
+    {
+        $query = Payment::query()
+            ->with(['user.role', 'user.profile', 'event.category', 'event.city', 'registration'])
+            ->latest();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
+        if ($request->filled('provider')) {
+            $query->where('provider', $request->input('provider'));
+        }
+
+        if ($request->filled('keyword')) {
+            $keyword = $request->input('keyword');
+            $query->where(function ($subQuery) use ($keyword) {
+                $subQuery->where('reference', 'like', "%{$keyword}%")
+                    ->orWhere('provider_reference', 'like', "%{$keyword}%")
+                    ->orWhere('phone_number', 'like', "%{$keyword}%")
+                    ->orWhereHas('user', fn ($userQuery) => $userQuery->where('name', 'like', "%{$keyword}%")->orWhere('email', 'like', "%{$keyword}%"))
+                    ->orWhereHas('event', fn ($eventQuery) => $eventQuery->where('title', 'like', "%{$keyword}%"));
+            });
+        }
+
+        return response()->json([
+            'payments' => PaymentResource::collection($query->paginate(min((int) $request->input('per_page', 15), 50))),
+        ]);
+    }
+
+    public function paymentSummary(): JsonResponse
+    {
+        $paidStatuses = ['paid', 'successful', 'success', 'completed'];
+
+        return response()->json([
+            'summary' => [
+                'total_payments' => Payment::count(),
+                'paid_payments' => Payment::whereIn('status', $paidStatuses)->count(),
+                'pending_payments' => Payment::where('status', 'pending')->count(),
+                'failed_payments' => Payment::whereIn('status', ['failed', 'cancelled'])->count(),
+                'total_revenue' => (float) Payment::whereIn('status', $paidStatuses)->sum('amount'),
+                'pending_revenue' => (float) Payment::where('status', 'pending')->sum('amount'),
+                'revenue_by_event' => Payment::query()
+                    ->select('event_id', DB::raw('SUM(amount) as revenue'), DB::raw('COUNT(*) as payments_count'))
+                    ->whereIn('status', $paidStatuses)
+                    ->with('event:id,title')
+                    ->groupBy('event_id')
+                    ->orderByDesc('revenue')
+                    ->limit(8)
+                    ->get(),
+            ],
+        ]);
+    }
+
+    public function auditLogs(Request $request): JsonResponse
+    {
+        $query = AuditLog::query()->with(['actor.role', 'actor.profile'])->latest();
+
+        if ($request->filled('action')) {
+            $query->where('action', $request->input('action'));
+        }
+
+        if ($request->filled('actor_id')) {
+            $query->where('actor_id', $request->integer('actor_id'));
+        }
+
+        if ($request->filled('keyword')) {
+            $keyword = $request->input('keyword');
+            $query->where(function ($subQuery) use ($keyword) {
+                $subQuery->where('action', 'like', "%{$keyword}%")
+                    ->orWhere('description', 'like', "%{$keyword}%")
+                    ->orWhereHas('actor', fn ($actorQuery) => $actorQuery->where('name', 'like', "%{$keyword}%")->orWhere('email', 'like', "%{$keyword}%"));
+            });
+        }
+
+        return response()->json([
+            'audit_logs' => AuditLogResource::collection($query->paginate(min((int) $request->input('per_page', 20), 100))),
+        ]);
+    }
+
 }

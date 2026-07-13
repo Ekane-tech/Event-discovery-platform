@@ -11,6 +11,7 @@ use App\Jobs\SendEventInterestNotificationsJob;
 use App\Models\Event;
 use App\Models\EventImage;
 use App\Models\EventView;
+use App\Models\AuditLog;
 use App\Notifications\EventAvailableNotification;
 use App\Notifications\EventOrganizerModerationNotification;
 use App\Notifications\EventUnavailableNotification;
@@ -19,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 class EventController extends Controller
@@ -153,13 +155,25 @@ class EventController extends Controller
         }
 
         $request->validate([
-            'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
-            'gallery' => ['nullable', 'array'],
-            'gallery.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'gallery' => ['nullable', 'array', 'max:8'],
+            'gallery.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ]);
 
+        $incomingGalleryCount = count($request->file('gallery', []));
+        $existingGalleryCount = $event->images()->where('is_cover', false)->count();
+
+        if ($existingGalleryCount + $incomingGalleryCount > 8) {
+            return response()->json([
+                'message' => 'Gallery limit reached. Keep a maximum of 8 gallery images per event.',
+            ], 422);
+        }
+
         if ($request->hasFile('cover')) {
-            $event->images()->where('is_cover', true)->update(['is_cover' => false, 'type' => 'gallery']);
+            foreach ($event->images()->where('is_cover', true)->get() as $oldCover) {
+                Storage::disk('public')->delete($oldCover->path);
+                $oldCover->delete();
+            }
             $path = $request->file('cover')->store('events/'.$event->id, 'public');
             $event->images()->create(['path' => $path, 'type' => 'cover', 'is_cover' => true]);
         }
@@ -168,6 +182,11 @@ class EventController extends Controller
             $path = $image->store('events/'.$event->id, 'public');
             $event->images()->create(['path' => $path, 'type' => 'gallery', 'is_cover' => false]);
         }
+
+        AuditLog::record($request->user(), 'event.images.updated', $event, 'Event photos were updated.', [
+            'cover_uploaded' => $request->hasFile('cover'),
+            'gallery_uploaded' => $incomingGalleryCount,
+        ]);
 
         return response()->json([
             'message' => 'Event images uploaded successfully.',
@@ -187,10 +206,126 @@ class EventController extends Controller
             abort(403, 'You do not have permission to delete images for this event.');
         }
 
+        $wasCover = (bool) $image->is_cover;
+
         Storage::disk('public')->delete($image->path);
         $image->delete();
 
-        return response()->json(['message' => 'Event image deleted successfully.']);
+        if ($wasCover) {
+            $replacement = $event->images()->oldest()->first();
+            if ($replacement) {
+                $replacement->update(['is_cover' => true, 'type' => 'cover']);
+            }
+        }
+
+        AuditLog::record($request->user(), 'event.image.deleted', $event, 'An event photo was deleted.', [
+            'image_id' => $image->id,
+            'was_cover' => $wasCover,
+        ]);
+
+        return response()->json([
+            'message' => 'Event image deleted successfully.',
+            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images'])),
+        ]);
+    }
+
+    public function setCoverImage(Request $request, Event $event, EventImage $image): JsonResponse
+    {
+        $user = $request->user();
+
+        if ((int) $image->event_id !== (int) $event->id) {
+            abort(404);
+        }
+
+        if (! $user->hasRole('admin') && ! ($user->hasRole('organizer') && (int) $event->organizer_id === (int) $user->id)) {
+            abort(403, 'You do not have permission to manage images for this event.');
+        }
+
+        $event->images()->update(['is_cover' => false, 'type' => 'gallery']);
+        $image->update(['is_cover' => true, 'type' => 'cover']);
+
+        AuditLog::record($user, 'event.cover.updated', $event, 'Event cover photo was changed.', [
+            'image_id' => $image->id,
+        ]);
+
+        return response()->json([
+            'message' => 'Cover image updated successfully.',
+            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images'])),
+        ]);
+    }
+
+    public function duplicate(Request $request, Event $event): JsonResponse
+    {
+        if (! $request->user()->hasRole('admin') && (int) $event->organizer_id !== (int) $request->user()->id) {
+            abort(403, 'You do not have permission to duplicate this event.');
+        }
+
+        $event->loadMissing(['images', 'categories']);
+
+        $copy = $event->replicate(['slug', 'views']);
+        $copy->title = $event->title.' (Copy)';
+        $copy->slug = Event::generateUniqueSlug($copy->title);
+        $copy->status = 'draft';
+        $copy->views = 0;
+        $copy->push();
+        $copy->categories()->sync($event->categories()->pluck('categories.id')->all());
+
+        foreach ($event->images as $image) {
+            $newPath = 'events/'.$copy->id.'/'.basename($image->path);
+            if (Storage::disk('public')->exists($image->path)) {
+                Storage::disk('public')->copy($image->path, $newPath);
+                $copy->images()->create([
+                    'path' => $newPath,
+                    'type' => $image->type,
+                    'is_cover' => $image->is_cover,
+                ]);
+            }
+        }
+
+        AuditLog::record($request->user(), 'event.duplicated', $copy, 'Event duplicated as draft.', [
+            'source_event_id' => $event->id,
+        ]);
+
+        return response()->json([
+            'message' => 'Event duplicated as draft.',
+            'event' => new EventResource($copy->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images'])),
+        ], 201);
+    }
+
+    public function exportAttendees(Request $request, Event $event): StreamedResponse
+    {
+        if (! $request->user()->hasRole('admin') && (int) $event->organizer_id !== (int) $request->user()->id) {
+            abort(403, 'You do not have permission to export attendees for this event.');
+        }
+
+        AuditLog::record($request->user(), 'event.attendees.exported', $event, 'Attendee CSV was exported.');
+
+        $fileName = 'attendees-event-'.$event->id.'.csv';
+
+        return response()->streamDownload(function () use ($event) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['Name', 'Email', 'Phone', 'City', 'Ticket', 'Status', 'Registered At', 'Checked In At']);
+
+            $event->registrations()
+                ->with(['user.profile'])
+                ->latest()
+                ->chunk(200, function ($registrations) use ($handle) {
+                    foreach ($registrations as $registration) {
+                        fputcsv($handle, [
+                            $registration->user?->name,
+                            $registration->user?->email,
+                            $registration->user?->profile?->phone,
+                            $registration->user?->profile?->city,
+                            $registration->ticket_number,
+                            $registration->status,
+                            optional($registration->registered_at)->toDateTimeString(),
+                            optional($registration->checked_in_at)->toDateTimeString(),
+                        ]);
+                    }
+                });
+
+            fclose($handle);
+        }, $fileName, ['Content-Type' => 'text/csv']);
     }
 
     public function myEvents(Request $request): JsonResponse
@@ -211,9 +346,10 @@ class EventController extends Controller
             abort(403, 'You do not have permission to view attendees for this event.');
         }
 
-        $registrations = $event->registrations()->with(['user.role', 'user.profile'])->latest()->paginate(min((int) $request->input('per_page', 25), 100));
+        $registrations = $event->registrations()->with(['user.role', 'user.profile', 'checkedInBy.role', 'checkedInBy.profile'])->latest()->paginate(min((int) $request->input('per_page', 25), 100));
         $confirmedCount = $event->registrations()->where('status', 'confirmed')->count();
         $cancelledCount = $event->registrations()->whereIn('status', ['cancelled_by_user', 'cancelled_by_event', 'cancelled'])->count();
+        $checkedInCount = $event->registrations()->whereNotNull('checked_in_at')->count();
 
         return response()->json([
             'event' => new EventResource($event->load(['category', 'region', 'division', 'city'])->loadCount(['registrations'])),
@@ -221,6 +357,7 @@ class EventController extends Controller
                 'registrations_count' => $event->registrations()->count(),
                 'confirmed_count' => $confirmedCount,
                 'cancelled_count' => $cancelledCount,
+                'checked_in_count' => $checkedInCount,
                 'capacity' => $event->maximum_participants,
                 'available_places' => $event->maximum_participants ? max(0, $event->maximum_participants - $confirmedCount) : null,
             ],
@@ -236,7 +373,7 @@ class EventController extends Controller
 
         $validated = $request->validate([
             'status' => ['required', 'in:draft,pending,published,rejected,cancelled'],
-            'moderation_reason' => ['nullable', 'string', 'max:1000'],
+            'moderation_reason' => ['nullable', 'required_if:status,rejected,cancelled', 'string', 'max:1000'],
         ]);
 
         $wasAvailable = $event->status === 'published' && $event->visibility === 'public';

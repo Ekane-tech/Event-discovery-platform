@@ -15,12 +15,15 @@ class Registration extends Model
         'status',
         'ticket_number',
         'registered_at',
+        'checked_in_at',
+        'checked_in_by',
     ];
 
     protected function casts(): array
     {
         return [
             'registered_at' => 'datetime',
+            'checked_in_at' => 'datetime',
         ];
     }
 
@@ -38,4 +41,10 @@ class Registration extends Model
     {
         return $this->hasOne(Payment::class);
     }
+
+    public function checkedInBy()
+    {
+        return $this->belongsTo(User::class, 'checked_in_by');
+    }
 }
+

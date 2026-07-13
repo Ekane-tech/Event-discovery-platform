@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom'
 
 export default function Sidebar({ links = [] }) {
   return (
-    <aside className="w-full rounded-2xl border border-slate-200 bg-white p-4 md:w-64">
+    <aside className="w-full rounded-2xl border border-slate-200 bg-white p-2 md:w-64">
       <nav className="flex flex-col gap-1">
         {links.map((link) => (
           <NavLink

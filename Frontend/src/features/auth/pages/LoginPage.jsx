@@ -5,6 +5,7 @@ import Alert from '../../../shared/components/feedback/Alert.jsx'
 import Button from '../../../shared/components/ui/Button.jsx'
 import FormInput from '../../../shared/components/forms/FormInput.jsx'
 import AuthCard from '../components/AuthCard.jsx'
+import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 import { useAuth } from '../hooks/useAuth.js'
 import { getDashboardPathByRole } from '../utils/authRedirects.js'
 
@@ -15,6 +16,7 @@ const quickAccess = [
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const location = useLocation()
   const { login } = useAuth()
   const [form, setForm] = useState({ email: '', password: '' })
@@ -64,7 +66,7 @@ export default function LoginPage() {
       </section>
 
       <section className="flex items-center">
-        <AuthCard eyebrow="Secure login" title="Sign in" description="Choose your account type or enter your credentials to continue." footer={<>No account yet? <Link className="font-bold text-teal-700" to="/register">Create an account</Link></>}>
+        <AuthCard eyebrow={t('auth.secureLogin')} title={t('auth.signIn')} description="Choose your account type or enter your credentials to continue." footer={<>No account yet? <Link className="font-bold text-teal-700" to="/register">Create an account</Link></>}>
           <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:hidden">
             {quickAccess.map((item) => {
               const Icon = item.icon
@@ -73,11 +75,11 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="grid gap-3">
-            <FormInput label="Email address" name="email" type="email" value={form.email} onChange={updateField} placeholder="you@example.com" required />
-            <FormInput label="Password" name="password" type="password" value={form.password} onChange={updateField} placeholder="Your password" required />
-            <div className="flex items-center justify-between gap-3"><label className="flex items-center gap-2 text-sm text-slate-600"><input type="checkbox" className="h-4 w-4 accent-teal-600" defaultChecked />Remember me</label><Link to="/forgot-password" className="text-sm font-bold text-teal-700">Forgot password?</Link></div>
+            <FormInput label={t('auth.email')} name="email" type="email" value={form.email} onChange={updateField} placeholder="you@example.com" required />
+            <FormInput label={t('auth.password')} name="password" type="password" value={form.password} onChange={updateField} placeholder="Your password" required />
+            <div className="flex items-center justify-between gap-3"><label className="flex items-center gap-2 text-sm text-slate-600"><input type="checkbox" className="h-4 w-4 accent-teal-600" defaultChecked />{t('auth.rememberMe')}</label><Link to="/forgot-password" className="text-sm font-bold text-teal-700">{t('auth.forgotPassword')}</Link></div>
             {error && <Alert type="error">{error}</Alert>}
-            <Button type="submit" disabled={submitting} className="h-11 gap-2 bg-pink-600 hover:bg-pink-700">{submitting ? 'Signing in...' : 'Sign in'}{!submitting && <ArrowRight className="h-4 w-4" />}</Button>
+            <Button type="submit" disabled={submitting} variant="pink" className="h-11 gap-2">{submitting ? 'Signing in...' : 'Sign in'}{!submitting && <ArrowRight className="h-4 w-4" />}</Button>
           </form>
           <div className="mt-4 rounded-2xl bg-slate-50 p-4 text-xs leading-5 text-slate-500"><ShieldCheck className="mb-2 h-4 w-4 text-teal-700" />Your account is protected and your activity stays private.</div>
         </AuthCard>

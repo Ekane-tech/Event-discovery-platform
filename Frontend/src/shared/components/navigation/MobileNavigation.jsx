@@ -2,14 +2,14 @@ import { Link, NavLink } from 'react-router-dom'
 import Button from '../ui/Button.jsx'
 import NavigationBadge from './NavigationBadge.jsx'
 import NavIcon from './NavIcon.jsx'
-
+import { useTranslation } from '../../i18n/useTranslation.js'
 export default function MobileNavigation({ open, groups = [], unreadCount = 0, isAuthenticated, user, onLogout, onClose }) {
-  if (!open) return null
+  const { t } = useTranslation()
 
+  if (!open) return null
   function getBadgeCount(link) {
     return link.badge === 'notifications' ? unreadCount : 0
   }
-
   return (
     <div className="border-t border-slate-200 bg-white px-4 py-4 shadow-xl lg:hidden">
       {isAuthenticated && (
@@ -19,7 +19,6 @@ export default function MobileNavigation({ open, groups = [], unreadCount = 0, i
           <p className="mt-1 text-xs capitalize text-teal-700">{user?.role}</p>
         </div>
       )}
-
       <div className="grid gap-5">
         {groups.map((group) => (
           <div key={group.title}>
@@ -36,7 +35,7 @@ export default function MobileNavigation({ open, groups = [], unreadCount = 0, i
                 >
                   <span className="flex items-center gap-3">
                     <NavIcon name={link.icon} />
-                    {link.label}
+                    {t(link.labelKey, link.label)}
                   </span>
                   <NavigationBadge count={getBadgeCount(link)} />
                 </NavLink>
@@ -45,7 +44,6 @@ export default function MobileNavigation({ open, groups = [], unreadCount = 0, i
           </div>
         ))}
       </div>
-
       <div className="mt-5 flex gap-2">
         {isAuthenticated ? (
           <Button variant="secondary" className="w-full" onClick={onLogout}>Logout</Button>

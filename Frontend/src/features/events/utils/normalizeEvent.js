@@ -47,6 +47,7 @@ export function normalizeEvent(apiEvent) {
     slug: apiEvent.slug,
     description: apiEvent.description,
     category: apiEvent.category?.name || '',
+    categoryImageUrl: apiEvent.category?.image_url || '',
     region: apiEvent.region?.name || '',
     division: apiEvent.division?.name || '',
     city: apiEvent.city?.name || '',
@@ -101,7 +102,7 @@ export function eventToFormValues(event) {
   }
 }
 
-export function formValuesToApiPayload(form) {
+export function formValuesToApiPayload(form, status = 'pending') {
   return {
     title: form.title,
     description: form.description,
@@ -116,7 +117,7 @@ export function formValuesToApiPayload(form) {
     registration_deadline: form.registrationDeadline || null,
     price: Number(form.price || 0),
     maximum_participants: form.maximumParticipants ? Number(form.maximumParticipants) : null,
-    status: 'pending',
+    status,
     visibility: form.visibility || 'public',
   }
 }

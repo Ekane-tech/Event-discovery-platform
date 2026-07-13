@@ -14,7 +14,7 @@ export default function EventCard({ event }) {
   const location = useLocation()
   const { isAuthenticated, role } = useAuth()
   const { isBookmarked, toggleBookmark } = useBookmarks()
-  const bg = event.coverImage?.url || '/hero-events.svg'
+  const bg = event.coverImage?.url || event.categoryImageUrl || '/hero-events.svg'
   const bookmarked = isBookmarked(event.id)
   const canBookmark = isAuthenticated && role === ROLES.USER
 

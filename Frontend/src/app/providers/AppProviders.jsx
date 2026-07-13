@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState } from 'react'
 import AuthProvider from '../../features/auth/context/AuthContext.jsx'
+import LanguageProvider from '../../shared/i18n/LanguageProvider.jsx'
 import AppToaster from '../../shared/components/feedback/AppToaster.jsx'
 
 export default function AppProviders({ children }) {
@@ -8,10 +9,12 @@ export default function AppProviders({ children }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        {children}
-        <AppToaster />
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          {children}
+          <AppToaster />
+        </AuthProvider>
+      </LanguageProvider>
     </QueryClientProvider>
   )
 }

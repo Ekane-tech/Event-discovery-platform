@@ -8,6 +8,7 @@ import FormSelect from '../../../shared/components/forms/FormSelect.jsx'
 import { CAMEROON_REGIONS } from '../../../shared/constants/regions.js'
 import AuthCard from '../components/AuthCard.jsx'
 import PasswordChecklist from '../components/PasswordChecklist.jsx'
+import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 import { useAuth } from '../hooks/useAuth.js'
 import { getDashboardPathByRole } from '../utils/authRedirects.js'
 
@@ -18,6 +19,7 @@ const ACCOUNT_TYPES = [
 
 export default function RegisterPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { register } = useAuth()
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -50,7 +52,7 @@ export default function RegisterPage() {
         </div>
       </section>
       <section>
-        <AuthCard eyebrow="Create account" title="How do you want to start?" description="Choose your account type, then complete your profile." footer={<>Already have an account? <Link className="font-bold text-teal-700" to="/login">Sign in</Link></>}>
+        <AuthCard eyebrow="Create account" title="{t('auth.registerTitle')}" description="Choose your account type, then complete your profile." footer={<>Already have an account? <Link className="font-bold text-teal-700" to="/login">Sign in</Link></>}>
           {error && <div className="mb-4"><Alert type="error">{error}</Alert></div>}
           <div className="mb-5 grid gap-3 sm:grid-cols-2">
             {ACCOUNT_TYPES.map((item) => {
@@ -68,13 +70,13 @@ export default function RegisterPage() {
           {form.accountType && (
             <form onSubmit={handleSubmit} className="grid gap-4">
               <FormInput label="Full name" name="name" value={form.name} onChange={updateField} placeholder="Your name" required />
-              <FormInput label="Email address" name="email" type="email" value={form.email} onChange={updateField} placeholder="you@example.com" required />
+              <FormInput label={t('auth.email')} name="email" type="email" value={form.email} onChange={updateField} placeholder="you@example.com" required />
               <div className="grid gap-4 sm:grid-cols-2"><FormInput label="Phone" name="phone" value={form.phone} onChange={updateField} placeholder="+237 6XX XXX XXX" /><FormInput label="City" name="city" value={form.city} onChange={updateField} placeholder="Douala" /></div>
               <div className="grid gap-4 sm:grid-cols-2"><FormSelect label="Region" name="region" value={form.region} onChange={updateField}>{CAMEROON_REGIONS.map((region) => <option key={region}>{region}</option>)}</FormSelect><FormSelect label="Language" name="preferredLanguage" value={form.preferredLanguage} onChange={updateField}><option>English</option><option>French</option></FormSelect></div>
-              <FormInput label="Password" name="password" type="password" value={form.password} onChange={updateField} placeholder="Example: password1" required />
+              <FormInput label={t('auth.password')} name="password" type="password" value={form.password} onChange={updateField} placeholder="Example: password1" required />
               <FormInput label="Confirm password" name="passwordConfirmation" type="password" value={form.passwordConfirmation} onChange={updateField} required />
               <PasswordChecklist password={form.password} confirmation={form.passwordConfirmation} />
-              <Button type="submit" disabled={submitting} className="h-12 gap-2 bg-pink-600 hover:bg-pink-700">{submitting ? 'Creating account...' : 'Create account'}{!submitting && <ArrowRight className="h-4 w-4" />}</Button>
+              <Button type="submit" disabled={submitting} variant="pink" className="h-12 gap-2">{submitting ? 'Creating account...' : 'Create account'}{!submitting && <ArrowRight className="h-4 w-4" />}</Button>
             </form>
           )}
         </AuthCard>

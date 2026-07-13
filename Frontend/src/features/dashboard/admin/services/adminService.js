@@ -1,11 +1,18 @@
 import axiosClient from '../../../../shared/api/axiosClient.js'
 
+function multipartConfig(payload) {
+  return payload instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {}
+}
+
 export const adminService = {
   getUsers: (params = {}) => axiosClient.get('/admin/users', { params }),
   updateUserRole: (userId, role) => axiosClient.patch(`/admin/users/${userId}/role`, { role }),
   updateUserStatus: (userId, status) => axiosClient.patch(`/admin/users/${userId}/status`, { status }),
 
   getEvents: (params = {}) => axiosClient.get('/admin/events', { params }),
+  getPayments: (params = {}) => axiosClient.get('/admin/payments', { params }),
+  getPaymentSummary: () => axiosClient.get('/admin/payments/summary'),
+  getAuditLogs: (params = {}) => axiosClient.get('/admin/audit-logs', { params }),
   updateEventStatus: (eventId, status, moderationReason = '') => axiosClient.patch(`/admin/events/${eventId}/status`, { status, moderation_reason: moderationReason || null }),
 
   getReports: (params = {}) => axiosClient.get('/admin/reports', { params }),
@@ -19,8 +26,8 @@ export const adminService = {
   sendAnnouncement: (announcementId) => axiosClient.patch(`/admin/announcements/${announcementId}/send`),
 
   getCategories: (params = {}) => axiosClient.get('/categories', { params }),
-  createCategory: (payload) => axiosClient.post('/categories', payload),
-  updateCategory: (categoryId, payload) => axiosClient.put(`/categories/${categoryId}`, payload),
+  createCategory: (payload) => axiosClient.post('/categories', payload, multipartConfig(payload)),
+  updateCategory: (categoryId, payload) => axiosClient.post(`/categories/${categoryId}`, payload, multipartConfig(payload)),
   deleteCategory: (categoryId) => axiosClient.delete(`/categories/${categoryId}`),
 
   getRegions: (params = {}) => axiosClient.get('/regions', { params }),

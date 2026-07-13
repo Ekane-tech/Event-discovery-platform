@@ -18,8 +18,14 @@ there should be a feedback page for the users to be able to rate our app and als
 
 also the reset password needs still to be done for a production ready system and the login ui should be ameliorated so i dont have to scroll before pressing login.
 
+
 when a user of any type creates his profile picture or avatar he should see it somewhere.
 
 also fix the fact that when a user registers for an event and it gets cancelled and published back he should be able to cancel his registration. 
 
 when we click logout, the sidebar goes after the public page appeared fix that too.
+
+
+fix everywhere the code error is habdle showing queries like this in the project.
+
+SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: event_discovery_platform, SQL: select * from `users` where `email` = user@example.com limit 1)
