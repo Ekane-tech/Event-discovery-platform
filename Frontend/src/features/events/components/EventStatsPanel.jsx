@@ -1,10 +1,12 @@
 import { Bookmark, Eye, Ticket } from 'lucide-react'
+import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
 export default function EventStatsPanel({ event }) {
+  const { t } = useTranslation()
   const stats = [
-    { label: 'Views', value: event.views || 0, icon: Eye },
-    { label: 'Registrations', value: event.registrations || 0, icon: Ticket },
-    { label: 'Bookmarks', value: event.bookmarks || 0, icon: Bookmark },
+    { label: t('events.stats.views'), value: event.views || 0, icon: Eye },
+    { label: t('events.stats.registrations'), value: event.registrations || 0, icon: Ticket },
+    { label: t('events.stats.bookmarks'), value: event.bookmarks || 0, icon: Bookmark },
   ]
 
   return (

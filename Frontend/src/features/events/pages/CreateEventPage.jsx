@@ -7,8 +7,10 @@ import { createEmptyEventForm } from '../utils/eventDefaults.js'
 import { eventService } from '../services/eventService.js'
 import { buildEventImagesFormData, extractEventFiles, formValuesToApiPayload, hasEventFiles } from '../utils/normalizeEvent.js'
 import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
+import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
 export default function CreateEventPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -21,10 +23,10 @@ export default function CreateEventPage() {
       const eventId = response.data.event.id
       const files = extractEventFiles(payload)
       if (hasEventFiles(files)) await eventService.uploadImages(eventId, buildEventImagesFormData(files))
-      toast.success(status === 'draft' ? 'Draft saved successfully.' : 'Event submitted successfully.')
+      toast.success(status === 'draft' ? t('events.create.draftSaved') : t('events.create.successMessage'))
       navigate('/organizer/events')
     } catch (createError) {
-      const message = getApiErrorMessage(createError, 'Unable to create event.')
+      const message = getApiErrorMessage(createError, t('events.create.errorMessage'))
       toast.error(message)
       setError(message)
     } finally {
@@ -35,12 +37,12 @@ export default function CreateEventPage() {
   return (
     <PageContainer>
       <section className="mb-6 rounded-3xl bg-gradient-to-r from-teal-700 to-slate-950 p-8 text-white">
-        <h1 className="text-4xl font-black">Create Event</h1>
-        <p className="mt-3 max-w-2xl text-slate-200">Add the essential details, photos and schedule. Save a draft or submit when ready for review.</p>
+        <h1 className="text-4xl font-black">{t('events.create.title')}</h1>
+        <p className="mt-3 max-w-2xl text-slate-200">{t('events.create.description')}</p>
       </section>
       <EventForm
         initialValues={createEmptyEventForm()}
-        submitLabel="Submit Event"
+        submitLabel={t('events.create.submitButton')}
         onSubmit={(payload) => saveEvent(payload, 'pending')}
         onDraft={(payload) => saveEvent(payload, 'draft')}
         submitting={submitting}

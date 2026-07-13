@@ -1,8 +1,11 @@
-import { useContext } from 'react'
-import { LanguageContext } from './LanguageProvider.jsx'
+import { useTranslation as useReactTranslation } from 'react-i18next'
 
 export function useTranslation() {
-  const context = useContext(LanguageContext)
-  if (!context) throw new Error('useTranslation must be used inside LanguageProvider')
-  return context
+  const { t, i18n } = useReactTranslation()
+
+  return {
+    t,
+    language: i18n.language || 'en',
+    setLanguage: (nextLanguage) => i18n.changeLanguage(nextLanguage),
+  }
 }

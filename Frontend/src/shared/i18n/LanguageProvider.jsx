@@ -1,30 +1,23 @@
-import { createContext, useEffect, useMemo, useState } from 'react'
-import { translations } from './translations.js'
-
-export const LanguageContext = createContext(null)
-const STORAGE_KEY = 'app_language'
-
-function getNestedValue(object, path) {
-  return path.split('.').reduce((current, key) => current?.[key], object)
-}
+import { useEffect } from 'react'
+import { ThemeProvider } from '../theme/ThemeProvider.jsx'
+import i18n from './i18n.js'
 
 export default function LanguageProvider({ children }) {
-  const [language, setLanguageState] = useState(() => localStorage.getItem(STORAGE_KEY) || 'en')
-
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, language)
-    document.documentElement.lang = language
-  }, [language])
+    document.documentElement.lang = i18n.language || 'en'
 
-  function setLanguage(nextLanguage) {
-    setLanguageState(nextLanguage)
-  }
+    const onLanguageChanged = (nextLanguage) => {
+      document.documentElement.lang = nextLanguage
+      localStorage.setItem('app_language', nextLanguage)
+    }
 
-  function t(key, fallback = key) {
-    return getNestedValue(translations[language], key) || getNestedValue(translations.en, key) || fallback
-  }
+    i18n.on('languageChanged', onLanguageChanged)
+    return () => i18n.off('languageChanged', onLanguageChanged)
+  }, [])
 
-  const value = useMemo(() => ({ language, setLanguage, t }), [language])
-
-  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>
+  return (
+    <ThemeProvider>
+      {children}
+    </ThemeProvider>
+  )
 }

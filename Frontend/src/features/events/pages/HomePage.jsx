@@ -100,13 +100,13 @@ export default function HomePage() {
             <SearchSuggestInput label={t('home.lookingFor')} placeholder={t('home.lookingForPlaceholder')} value={searchForm.what} onChange={(value) => updateSearchField('what', value)} suggestions={whatSuggestions} />
             <SearchSuggestInput label={t('home.where')} placeholder={t('home.wherePlaceholder')} value={searchForm.where} onChange={(value) => updateSearchField('where', value)} suggestions={whereSuggestions} />
             <label className="block"><span className="mb-2 block text-sm font-bold text-slate-800">{t('home.when')}</span><Select value={searchForm.when} onChange={(event) => updateSearchField('when', event.target.value)} className="h-12">{whenOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</Select></label>
-            <Button type="submit" variant="pink" className="h-12 px-8"><Search className="mr-2 h-4 w-4" /> {t('common.search')}</Button>
+            <Button type="submit" variant="pink" className="h-12 px-8"><Search className="mr-2 h-4 w-4" /> {t('search')}</Button>
           </form>
 
           <div className="mt-7 flex flex-wrap gap-3">
-            <Link to="/events"><Button variant="light"><CalendarSearch className="mr-2 h-4 w-4" /> {t('common.browseEvents')}</Button></Link>
-            <Link to="/register"><Button variant="secondary">{t('common.createAccount')}</Button></Link>
-            <Link to="/organizer/events/create"><Button className="bg-teal-500 text-white hover:bg-teal-600">{t('common.becomeProvider')}</Button></Link>
+            <Link to="/events"><Button variant="light"><CalendarSearch className="mr-2 h-4 w-4" /> {t('browseEvents')}</Button></Link>
+            <Link to="/register"><Button variant="secondary">{t('createAccount')}</Button></Link>
+            <Link to="/organizer/events/create"><Button className="bg-teal-500 text-white hover:bg-teal-600">{t('becomeProvider')}</Button></Link>
           </div>
         </div>
       </section>
@@ -131,7 +131,7 @@ export default function HomePage() {
         </section>
 
         <section className="mt-12 overflow-hidden rounded-3xl bg-slate-950 p-8 text-white md:p-10">
-          <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center"><div><h2 className="text-3xl font-black">{t('home.providerTitle')}</h2><p className="mt-3 max-w-2xl text-slate-300">{t('home.providerText')}</p></div><Link to="/register"><Button variant="pink">{t('common.becomeProvider')}</Button></Link></div>
+          <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center"><div><h2 className="text-3xl font-black">{t('home.providerTitle')}</h2><p className="mt-3 max-w-2xl text-slate-300">{t('home.providerText')}</p></div><Link to="/register"><Button variant="pink">{t('becomeProvider')}</Button></Link></div>
         </section>
       </PageContainer>
     </div>

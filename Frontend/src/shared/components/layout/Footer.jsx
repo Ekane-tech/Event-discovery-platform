@@ -1,4 +1,4 @@
-import { Mail, MapPin, Phone } from 'lucide-react'
+﻿import { Mail, MapPin, Phone } from 'lucide-react'
 import {
   FaFacebookF,
   FaInstagram,
@@ -9,61 +9,64 @@ import { Link } from 'react-router-dom'
 
 import { APP_NAME } from '../../constants/app.js'
 import LanguageSwitcher from '../language/LanguageSwitcher.jsx'
-
-const footerSections = [
-  {
-    title: 'Platform',
-    links: [
-      { label: 'About us', to: '/about' },
-      { label: 'Browse events', to: '/events' },
-      { label: 'Public announcements', to: '/public-notifications' },
-      { label: 'Feedback', to: '/feedback' },
-    ],
-  },
-  {
-    title: 'Events',
-    links: [
-      { label: 'Create account', to: '/register' },
-      { label: 'Find events', to: '/events' },
-      { label: 'My tickets', to: '/registrations' },
-      { label: 'Categories', to: '/events' },
-    ],
-  },
-  {
-    title: 'For providers',
-    links: [
-      { label: 'Become a service provider', to: '/register' },
-      { label: 'Organizer dashboard', to: '/organizer/dashboard' },
-      { label: 'Create event', to: '/organizer/events/create' },
-      { label: 'Statistics', to: '/organizer/statistics' },
-    ],
-  },
-]
-
-const socialLinks = [
-  {
-    label: 'Facebook',
-    icon: FaFacebookF,
-    href: '#',
-  },
-  {
-    label: 'Instagram',
-    icon: FaInstagram,
-    href: '#',
-  },
-  {
-    label: 'LinkedIn',
-    icon: FaLinkedinIn,
-    href: '#',
-  },
-  {
-    label: 'X',
-    icon: FaXTwitter,
-    href: '#',
-  },
-]
+import { useTranslation } from '../../i18n/useTranslation.js'
 
 export default function Footer() {
+  const { t } = useTranslation()
+
+  const footerSections = [
+    {
+      title: t('footer.platformTitle'),
+      links: [
+        { label: t('footer.aboutUs'), to: '/about' },
+        { label: t('footer.browseEvents'), to: '/events' },
+        { label: t('footer.publicAnnouncements'), to: '/public-notifications' },
+        { label: t('footer.feedback'), to: '/feedback' },
+      ],
+    },
+    {
+      title: t('footer.eventsTitle'),
+      links: [
+        { label: t('footer.createAccount'), to: '/register' },
+        { label: t('footer.findEvents'), to: '/events' },
+        { label: t('footer.myTickets'), to: '/registrations' },
+        { label: t('footer.categories'), to: '/events' },
+      ],
+    },
+    {
+      title: t('footer.providersTitle'),
+      links: [
+        { label: t('footer.becomeProvider'), to: '/register' },
+        { label: t('footer.organizerDashboard'), to: '/organizer/dashboard' },
+        { label: t('footer.createEvent'), to: '/organizer/events/create' },
+        { label: t('footer.statistics'), to: '/organizer/statistics' },
+      ],
+    },
+  ]
+
+  const socialLinks = [
+    {
+      label: 'Facebook',
+      icon: FaFacebookF,
+      href: '#',
+    },
+    {
+      label: 'Instagram',
+      icon: FaInstagram,
+      href: '#',
+    },
+    {
+      label: 'LinkedIn',
+      icon: FaLinkedinIn,
+      href: '#',
+    },
+    {
+      label: 'X',
+      icon: FaXTwitter,
+      href: '#',
+    },
+  ]
+
   return (
     <footer className="border-t border-slate-200 bg-slate-950 text-white">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -74,8 +77,7 @@ export default function Footer() {
             </Link>
 
             <p className="mt-4 max-w-sm text-sm leading-6 text-slate-300">
-              Discover events, receive smart notifications, register with
-              digital tickets, and manage event activity across Cameroon.
+              {t('footer.description')}
             </p>
 
             <div className="mt-5 flex gap-2">
@@ -117,12 +119,12 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="font-bold text-white">Contact us</h3>
+            <h3 className="font-bold text-white">{t('footer.contactUs')}</h3>
 
             <div className="mt-4 grid gap-3 text-sm text-slate-300">
               <p className="flex gap-2">
                 <MapPin className="h-4 w-4 text-teal-300" />
-                Cameroon
+                {t('footer.country')}
               </p>
 
               <p className="flex gap-2">
@@ -137,7 +139,7 @@ export default function Footer() {
             </div>
 
             <div className="mt-5 rounded-2xl bg-white/10 p-4">
-              <p className="mb-2 text-sm font-bold text-white">Language</p>
+              <p className="mb-2 text-sm font-bold text-white">{t('language')}</p>
               <LanguageSwitcher />
             </div>
           </div>
@@ -145,18 +147,18 @@ export default function Footer() {
 
         <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-slate-400 md:flex-row md:items-center md:justify-between">
           <p>
-            © {new Date().getFullYear()} {APP_NAME}. All rights reserved.
+            © {new Date().getFullYear()} {APP_NAME}. {t('footer.allRightsReserved')}
           </p>
 
           <div className="flex flex-wrap gap-4">
             <Link to="#" className="hover:text-teal-300">
-              Terms
+              {t('footer.terms')}
             </Link>
             <Link to="#" className="hover:text-teal-300">
-              Privacy
+              {t('footer.privacy')}
             </Link>
             <Link to="#" className="hover:text-teal-300">
-              Cookies
+              {t('footer.cookies')}
             </Link>
           </div>
         </div>

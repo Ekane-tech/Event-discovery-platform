@@ -1,4 +1,4 @@
-import { KeyRound } from 'lucide-react'
+﻿import { KeyRound } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import Alert from '../../../shared/components/feedback/Alert.jsx'
@@ -8,9 +8,11 @@ import AuthCard from '../components/AuthCard.jsx'
 import PasswordChecklist from '../components/PasswordChecklist.jsx'
 import { authService } from '../services/authService.js'
 import { getApiErrorMessage } from '../utils/normalizeAuthUser.js'
+import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams()
+  const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [token, setToken] = useState('')
   const [form, setForm] = useState({ password: '', passwordConfirmation: '' })
@@ -34,12 +36,12 @@ export default function ResetPasswordPage() {
     setError('')
     setSuccess(false)
 
-    if (!email) return setError('Email is required. Use the reset link from your email or Laravel log.')
-    if (!token) return setError('Reset token is required. Use the reset link from your email or Laravel log.')
-    if (form.password.length < 8) return setError('Password must be at least 8 characters.')
-    if (!/[a-zA-Z]/.test(form.password)) return setError('Password must contain at least one letter.')
-    if (!/\d/.test(form.password)) return setError('Password must contain at least one number.')
-    if (form.password !== form.passwordConfirmation) return setError('Passwords do not match.')
+    if (!email) return setError(t('auth.emailRequired'))
+    if (!token) return setError(t('auth.resetTokenRequired'))
+    if (form.password.length < 8) return setError(t('auth.passwordMinLength'))
+    if (!/[a-zA-Z]/.test(form.password)) return setError(t('auth.passwordLetter'))
+    if (!/\d/.test(form.password)) return setError(t('auth.passwordNumber'))
+    if (form.password !== form.passwordConfirmation) return setError(t('auth.passwordsNotMatch'))
 
     setSubmitting(true)
 
@@ -53,7 +55,7 @@ export default function ResetPasswordPage() {
       setSuccess(true)
       setForm({ password: '', passwordConfirmation: '' })
     } catch (resetError) {
-      setError(getApiErrorMessage(resetError, 'Unable to reset password.'))
+      setError(getApiErrorMessage(resetError, t('auth.resetFailure')))
     } finally {
       setSubmitting(false)
     }
@@ -61,23 +63,23 @@ export default function ResetPasswordPage() {
 
   return (
     <AuthCard
-      eyebrow="Secure reset"
-      title="Reset password"
-      description="Use the reset link sent by Laravel. The link must include email and token query parameters."
-      footer={<Link className="font-bold text-teal-700" to="/login">Return to login</Link>}
+      eyebrow={t('auth.passwordResetTitle')}
+      title={t('auth.passwordResetTitle')}
+      description={t('auth.passwordResetDescription')}
+      footer={<Link className="font-bold text-teal-700" to="/login">{t('auth.backToLogin')}</Link>}
     >
-      {success && <div className="mb-5"><Alert type="success">Password reset successfully. You can now return to login.</Alert></div>}
+      {success && <div className="mb-5"><Alert type="success">{t('auth.resetPasswordSuccess')}</Alert></div>}
       {error && <div className="mb-5"><Alert type="error">{error}</Alert></div>}
 
       <form onSubmit={handleSubmit} className="grid gap-4">
-        <FormInput label="Email" name="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
-        <FormInput label="Reset token" name="token" value={token} onChange={(event) => setToken(event.target.value)} required />
-        <FormInput label="New password" name="password" type="password" value={form.password} onChange={updateField} required />
-        <FormInput label="Confirm password" name="passwordConfirmation" type="password" value={form.passwordConfirmation} onChange={updateField} required />
+        <FormInput label={t('auth.email')} name="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+        <FormInput label={t('auth.resetToken')} name="token" value={token} onChange={(event) => setToken(event.target.value)} required />
+        <FormInput label={t('auth.newPassword')} name="password" type="password" value={form.password} onChange={updateField} required />
+        <FormInput label={t('auth.confirmPassword')} name="passwordConfirmation" type="password" value={form.passwordConfirmation} onChange={updateField} required />
         <PasswordChecklist password={form.password} confirmation={form.passwordConfirmation} />
         <Button type="submit" disabled={submitting} className="h-12 gap-2 bg-teal-700 hover:bg-teal-800">
           <KeyRound className="h-4 w-4" />
-          {submitting ? 'Resetting...' : 'Reset password'}
+          {submitting ? t('auth.resetting') : t('auth.passwordResetTitle')}
         </Button>
       </form>
     </AuthCard>

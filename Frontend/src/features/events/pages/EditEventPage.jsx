@@ -10,8 +10,10 @@ import EventForm from '../components/EventForm.jsx'
 import { eventService } from '../services/eventService.js'
 import { buildEventImagesFormData, eventToFormValues, extractEventFiles, formValuesToApiPayload, hasEventFiles, normalizeEvent } from '../utils/normalizeEvent.js'
 import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
+import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
 export default function EditEventPage() {
+  const { t } = useTranslation()
   const { id } = useParams()
   const navigate = useNavigate()
   const [event, setEvent] = useState(null)
@@ -26,13 +28,13 @@ export default function EditEventPage() {
         const response = await eventService.getOrganizerEvent(id)
         setEvent(normalizeEvent(response.data.event))
       } catch (fetchError) {
-        setError(getApiErrorMessage(fetchError, 'Unable to load organizer event.'))
+        setError(getApiErrorMessage(fetchError, t('events.edit.loadFailed')))
       } finally {
         setLoading(false)
       }
     }
     run()
-  }, [id])
+  }, [id, t])
 
   async function handleUpdateEvent(payload, status = 'pending') {
     setSubmitting(true)
@@ -41,10 +43,10 @@ export default function EditEventPage() {
       await eventService.updateEvent(id, formValuesToApiPayload(payload, status))
       const files = extractEventFiles(payload)
       if (hasEventFiles(files)) await eventService.uploadImages(id, buildEventImagesFormData(files))
-      toast.success(status === 'draft' ? 'Draft saved successfully.' : 'Event updated successfully.')
+      toast.success(status === 'draft' ? t('events.edit.draftSaved') : t('events.edit.successMessage'))
       navigate('/organizer/events')
     } catch (updateError) {
-      const message = getApiErrorMessage(updateError, 'Unable to update event.')
+      const message = getApiErrorMessage(updateError, t('events.edit.errorMessage'))
       toast.error(message)
       setSubmitError(message)
     } finally {
@@ -56,7 +58,7 @@ export default function EditEventPage() {
     const response = await eventService.deleteImage(id, image.id)
     const updated = normalizeEvent(response.data.event)
     setEvent(updated)
-    toast.success('Image deleted.')
+    toast.success(t('events.edit.imageDeleted'))
     return updated
   }
 
@@ -64,17 +66,17 @@ export default function EditEventPage() {
     const response = await eventService.setCoverImage(id, image.id)
     const updated = normalizeEvent(response.data.event)
     setEvent(updated)
-    toast.success('Cover image updated.')
+    toast.success(t('events.edit.coverUpdated'))
     return updated
   }
 
-  if (loading) return <PageContainer><Loader message="Loading organizer event..." /></PageContainer>
-  if (error) return <PageContainer><ErrorState title="Unable to load event" message={error} /></PageContainer>
+  if (loading) return <PageContainer><Loader message={t('events.edit.loadingMessage')} /></PageContainer>
+  if (error) return <PageContainer><ErrorState title={t('events.edit.loadErrorTitle')} message={error} /></PageContainer>
   if (!event) {
     return (
       <PageContainer>
-        <EmptyState title="Organizer event not found" message="The event may have been deleted or does not belong to this organizer." />
-        <div className="mt-6"><Link to="/organizer/events"><Button>Back to My Events</Button></Link></div>
+        <EmptyState title={t('events.edit.notFoundTitle')} message={t('events.edit.notFoundMessage')} />
+        <div className="mt-6"><Link to="/organizer/events"><Button>{t('events.edit.backToMyEvents')}</Button></Link></div>
       </PageContainer>
     )
   }
@@ -82,12 +84,12 @@ export default function EditEventPage() {
   return (
     <PageContainer>
       <section className="mb-6 rounded-3xl bg-gradient-to-r from-teal-700 to-slate-950 p-8 text-white">
-        <h1 className="text-4xl font-black">Edit Event</h1>
-        <p className="mt-3 max-w-2xl text-slate-200">Update {event.title}. Manage the cover photo and existing gallery without leaving this page.</p>
+        <h1 className="text-4xl font-black">{t('events.edit.title')}</h1>
+        <p className="mt-3 max-w-2xl text-slate-200">{t('events.edit.pageDescription', { title: event.title })}</p>
       </section>
       <EventForm
         initialValues={eventToFormValues(event)}
-        submitLabel="Submit for Review"
+        submitLabel={t('events.edit.submitButton')}
         onSubmit={(payload) => handleUpdateEvent(payload, 'pending')}
         onDraft={(payload) => handleUpdateEvent(payload, 'draft')}
         submitting={submitting}
