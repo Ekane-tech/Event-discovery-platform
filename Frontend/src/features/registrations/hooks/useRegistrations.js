@@ -13,6 +13,8 @@ function normalizeRegistration(apiRegistration) {
     status: apiRegistration.status,
     ticketNumber: apiRegistration.ticket_number,
     registrationDate: apiRegistration.registered_at || apiRegistration.created_at,
+    checkedInAt: apiRegistration.checked_in_at || null,
+    checkedInBy: apiRegistration.checked_in_by_user?.name || apiRegistration.checked_in_by || '',
     event: apiRegistration.event ? normalizeEvent(apiRegistration.event) : null,
     payment: apiRegistration.payment || null,
     raw: apiRegistration,
@@ -53,7 +55,8 @@ export function useRegistrations() {
   }, [fetchRegistrations])
 
   function getRegistration(eventId) {
-    return registrations.find((registration) => Number(registration.eventId) === Number(eventId))
+    const matches = registrations.filter((registration) => Number(registration.eventId) === Number(eventId))
+    return matches.find((registration) => ['confirmed', 'pending_payment'].includes(registration.status)) || matches[0]
   }
 
   function isRegistered(eventId) {

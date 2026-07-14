@@ -1,10 +1,41 @@
 import { ChevronDown, Search } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 export default function SearchableSelect({ label, value, onChange, options = [], placeholder = 'Select option', searchPlaceholder = 'Type to search...' }) {
+  const wrapperRef = useRef(null)
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const selected = options.find((option) => String(option.value) === String(value))
+
+
+  useEffect(() => {
+    if (!open) return undefined
+
+    function handlePointerDown(event) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setOpen(false)
+        setQuery('')
+      }
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        setOpen(false)
+        setQuery('')
+      }
+    }
+
+    document.addEventListener('mousedown', handlePointerDown)
+    document.addEventListener('touchstart', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown)
+      document.removeEventListener('touchstart', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [open])
+
   const filtered = useMemo(() => {
     const term = query.trim().toLowerCase()
     if (!term) return options.slice(0, 80)
@@ -18,7 +49,7 @@ export default function SearchableSelect({ label, value, onChange, options = [],
   }
 
   return (
-    <div className="relative">
+    <div ref={wrapperRef} className="relative">
       {label && <label className="mb-1 block text-sm font-semibold text-slate-700">{label}</label>}
       <button type="button" onClick={() => setOpen((current) => !current)} className="flex h-12 w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 text-left text-sm font-medium text-slate-800 shadow-sm outline-none transition hover:border-teal-300 hover:bg-white focus:border-teal-500 focus:ring-4 focus:ring-teal-100">
         <span className={selected ? 'text-slate-900' : 'text-slate-400'}>{selected?.label || placeholder}</span>

@@ -1,36 +1,63 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Button from '../../../shared/components/ui/Button.jsx'
-import Input from '../../../shared/components/ui/Input.jsx'
-import Select from '../../../shared/components/ui/Select.jsx'
+import SearchableSelect from '../../../shared/components/forms/SearchableSelect.jsx'
 import { categoryService } from '../../categories/services/categoryService.js'
 import { locationService } from '../../locations/services/locationService.js'
 import { extractCollection } from '../../events/utils/normalizeEvent.js'
 
+const dateOptions = [
+  { value: 'all', label: 'Any date' },
+  { value: 'today', label: 'Today' },
+  { value: 'week', label: 'Next 7 days' },
+  { value: 'month', label: 'Next 30 days' },
+  { value: 'upcoming', label: 'Upcoming' },
+]
+
+const priceOptions = [
+  { value: 'all', label: 'Any price' },
+  { value: 'free', label: 'Free' },
+  { value: 'paid', label: 'Paid' },
+]
+
+const sortOptions = [
+  { value: 'upcoming', label: 'Soonest first' },
+  { value: 'latest', label: 'Latest date' },
+  { value: 'popularity', label: 'Most popular' },
+  { value: 'price_low', label: 'Lowest price' },
+  { value: 'price_high', label: 'Highest price' },
+]
+
 export default function EventFilters({ filters, onFilterChange, onReset }) {
   const [categories, setCategories] = useState([])
-  const [regions, setRegions] = useState([])
   const [cities, setCities] = useState([])
 
   useEffect(() => {
     async function loadOptions() {
       try {
-        const [categoriesResponse, regionsResponse, citiesResponse] = await Promise.all([
+        const [categoriesResponse, citiesResponse] = await Promise.all([
           categoryService.getCategories(),
-          locationService.getRegions(),
           locationService.getCities(),
         ])
         setCategories(extractCollection(categoriesResponse.data, 'categories'))
-        setRegions(extractCollection(regionsResponse.data, 'regions'))
         setCities(extractCollection(citiesResponse.data, 'cities'))
       } catch {
         setCategories([])
-        setRegions([])
         setCities([])
       }
     }
 
     loadOptions()
   }, [])
+
+  const categoryOptions = useMemo(() => [
+    { value: 'all', label: 'All categories' },
+    ...categories.map((category) => ({ value: String(category.id), label: category.name })),
+  ], [categories])
+
+  const cityOptions = useMemo(() => [
+    { value: '', label: 'All cities' },
+    ...cities.map((city) => ({ value: String(city.id), label: city.name })),
+  ], [cities])
 
   return (
     <div className="rounded-2xl bg-white p-4 shadow-sm">
@@ -39,49 +66,49 @@ export default function EventFilters({ filters, onFilterChange, onReset }) {
         <Button type="button" variant="secondary" onClick={onReset}>Reset</Button>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-        <Select value={filters.category_id} onChange={(event) => onFilterChange('category_id', event.target.value)}>
-          <option value="all">All categories</option>
-          {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
-        </Select>
-
-        <Select value={filters.region_id} onChange={(event) => onFilterChange('region_id', event.target.value)}>
-          <option value="all">All regions</option>
-          {regions.map((region) => <option key={region.id} value={region.id}>{region.name}</option>)}
-        </Select>
-
-        <Select value={filters.city_id} onChange={(event) => onFilterChange('city_id', event.target.value)}>
-          <option value="">All cities</option>
-          {cities.map((city) => <option key={city.id} value={city.id}>{city.name}</option>)}
-        </Select>
-
-        <Input
-          value={filters.organizer_id}
-          onChange={(event) => onFilterChange('organizer_id', event.target.value)}
-          placeholder="Organizer ID"
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        <SearchableSelect
+          label="Category"
+          value={filters.category_id}
+          onChange={(value) => onFilterChange('category_id', value || 'all')}
+          options={categoryOptions}
+          placeholder="All categories"
         />
 
-        <Select value={filters.date} onChange={(event) => onFilterChange('date', event.target.value)}>
-          <option value="all">Any date</option>
-          <option value="today">Today</option>
-          <option value="week">Next 7 days</option>
-          <option value="month">Next 30 days</option>
-          <option value="upcoming">Upcoming</option>
-        </Select>
+        <SearchableSelect
+          label="City"
+          value={filters.city_id}
+          onChange={(value) => onFilterChange('city_id', value || '')}
+          options={cityOptions}
+          placeholder="All cities"
+        />
 
-        <Select value={filters.price} onChange={(event) => onFilterChange('price', event.target.value)}>
-          <option value="all">Any price</option>
-          <option value="free">Free</option>
-          <option value="paid">Paid</option>
-        </Select>
+        <SearchableSelect
+          label="Date"
+          value={filters.date}
+          onChange={(value) => onFilterChange('date', value || 'all')}
+          options={dateOptions}
+          placeholder="Any date"
+          searchPlaceholder="Search date options..."
+        />
 
-        <Select value={filters.sort} onChange={(event) => onFilterChange('sort', event.target.value)}>
-          <option value="upcoming">Soonest first</option>
-          <option value="latest">Latest date</option>
-          <option value="popularity">Most popular</option>
-          <option value="price_low">Lowest price</option>
-          <option value="price_high">Highest price</option>
-        </Select>
+        <SearchableSelect
+          label="Price"
+          value={filters.price}
+          onChange={(value) => onFilterChange('price', value || 'all')}
+          options={priceOptions}
+          placeholder="Any price"
+          searchPlaceholder="Search price options..."
+        />
+
+        <SearchableSelect
+          label="Sort by"
+          value={filters.sort}
+          onChange={(value) => onFilterChange('sort', value || 'upcoming')}
+          options={sortOptions}
+          placeholder="Soonest first"
+          searchPlaceholder="Search sort options..."
+        />
       </div>
     </div>
   )

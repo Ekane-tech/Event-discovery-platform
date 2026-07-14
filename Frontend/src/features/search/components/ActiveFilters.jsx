@@ -5,9 +5,7 @@ import { getActiveFilters } from '../utils/filterEvents.js'
 const labels = {
   keyword: 'Keyword',
   category_id: 'Category',
-  region_id: 'Region',
   city_id: 'City',
-  organizer_id: 'Organizer',
   date: 'Date',
   price: 'Price',
   sort: 'Sort',

@@ -7,9 +7,7 @@ import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
 export const defaultEventFilters = {
   keyword: '',
   category_id: 'all',
-  region_id: 'all',
   city_id: '',
-  organizer_id: '',
   date: 'upcoming',
   price: 'all',
   sort: 'upcoming',
@@ -29,9 +27,7 @@ function toApiParams(filters) {
   const params = {}
   if (filters.keyword) params.keyword = filters.keyword
   if (filters.category_id && filters.category_id !== 'all') params.category_id = filters.category_id
-  if (filters.region_id && filters.region_id !== 'all') params.region_id = filters.region_id
   if (filters.city_id) params.city_id = filters.city_id
-  if (filters.organizer_id) params.organizer_id = filters.organizer_id
   if (filters.date && filters.date !== 'all') params.date = filters.date
   if (filters.price && filters.price !== 'all') params.price = filters.price
   if (filters.sort) params.sort = filters.sort === 'popularity' ? 'popular' : filters.sort

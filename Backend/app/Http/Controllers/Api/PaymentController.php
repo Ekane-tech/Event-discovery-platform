@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PaymentResource;
+use App\Models\AuditLog;
 use App\Models\Payment;
 use App\Services\Payments\MobileMoneyPaymentService;
 use Illuminate\Http\JsonResponse;
@@ -38,7 +39,7 @@ class PaymentController extends Controller
     {
         $this->authorizePaymentOwner($request, $payment);
 
-        if (! in_array($payment->status, ['pending', 'processing'], true)) {
+        if (! in_array($payment->status, ['pending', 'processing', 'failed'], true)) {
             return response()->json([
                 'message' => 'This payment cannot be initiated.',
                 'payment' => new PaymentResource($payment),
@@ -53,14 +54,16 @@ class PaymentController extends Controller
         $payment = $paymentService->initiate($payment, $validated['operator'], $this->normalizePhoneNumber($validated['phone_number']));
 
         return response()->json([
-            'message' => $payment->status === 'failed'
-                ? 'Payment initiation failed.'
-                : 'Mobile money payment request initiated.',
+            'message' => match ($payment->status) {
+                'paid' => 'Payment completed successfully.',
+                'failed' => 'Payment initiation failed.',
+                default => 'Mobile money payment request initiated. Confirm the prompt on your phone.',
+            },
             'payment' => new PaymentResource($payment->load(['event.category', 'event.region', 'event.city', 'registration'])),
         ], $payment->status === 'failed' ? 422 : 200);
     }
 
-    public function confirm(Request $request, Payment $payment): JsonResponse
+    public function confirm(Request $request, Payment $payment, MobileMoneyPaymentService $paymentService): JsonResponse
     {
         $this->authorizePaymentOwner($request, $payment);
 
@@ -78,13 +81,24 @@ class PaymentController extends Controller
             ], 422);
         }
 
+        if ($payment->provider === 'campay') {
+            $payment = $paymentService->refreshStatus($payment);
+
+            return response()->json([
+                'message' => $payment->status === 'paid'
+                    ? 'Payment confirmed successfully.'
+                    : 'Payment is still pending. Confirm the prompt on your phone, then check again.',
+                'payment' => new PaymentResource($payment->load(['event.category', 'event.region', 'event.city', 'registration'])),
+            ], $payment->status === 'failed' ? 422 : 200);
+        }
+
         $payment->update([
             'status' => 'paid',
             'paid_at' => now(),
             'metadata' => [
                 ...($payment->metadata ?? []),
-                'mock_confirmed_at' => now()->toISOString(),
-                'mock_confirmed_ip' => $request->ip(),
+                'development_confirmed_at' => now()->toISOString(),
+                'development_confirmed_ip' => $request->ip(),
             ],
         ]);
 
@@ -92,23 +106,35 @@ class PaymentController extends Controller
             $payment->registration->update(['status' => 'confirmed']);
         }
 
+        AuditLog::record($request->user(), 'payment.confirmed', $payment, 'Payment confirmed.', [
+            'provider' => $payment->provider,
+        ]);
+
         return response()->json([
             'message' => 'Payment confirmed successfully.',
             'payment' => new PaymentResource($payment->fresh()->load(['event.category', 'event.region', 'event.city', 'registration'])),
         ]);
     }
 
-    public function status(Request $request, Payment $payment): JsonResponse
+    public function status(Request $request, Payment $payment, MobileMoneyPaymentService $paymentService): JsonResponse
     {
         $this->authorizePaymentOwner($request, $payment);
+
+        if ($payment->provider === 'campay' && in_array($payment->status, ['pending', 'processing'], true)) {
+            $payment = $paymentService->refreshStatus($payment);
+        }
 
         return response()->json([
             'payment' => new PaymentResource($payment->fresh()->load(['event.category', 'event.region', 'event.city', 'registration'])),
         ]);
     }
 
-    public function campayCallback(Request $request): JsonResponse
+    public function campayCallback(Request $request, MobileMoneyPaymentService $paymentService): JsonResponse
     {
+        if (! $this->validCampayCallback($request)) {
+            return response()->json(['message' => 'Invalid callback signature.'], 403);
+        }
+
         $reference = $request->input('external_reference')
             ?? $request->input('reference')
             ?? $request->input('merchant_reference');
@@ -119,23 +145,15 @@ class PaymentController extends Controller
 
         $payment = Payment::where('reference', $reference)
             ->orWhere('external_reference', $reference)
+            ->orWhere('provider_reference', $reference)
             ->firstOrFail();
 
-        $status = strtolower((string) ($request->input('status') ?? $request->input('payment_status')));
-        $isPaid = in_array($status, ['successful', 'success', 'completed', 'paid'], true);
+        $payment = $paymentService->applyProviderStatus($payment, $request->all(), 'callback');
 
-        $payment->update([
-            'status' => $isPaid ? 'paid' : 'failed',
-            'paid_at' => $isPaid ? now() : null,
-            'failure_reason' => $isPaid ? null : ($request->input('message') ?? 'Payment failed.'),
-            'callback_payload' => $request->all(),
+        return response()->json([
+            'message' => 'Callback processed.',
+            'status' => $payment->status,
         ]);
-
-        if ($isPaid && $payment->registration) {
-            $payment->registration->update(['status' => 'confirmed']);
-        }
-
-        return response()->json(['message' => 'Callback processed.']);
     }
 
     private function authorizePaymentOwner(Request $request, Payment $payment): void
@@ -154,5 +172,26 @@ class PaymentController extends Controller
         }
 
         return '+237'.$digits;
+    }
+
+    private function validCampayCallback(Request $request): bool
+    {
+        $secret = env('CAMPAY_CALLBACK_SECRET');
+
+        if (! $secret) {
+            return true;
+        }
+
+        $signature = $request->header('X-Campay-Signature')
+            ?? $request->header('X-Signature')
+            ?? $request->input('signature');
+
+        if (! $signature) {
+            return false;
+        }
+
+        $expected = hash_hmac('sha256', $request->getContent(), $secret);
+
+        return hash_equals($expected, (string) $signature);
     }
 }

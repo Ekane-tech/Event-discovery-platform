@@ -18,7 +18,7 @@ class RegistrationController extends Controller
     {
         $registrations = Registration::query()
             ->where('user_id', $request->user()->id)
-            ->with(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'checkedInBy.role', 'checkedInBy.profile'])
+            ->with(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'checkedInBy.role', 'checkedInBy.profile'])
             ->latest()
             ->paginate(min((int) $request->input('per_page', 12), 50));
 
@@ -35,7 +35,7 @@ class RegistrationController extends Controller
 
         return response()->json([
             'registration' => new RegistrationResource(
-                $registration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'checkedInBy.role', 'checkedInBy.profile'])
+                $registration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'checkedInBy.role', 'checkedInBy.profile'])
             ),
         ]);
     }
@@ -45,37 +45,33 @@ class RegistrationController extends Controller
         $this->ensureEventCanBeRegistered($event);
         $this->ensureCapacityIsAvailable($event);
 
-        $registration = Registration::query()
+        $activeRegistration = Registration::query()
             ->where('user_id', $request->user()->id)
             ->where('event_id', $event->id)
+            ->whereIn('status', ['confirmed', 'pending_payment'])
+            ->latest()
             ->first();
 
-        if ($registration && $registration->status === 'confirmed') {
+        if ($activeRegistration) {
             return response()->json([
-                'message' => 'You are already registered for this event.',
+                'message' => $activeRegistration->status === 'confirmed'
+                    ? 'You are already registered for this event.'
+                    : 'You already have a pending payment for this event.',
                 'registration' => new RegistrationResource(
-                    $registration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'checkedInBy.role', 'checkedInBy.profile'])
+                    $activeRegistration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'checkedInBy.role', 'checkedInBy.profile'])
                 ),
-            ]);
+            ], $activeRegistration->status === 'pending_payment' ? 202 : 200);
         }
 
         $isPaidEvent = (float) $event->price > 0;
 
-        if (! $registration) {
-            $registration = Registration::create([
-                'user_id' => $request->user()->id,
-                'event_id' => $event->id,
-                'status' => $isPaidEvent ? 'pending_payment' : 'confirmed',
-                'ticket_number' => $this->generateTicketNumber($event),
-                'registered_at' => now(),
-            ]);
-        } else {
-            $registration->update([
-                'status' => $isPaidEvent ? 'pending_payment' : 'confirmed',
-                'ticket_number' => $this->generateTicketNumber($event),
-                'registered_at' => now(),
-            ]);
-        }
+        $registration = Registration::create([
+            'user_id' => $request->user()->id,
+            'event_id' => $event->id,
+            'status' => $isPaidEvent ? 'pending_payment' : 'confirmed',
+            'ticket_number' => $this->generateTicketNumber($event),
+            'registered_at' => now(),
+        ]);
 
         $payment = null;
 
@@ -90,9 +86,9 @@ class RegistrationController extends Controller
                 [
                     'amount' => $event->price,
                     'currency' => 'XAF',
-                    'provider' => 'mock',
+                    'provider' => env('PAYMENT_PROVIDER', 'mock'),
                     'reference' => $this->generatePaymentReference($event),
-                    'metadata' => ['mode' => 'mock_payment'],
+                    'metadata' => ['registration_attempt_id' => $registration->id],
                 ]
             );
         }
@@ -208,6 +204,8 @@ class RegistrationController extends Controller
         $registration = Registration::query()
             ->where('user_id', $request->user()->id)
             ->where('event_id', $event->id)
+            ->where('status', 'confirmed')
+            ->latest()
             ->first();
 
         if (! $registration) {
