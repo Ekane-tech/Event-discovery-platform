@@ -7,7 +7,7 @@ function multipartConfig(payload) {
 export const adminService = {
   getUsers: (params = {}) => axiosClient.get('/admin/users', { params }),
   updateUserRole: (userId, role) => axiosClient.patch(`/admin/users/${userId}/role`, { role }),
-  updateUserStatus: (userId, status) => axiosClient.patch(`/admin/users/${userId}/status`, { status }),
+  updateUserStatus: (userId, status, reason = '') => axiosClient.patch(`/admin/users/${userId}/status`, { status, reason: reason || null }),
 
   getEvents: (params = {}) => axiosClient.get('/admin/events', { params }),
   getPayments: (params = {}) => axiosClient.get('/admin/payments', { params }),

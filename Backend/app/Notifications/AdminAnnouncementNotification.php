@@ -27,10 +27,12 @@ class AdminAnnouncementNotification extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->subject($this->announcement->title)
-            ->greeting('Hello '.$notifiable->name.',')
-            ->line($this->announcement->message)
-            ->action('Open notifications', $this->frontendUrl('/notifications'))
-            ->line('You received this because platform announcements are enabled for your account.');
+            ->view('emails.admin-announcement', [
+                'name' => $notifiable->name,
+                'title' => $this->announcement->title,
+                'body' => $this->announcement->message,
+                'url' => $this->frontendUrl('/notifications'),
+            ]);
     }
 
     public function toArray(object $notifiable): array

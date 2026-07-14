@@ -83,7 +83,7 @@ export default function EditEventPage() {
 
   return (
     <PageContainer>
-      <section className="mb-6 rounded-3xl bg-gradient-to-r from-teal-700 to-slate-950 p-8 text-white">
+      <section className="mb-6 rounded-3xl bg-linear-to-r from-teal-700 to-slate-950 p-8 text-white">
         <h1 className="text-4xl font-black">{t('events.edit.title')}</h1>
         <p className="mt-3 max-w-2xl text-slate-200">{t('events.edit.pageDescription', { title: event.title })}</p>
       </section>

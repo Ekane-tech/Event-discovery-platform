@@ -16,6 +16,7 @@ class UpdateUserStatusRequest extends FormRequest
     {
         return [
             'status' => ['required', 'string', Rule::in(['active', 'pending_approval', 'suspended'])],
+            'reason' => ['nullable', 'required_if:status,suspended', 'string', 'max:1000'],
         ];
     }
 }

@@ -24,6 +24,7 @@ function toApiProfilePayload(currentUser, payload) {
 
   return {
     name: merged.name,
+    organization_name: merged.organizationName || merged.organization_name || null,
     phone: merged.phone || null,
     city: merged.city || null,
     region: merged.region || null,

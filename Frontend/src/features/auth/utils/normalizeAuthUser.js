@@ -22,7 +22,7 @@ function normalizeAvatarUrl(avatar) {
 export function normalizeAuthUser(apiUser) {
   if (!apiUser) return null
 
-  const roleName = typeof apiUser.role === 'string' ? apiUser.role : apiUser.role?.name
+  const roleName = (typeof apiUser.role === 'string' ? apiUser.role : apiUser.role?.name)?.toLowerCase?.()
   const preferredLanguage = pickProfileValue(apiUser, 'preferred_language', apiUser?.preferredLanguage)
   const avatar = pickProfileValue(apiUser, 'avatar')
 
@@ -34,6 +34,7 @@ export function normalizeAuthUser(apiUser) {
     emailVerifiedAt: apiUser.email_verified_at || null,
     role: roleName || ROLES.USER,
     roleData: typeof apiUser.role === 'object' ? apiUser.role : null,
+    organizationName: pickProfileValue(apiUser, 'organization_name'),
     phone: pickProfileValue(apiUser, 'phone'),
     city: pickProfileValue(apiUser, 'city'),
     region: pickProfileValue(apiUser, 'region'),

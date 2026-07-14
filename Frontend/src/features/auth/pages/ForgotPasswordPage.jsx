@@ -7,8 +7,10 @@ import FormInput from '../../../shared/components/forms/FormInput.jsx'
 import AuthCard from '../components/AuthCard.jsx'
 import { authService } from '../services/authService.js'
 import { getApiErrorMessage } from '../utils/normalizeAuthUser.js'
+import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
-const SAFE_RESET_MESSAGE = 'If an account exists for this email, a password reset link has been sent.'
+// message fallback when API doesn't return one
+// uses i18n at render time
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -16,6 +18,7 @@ export default function ForgotPasswordPage() {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const { t } = useTranslation()
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -42,10 +45,8 @@ export default function ForgotPasswordPage() {
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-400 text-slate-950">
             <ShieldCheck className="h-7 w-7" />
           </div>
-          <h2 className="mt-6 text-3xl font-black leading-tight">Recover your account securely.</h2>
-          <p className="mt-3 text-sm leading-7 text-slate-300">
-            Enter your email address and we will send a private password reset link if the account exists.
-          </p>
+            <h2 className="mt-6 text-3xl font-black leading-tight">{t('auth.forgotPasswordTitle')}</h2>
+            <p className="mt-3 text-sm leading-7 text-slate-300">{t('auth.forgotPasswordDescription')}</p>
           <div className="mt-6 grid gap-3 text-sm text-slate-200">
             <p className="rounded-2xl bg-white/10 p-4">Reset links are time-limited for your safety.</p>
             <p className="rounded-2xl bg-white/10 p-4">We never reveal whether an email is registered.</p>
@@ -55,25 +56,25 @@ export default function ForgotPasswordPage() {
 
         <div className="mx-auto w-full max-w-xl">
           <AuthCard
-            eyebrow="Password recovery"
-            title="Forgot your password?"
-            description="Enter the email linked to your account. Check your inbox for the reset instructions."
-            footer={<><Link className="inline-flex items-center gap-1 font-bold text-teal-700" to="/login"><ArrowLeft className="h-4 w-4" /> Back to login</Link> <span className="text-slate-400">or</span> <Link className="font-bold text-teal-700" to="/register">create an account</Link></>}
+            eyebrow={t('auth.forgotPasswordTitle')}
+            title={t('auth.forgotPasswordTitle')}
+            description={t('auth.forgotPasswordDescription')}
+            footer={<><Link className="inline-flex items-center gap-1 font-bold text-teal-700" to="/login"><ArrowLeft className="h-4 w-4" /> {t('auth.backToLogin')}</Link> <span className="text-slate-400">{t('or', 'or')}</span> <Link className="font-bold text-teal-700" to="/register">{t('auth.createAccount')}</Link></>}
           >
-            {sent && <div className="mb-5"><Alert type="success">{message}</Alert></div>}
+            {sent && <div className="mb-5"><Alert type="success">{message || t('auth.safeResetMessage')}</Alert></div>}
             {error && <div className="mb-5"><Alert type="error">{error}</Alert></div>}
 
             <form onSubmit={handleSubmit} className="grid gap-4">
-              <FormInput label="Email address" type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" required />
+              <FormInput label={t('auth.email')} type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" required />
               <Button type="submit" disabled={submitting} className="h-12 gap-2 bg-teal-700 hover:bg-teal-800">
                 <MailCheck className="h-4 w-4" />
-                {submitting ? 'Sending...' : 'Send reset link'}
+                {submitting ? t('auth.sending') : t('auth.sendResetLink')}
               </Button>
             </form>
 
             {sent && (
               <div className="mt-5 rounded-2xl border border-teal-100 bg-teal-50 p-4 text-sm leading-6 text-teal-900">
-                If the message does not arrive within a few minutes, check your spam folder or request another link.
+                {t('auth.safeResetMessage')}
               </div>
             )}
           </AuthCard>

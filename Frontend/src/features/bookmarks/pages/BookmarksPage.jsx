@@ -14,7 +14,7 @@ export default function BookmarksPage() {
 
   return (
     <PageContainer>
-      <section className="overflow-hidden rounded-3xl bg-gradient-to-r from-yellow-500 to-orange-600 p-8 text-white shadow-sm">
+      <section className="overflow-hidden rounded-3xl bg-linear-to-r from-yellow-500 to-orange-600 p-8 text-white shadow-sm">
         <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-bold backdrop-blur"><Bookmark className="h-4 w-4" /> Saved events</span>
@@ -28,7 +28,7 @@ export default function BookmarksPage() {
       <div className="mt-6">
         <div className="mb-6 max-w-sm">
           {loading ? <StatCardSkeleton compact /> : (
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-yellow-500 to-orange-600 p-5 text-white shadow-sm">
+            <div className="relative overflow-hidden rounded-3xl bg-linear-to-br from-yellow-500 to-orange-600 p-5 text-white shadow-sm">
               <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/15" />
               <div className="relative flex items-center justify-between">
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/25"><Bookmark className="h-5 w-5" /></span>

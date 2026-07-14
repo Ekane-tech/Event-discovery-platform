@@ -31,10 +31,9 @@ class ResetPasswordNotification extends Notification
 
         return (new MailMessage)
             ->subject('Reset your password')
-            ->greeting('Hello '.$notifiable->name.',')
-            ->line('We received a request to reset your password.')
-            ->action('Reset password', $resetUrl)
-            ->line('This password reset link expires according to your security settings.')
-            ->line('If you did not request a password reset, no further action is required.');
+            ->view('emails.reset-password', [
+                'name' => $notifiable->name,
+                'url' => $resetUrl,
+            ]);
     }
 }

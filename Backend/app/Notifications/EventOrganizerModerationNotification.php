@@ -29,16 +29,15 @@ class EventOrganizerModerationNotification extends Notification
             ? $this->event->title.' has been published and is visible to users.'
             : $this->event->title.' is now '.$this->status.'.';
 
-        $mail = (new MailMessage)
+        return (new MailMessage)
             ->subject($subject)
-            ->greeting('Hello '.$notifiable->name.',')
-            ->line($message);
-
-        if ($this->reason) {
-            $mail->line('Reason: '.$this->reason);
-        }
-
-        return $mail->action('Manage event', $this->frontendUrl('/organizer/events/'.$this->event->id.'/details'));
+            ->view('emails.event-moderation', [
+                'name' => $notifiable->name,
+                'title' => $subject,
+                'message' => $message,
+                'reason' => $this->reason,
+                'url' => $this->frontendUrl('/organizer/events/'.$this->event->id.'/details'),
+            ]);
     }
 
     public function toArray(object $notifiable): array

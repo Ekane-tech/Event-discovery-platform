@@ -29,10 +29,9 @@ class VerifyEmailNotification extends Notification
 
         return (new MailMessage)
             ->subject('Verify your email address')
-            ->greeting('Hello '.$notifiable->name.',')
-            ->line('Thanks for creating your account. Please verify your email address to secure your account and receive important updates.')
-            ->action('Verify email address', $verificationUrl)
-            ->line('This verification link expires in 60 minutes.')
-            ->line('If you did not create this account, you can ignore this email.');
+            ->view('emails.verify-email', [
+                'name' => $notifiable->name,
+                'url' => $verificationUrl,
+            ]);
     }
 }

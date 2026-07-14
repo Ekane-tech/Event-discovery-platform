@@ -72,9 +72,9 @@ export default function RegisterPage() {
   return (
     <main className="mx-auto grid max-w-7xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_560px] lg:px-8 lg:py-14">
       <section className="hidden lg:block">
-        <div className="sticky top-28 overflow-hidden rounded-[2rem] bg-slate-950 shadow-2xl">
-          <img src="/hero-events.svg" alt="Event crowd" className="h-[650px] w-full object-cover opacity-80" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent" />
+        <div className="sticky top-28 overflow-hidden rounded-4xl bg-slate-950 shadow-2xl">
+          <img src="/hero-events.svg" alt="Event crowd" className="h-162.5 w-full object-cover opacity-80" />
+          <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/50 to-transparent" />
           <div className="absolute bottom-0 p-10 text-white">
             <Users className="mb-4 h-10 w-10 text-teal-300" />
             <h2 className="text-4xl font-black">Join the event ecosystem.</h2>
@@ -90,10 +90,10 @@ export default function RegisterPage() {
 
       <section>
         <AuthCard
-          eyebrow="Create account"
+          eyebrow={t('auth.createAccount')}
           title={t('auth.registerTitle', 'Create your account')}
-          description="Choose your account type, then add your contact details."
-          footer={<>Already have an account? <Link className="font-bold text-teal-700" to="/login">Sign in</Link></>}
+          description={t('auth.registerDescription')}
+          footer={<>{t('auth.alreadyAccount')} <Link className="font-bold text-teal-700" to="/login">{t('auth.signIn')}</Link></>}
         >
           {error && <div className="mb-4"><Alert type="error">{error}</Alert></div>}
           <div className="mb-5 grid gap-3 sm:grid-cols-2">
@@ -111,29 +111,30 @@ export default function RegisterPage() {
           </div>
 
           {form.accountType && (
-            <form onSubmit={handleSubmit} className="grid gap-4">
-              <FormInput label="Full name" name="name" value={form.name} onChange={updateField} placeholder="Your name" required />
-              {form.accountType === 'organizer' && <FormInput label="Organizer name" name="organizerName" value={form.organizerName} onChange={updateField} placeholder="Company, brand or organizer name" required />}
-              <FormInput label={t('auth.email', 'Email address')} name="email" type="email" value={form.email} onChange={updateField} placeholder="you@example.com" required />
+              <form onSubmit={handleSubmit} className="grid gap-4">
+              <FormInput label={t('auth.fullName')} name="name" value={form.name} onChange={updateField} placeholder={t('auth.fullName')} required />
+              {form.accountType === 'organizer' && <FormInput label={t('auth.organizerName', 'Organizer name')} name="organizerName" value={form.organizerName} onChange={updateField} placeholder={t('auth.organizerName', 'Company, brand or organizer name')} required />}
+              <FormInput label={t('auth.email')} name="email" type="email" value={form.email} onChange={updateField} placeholder="you@example.com" required />
               <div className="grid gap-4 sm:grid-cols-2">
-                <FormInput label="Phone" name="phone" value={form.phone} onChange={updateField} placeholder="+237 6XX XXX XXX" />
-                <FormInput label="City" name="city" value={form.city} onChange={updateField} placeholder="Douala" />
+                <FormInput label={t('auth.phone')} name="phone" value={form.phone} onChange={updateField} placeholder="+237 6XX XXX XXX" />
+                <FormInput label={t('auth.city')} name="city" value={form.city} onChange={updateField} placeholder="Douala" />
               </div>
-              <FormInput label={t('auth.password', 'Password')} name="password" type="password" value={form.password} onChange={updateField} placeholder="Example: password1" required />
-              <FormInput label="Confirm password" name="passwordConfirmation" type="password" value={form.passwordConfirmation} onChange={updateField} required />
+              <FormInput label={t('auth.password')} name="password" type="password" value={form.password} onChange={updateField} placeholder="Example: password1" required />
+              <FormInput label={t('auth.confirmPassword')} name="passwordConfirmation" type="password" value={form.passwordConfirmation} onChange={updateField} required />
               <PasswordChecklist password={form.password} confirmation={form.passwordConfirmation} />
 
               <label className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700">
                 <span className="flex gap-3">
                   <input type="checkbox" name="termsAccepted" checked={form.termsAccepted} onChange={updateField} className="mt-1 h-4 w-4 rounded border-slate-300 text-teal-700 focus:ring-teal-500" />
                   <span>
-                    By clicking the Sign Up button, I agree to <a href={TERMS_URL} target="_blank" rel="noreferrer" className="font-bold text-teal-700 underline">Terms of service</a> and <a href={PRIVACY_URL} target="_blank" rel="noreferrer" className="font-bold text-teal-700 underline">Privacy policy</a>.
+                    {t('auth.chooseAccountType')}{' '}
+                    <a href={TERMS_URL} target="_blank" rel="noreferrer" className="font-bold text-teal-700 underline">{t('footer.terms')}</a> {t('and', 'and')} <a href={PRIVACY_URL} target="_blank" rel="noreferrer" className="font-bold text-teal-700 underline">{t('footer.privacy')}</a>.
                   </span>
                 </span>
               </label>
 
               <Button type="submit" disabled={submitting} variant="pink" className="h-12 gap-2">
-                {submitting ? 'Creating account...' : 'Sign Up'}
+                {submitting ? t('auth.creatingAccount') : t('auth.createAccount')}
                 {!submitting && <ArrowRight className="h-4 w-4" />}
               </Button>
             </form>

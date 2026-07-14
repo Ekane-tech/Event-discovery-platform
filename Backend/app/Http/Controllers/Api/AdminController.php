@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateReportStatusRequest;
 use App\Notifications\AdminAnnouncementNotification;
 use App\Notifications\TestEmailNotification;
+use App\Notifications\UserStatusChangedNotification;
 use App\Models\AdminAnnouncement;
 use App\Http\Resources\AdminAnnouncementResource;
 use App\Http\Requests\Admin\StoreAnnouncementRequest;
@@ -207,17 +208,32 @@ class AdminController extends Controller
 
     public function updateUserStatus(UpdateUserStatusRequest $request, User $user): JsonResponse
     {
-        if ((int) $request->user()->id === (int) $user->id && $request->validated('status') === 'suspended') {
+        if ((int) $request->user()->id === (int) $user->id) {
             return response()->json([
-                'message' => 'You cannot suspend your own administrator account.',
+                'message' => 'You cannot change the status of your own administrator account.',
             ], 422);
         }
 
-        $user->update(['status' => $request->validated('status')]);
-        AuditLog::record($request->user(), 'user.status.updated', $user, 'User status updated.', ['status' => $user->status]);
+        $validated = $request->validated();
+        $oldStatus = $user->status;
+        $user->update(['status' => $validated['status']]);
+        AuditLog::record($request->user(), 'user.status.updated', $user, 'User status updated.', [
+            'old_status' => $oldStatus,
+            'status' => $user->status,
+            'reason' => $validated['reason'] ?? null,
+        ]);
 
         if ($user->status === 'suspended') {
             $user->tokens()->delete();
+        }
+
+        try {
+            $user->notify(new UserStatusChangedNotification($user->status, $validated['reason'] ?? null));
+        } catch (\Throwable $exception) {
+            AuditLog::record($request->user(), 'user.status.notification_failed', $user, 'User status notification failed.', [
+                'status' => $user->status,
+                'error' => $exception->getMessage(),
+            ]);
         }
 
         return response()->json([

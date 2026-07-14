@@ -1,5 +1,5 @@
 {
-  "appName": "Plateforme de Découverte d’Événements",
+  "appName": "Mboko Events 237",
   "loading": "Chargement...",
   "save": "Enregistrer",
   "cancel": "Annuler",
@@ -41,7 +41,7 @@
     "admin": "Admin"
   },
   "home": {
-    "badge": "Découverte intelligente",
+    "badge": "Decouvrez les événements du Mboko",
     "title": "Trouvez les bons événements et recevez les bonnes alertes.",
     "subtitle": "Découvrez concerts, conférences, ateliers, événements business, sport, culture et expériences premium au Cameroun.",
     "lookingFor": "À la recherche de",
@@ -57,7 +57,7 @@
     "featuredCategories": "Catégories vedettes",
     "featuredCategoriesDescription": "Explorez les expériences et types d’événements populaires.",
     "upcomingEvents": "Événements à venir",
-    "upcomingEventsDescription": "Découvrez les événements publiés sur la plateforme.",
+    "upcomingEventsDescription": "Découvrez les événements publiés sur la Mboko Events 237.",
     "providerTitle": "Prêt à faire passer vos événements au niveau supérieur ?",
     "providerText": "Créez des événements, gérez les participants, vendez des billets et suivez vos performances."
   },
@@ -162,7 +162,7 @@
   },
   "feedbackPage": {
     "title": "Aidez-nous à nous améliorer",
-    "description": "Dites-nous ce qui fonctionne, ce qui est déroutant et ce qui rendrait la plateforme meilleure pour vous.",
+    "description": "Dites-nous ce qui fonctionne, ce qui est déroutant et ce qui rendrait la Mboko Events 237 meilleure pour vous.",
     "highlights": {
       "fastDiscovery": "Découverte d'événements plus rapide",
       "usefulNotifications": "Notifications plus utiles",
@@ -213,7 +213,15 @@
       "notSpecified": "Non spécifié",
       "notLimited": "Illimité",
       "shareEvent": "Partager l'événement",
-      "galleryTitle": "Galerie de l'événement"
+      "galleryTitle": "Galerie de l'événement",
+      "shareText": "Découvrez {{title}} sur Mboko Events 237.",
+      "shareCopied": "Lien de l'événement copié dans le presse-papiers.",
+      "shareFailed": "Impossible de partager l'événement pour le moment.",
+      "previousImage": "Image de couverture précédente",
+      "nextImage": "Image de couverture suivante",
+      "galleryImageLabel": "Afficher l'image de galerie {{index}}",
+      "previousGalleryImages": "Images de galerie précédentes",
+      "nextGalleryImages": "Images de galerie suivantes"
     },
     "create": {
       "title": "Créer un événement",
@@ -397,16 +405,16 @@
     "statistics": "Statistiques",
     "contactUs": "Contactez-nous",
     "country": "Cameroun",
-    "description": "La plateforme de découverte d'événements aide les participants et les organisateurs à trouver des événements, gérer les inscriptions et rester informés.",
+    "description": "La plateforme Mboko Events 237 aide les participants et les organisateurs à trouver des événements, gérer les inscriptions et rester informés.",
     "allRightsReserved": "Tous droits réservés.",
     "terms": "Conditions d'utilisation",
     "privacy": "Politique de confidentialité",
     "cookies": "Politique de cookies"
   },
   "about": {
-    "badge": "À propos de la plateforme",
+    "badge": "À propos de la Mboko Events 237",
     "heading": "Une manière plus intelligente de découvrir et gérer les événements.",
-    "description": "La plateforme de découverte d'événements connecte les participants et les organisateurs grâce à une découverte personnalisée, des billets numériques, des notifications et une gestion fiable des événements.",
+    "description": "Mboko Events 237 connecte les participants et les organisateurs grâce à une découverte personnalisée, des billets numériques, des notifications et une gestion fiable des événements.",
     "browseEvents": "Voir les événements",
     "createAccount": "Créer un compte",
     "pillar1Title": "Découverte intelligente",

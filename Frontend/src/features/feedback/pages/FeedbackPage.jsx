@@ -14,15 +14,15 @@ import { feedbackService } from '../services/feedbackService.js'
 import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
 export default function FeedbackPage() {
-  const { t } = useTranslation()
   const { user } = useAuth()
+  const { t } = useTranslation()
   const [form, setForm] = useState({ name: user?.name || '', email: user?.email || '', rating: 5, category: 'general', message: '' })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   function updateField(event) {
-    setForm((c) => ({ ...c, [event.target.name]: event.target.value }))
+    setForm((current) => ({ ...current, [event.target.name]: event.target.value }))
   }
 
   async function handleSubmit(event) {
@@ -35,17 +35,15 @@ export default function FeedbackPage() {
       const response = await feedbackService.submitFeedback({ ...form, rating: Number(form.rating) })
       setSuccess(response.data.message || t('feedbackPage.successMessage'))
       toast.success(t('feedbackPage.successMessage'))
-      setForm((c) => ({ ...c, message: '', rating: 5, category: 'general' }))
-    } catch (e) {
-      const message = getApiErrorMessage(e, t('feedbackPage.submitFailed'))
+      setForm((current) => ({ ...current, message: '', rating: 5, category: 'general' }))
+    } catch (submitError) {
+      const message = getApiErrorMessage(submitError, t('feedbackPage.submitFailed'))
       setError(message)
       toast.error(message)
     } finally {
       setSubmitting(false)
     }
   }
-
-  const highlightKeys = ['feedbackPage.highlights.fastDiscovery', 'feedbackPage.highlights.usefulNotifications', 'feedbackPage.highlights.betterTools']
 
   return (
     <div>
@@ -60,14 +58,18 @@ export default function FeedbackPage() {
       <PageContainer>
         <div className="grid gap-8 lg:grid-cols-[1fr_520px]">
           <div className="grid gap-4">
-            {highlightKeys.map((key) => (
-              <Card key={key}>
+            {[
+              t('feedbackPage.highlights.fastDiscovery'),
+              t('feedbackPage.highlights.usefulNotifications'),
+              t('feedbackPage.highlights.betterTools'),
+            ].map((item) => (
+              <Card key={item}>
                 <div className="flex gap-3">
                   <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
                     <Star className="h-5 w-5" />
                   </span>
                   <div>
-                    <h2 className="font-bold text-slate-950">{t(key)}</h2>
+                    <h2 className="font-bold text-slate-950">{item}</h2>
                     <p className="mt-1 text-sm text-slate-600">{t('feedbackPage.highlightDescription')}</p>
                   </div>
                 </div>
@@ -77,21 +79,25 @@ export default function FeedbackPage() {
 
           <Card>
             <h2 className="text-xl font-bold text-slate-950">{t('feedbackPage.shareTitle')}</h2>
+
             {error && (
               <div className="mt-4">
                 <Alert type="error">{error}</Alert>
               </div>
             )}
+
             {success && (
               <div className="mt-4">
                 <Alert type="success">{success}</Alert>
               </div>
             )}
+
             <form onSubmit={handleSubmit} className="mt-5 grid gap-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <Input name="name" value={form.name} onChange={updateField} placeholder={t('feedbackPage.namePlaceholder')} />
                 <Input name="email" type="email" value={form.email} onChange={updateField} placeholder={t('feedbackPage.emailPlaceholder')} />
               </div>
+
               <div className="grid gap-4 md:grid-cols-2">
                 <Select name="rating" value={form.rating} onChange={updateField}>
                   {[5, 4, 3, 2, 1].map((rating) => (
@@ -100,6 +106,7 @@ export default function FeedbackPage() {
                     </option>
                   ))}
                 </Select>
+
                 <Select name="category" value={form.category} onChange={updateField}>
                   <option value="general">{t('feedbackPage.category.general')}</option>
                   <option value="bug">{t('feedbackPage.category.bug')}</option>
@@ -108,7 +115,9 @@ export default function FeedbackPage() {
                   <option value="performance">{t('feedbackPage.category.performance')}</option>
                 </Select>
               </div>
+
               <Textarea name="message" value={form.message} onChange={updateField} rows="6" placeholder={t('feedbackPage.messagePlaceholder')} />
+
               <Button type="submit" disabled={submitting}>
                 {submitting ? t('feedbackPage.submitting') : t('feedbackPage.submitFeedback')}
               </Button>

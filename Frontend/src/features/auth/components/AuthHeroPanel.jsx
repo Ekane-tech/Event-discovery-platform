@@ -14,7 +14,7 @@ export default function AuthHeroPanel() {
       <div>
         <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 text-2xl font-black shadow-lg">E</div>
         <h2 className="mt-6 max-w-md text-3xl font-bold leading-tight">Welcome to {APP_NAME}</h2>
-        <p className="mt-3 max-w-md text-sm leading-6 text-teal-50">Discover events, manage tickets, and grow event communities across Cameroon.</p>
+        <p className="mt-3 max-w-md text-sm leading-6 text-teal-50">Your gateway to Cameroon’s events. Discover, manage tickets, and grow event communities across Cameroon.</p>
       </div>
       <div className="mt-6 grid gap-3">
         {features.map((feature) => {

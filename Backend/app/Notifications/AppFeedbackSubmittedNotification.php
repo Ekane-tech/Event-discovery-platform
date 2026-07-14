@@ -26,10 +26,13 @@ class AppFeedbackSubmittedNotification extends Notification
     {
         return (new MailMessage)
             ->subject('New platform feedback')
-            ->greeting('Hello '.$notifiable->name.',')
-            ->line(($this->feedback->name ?: 'A visitor').' submitted '.$this->feedback->rating.'/5 feedback.')
-            ->line($this->feedback->message)
-            ->action('Review feedback', $this->frontendUrl('/admin/feedback'));
+            ->view('emails.feedback-alert', [
+                'name' => $notifiable->name,
+                'sender' => $this->feedback->name ?: 'A visitor',
+                'rating' => $this->feedback->rating,
+                'message' => $this->feedback->message,
+                'url' => $this->frontendUrl('/admin/feedback'),
+            ]);
     }
 
     public function toArray(object $notifiable): array

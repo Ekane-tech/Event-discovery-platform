@@ -49,7 +49,7 @@ export default function LoginPage() {
 
   return (
     <main className="mx-auto grid min-h-[calc(100vh-220px)] max-w-7xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_480px] lg:px-8 lg:py-14">
-      <section className="relative hidden overflow-hidden rounded-[2rem] bg-slate-950 bg-cover bg-center p-10 text-white lg:block" style={{ backgroundImage: 'linear-gradient(140deg, rgba(2,6,23,.82), rgba(15,118,110,.6)), url(/hero-events.svg)' }}>
+      <section className="relative hidden overflow-hidden rounded-4xl bg-slate-950 bg-cover bg-center p-10 text-white lg:block" style={{ backgroundImage: 'linear-gradient(140deg, rgba(2,6,23,.82), rgba(15,118,110,.6)), url(/hero-events.svg)' }}>
         <div className="relative z-10 flex h-full flex-col justify-between">
           <div>
             <span className="inline-flex rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100">{t('auth.welcomeBack')}</span>

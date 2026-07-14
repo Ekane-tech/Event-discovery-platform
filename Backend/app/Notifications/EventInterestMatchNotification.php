@@ -27,8 +27,11 @@ class EventInterestMatchNotification extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->subject('New event matching your interests')
-            ->line('A new event matches your interests: '.$this->event->title)
-            ->action('View Event', $this->frontendUrl('/events/'.$this->event->id));
+            ->view('emails.interest-match', [
+                'name' => $notifiable->name,
+                'eventTitle' => $this->event->title,
+                'url' => $this->frontendUrl('/events/'.$this->event->id),
+            ]);
     }
 
     public function toArray(object $notifiable): array

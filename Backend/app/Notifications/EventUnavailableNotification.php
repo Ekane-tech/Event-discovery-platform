@@ -38,9 +38,12 @@ class EventUnavailableNotification extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->subject('Event update')
-            ->greeting('Hello '.$notifiable->name.',')
-            ->line($this->event->title.' '.$this->reasonText().'.')
-            ->action('Browse events', $this->frontendUrl('/events'));
+            ->view('emails.event-unavailable', [
+                'name' => $notifiable->name,
+                'eventTitle' => $this->event->title,
+                'reasonText' => $this->reasonText(),
+                'url' => $this->frontendUrl('/events'),
+            ]);
     }
 
     public function toArray(object $notifiable): array

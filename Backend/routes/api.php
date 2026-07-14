@@ -25,7 +25,7 @@ Route::post('/payments/callback/campay', [PaymentController::class, 'campayCallb
 Route::get('/health', function () {
     return response()->json([
         'status' => 'ok',
-        'message' => 'Event Discovery Platform API is running',
+        'message' => 'Mboko Events 237 API is running',
     ]);
 });
 

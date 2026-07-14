@@ -27,9 +27,11 @@ class EventAvailableNotification extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->subject('Event is available again')
-            ->greeting('Hello '.$notifiable->name.',')
-            ->line($this->event->title.' is available again. Your registration has been reactivated.')
-            ->action('View event', $this->frontendUrl('/events/'.$this->event->id));
+            ->view('emails.event-available', [
+                'name' => $notifiable->name,
+                'eventTitle' => $this->event->title,
+                'url' => $this->frontendUrl('/events/'.$this->event->id),
+            ]);
     }
 
     public function toArray(object $notifiable): array
