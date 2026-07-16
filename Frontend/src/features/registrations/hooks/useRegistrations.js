@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
 import { normalizeEvent, normalizeEvents, extractCollection } from '../../events/utils/normalizeEvent.js'
 import { registrationService } from '../services/registrationService.js'
+import { useAuth } from '../../auth/hooks/useAuth.js'
 
 const REGISTRATIONS_UPDATED_EVENT = 'registrations-updated'
 
@@ -43,7 +44,13 @@ export function useRegistrations() {
     }
   }, [])
 
+  const { isAuthenticated } = useAuth()
+
   useEffect(() => {
+    if (!isAuthenticated) {
+      setLoading(false)
+      return
+    }
     fetchRegistrations()
 
     function handleRegistrationsUpdated() {
@@ -52,7 +59,7 @@ export function useRegistrations() {
 
     window.addEventListener(REGISTRATIONS_UPDATED_EVENT, handleRegistrationsUpdated)
     return () => window.removeEventListener(REGISTRATIONS_UPDATED_EVENT, handleRegistrationsUpdated)
-  }, [fetchRegistrations])
+  }, [fetchRegistrations, isAuthenticated])
 
   function getRegistration(eventId) {
     const matches = registrations.filter((registration) => Number(registration.eventId) === Number(eventId))

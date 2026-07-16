@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
 import { extractCollection, normalizeEvents } from '../../events/utils/normalizeEvent.js'
 import { bookmarkService } from '../services/bookmarkService.js'
+import { useAuth } from '../../auth/hooks/useAuth.js'
 
 const BOOKMARKS_UPDATED_EVENT = 'bookmarks-updated'
 
@@ -32,7 +33,13 @@ export function useBookmarks() {
     }
   }, [])
 
+  const { isAuthenticated } = useAuth()
+
   useEffect(() => {
+    if (!isAuthenticated) {
+      setLoading(false)
+      return
+    }
     fetchBookmarks()
 
     function handleBookmarksUpdated() {
@@ -41,7 +48,7 @@ export function useBookmarks() {
 
     window.addEventListener(BOOKMARKS_UPDATED_EVENT, handleBookmarksUpdated)
     return () => window.removeEventListener(BOOKMARKS_UPDATED_EVENT, handleBookmarksUpdated)
-  }, [fetchBookmarks])
+  }, [fetchBookmarks, isAuthenticated])
 
   function isBookmarked(eventId) {
     return bookmarks.some((bookmark) => Number(bookmark.eventId) === Number(eventId))

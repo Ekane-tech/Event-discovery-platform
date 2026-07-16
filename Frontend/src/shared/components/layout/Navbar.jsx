@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Bell, Menu, ShieldCheck, X } from 'lucide-react'
+import { Bell, Menu, ShieldCheck, X, Home } from 'lucide-react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { APP_NAME } from '../../constants/app.js'
 import { useAuth } from '../../../features/auth/hooks/useAuth.js'
@@ -45,7 +45,7 @@ export default function Navbar() {
           ))}
         </nav>
         <div className="hidden items-center gap-2 lg:flex">
-          <LanguageSwitcher compact />
+          {/* <LanguageSwitcher compact /> */}
           {isAuthenticated ? (
             <>
               <Link to="/public-notifications" className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700"><Bell className="h-5 w-5" /></Link>
@@ -55,6 +55,7 @@ export default function Navbar() {
             </>
           ) : (
             <>
+              <Link to="/" className="hidden h-11 items-center gap-2 rounded-2xl bg-slate-100 px-4 text-sm font-semibold text-slate-700 transition hover:bg-teal-50 hover:text-teal-700 xl:inline-flex"><Home className="h-4 w-4" />Home</Link>
               <Link to="/public-notifications" className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700"><Bell className="h-5 w-5" /></Link>
               <Link to="/feedback"><Button variant="secondary">Feedback</Button></Link>
               <Link to="/login"><Button variant="secondary">Login</Button></Link>
