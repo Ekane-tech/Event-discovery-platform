@@ -40,7 +40,7 @@ function getRoleConfig(role) {
     return {
       eyebrow: 'Administrator profile',
       title: 'System command profile',
-      description: 'Manage platform trust, moderation, payments, users, reports and operational visibility for Mboko Events 237.',
+      description: 'Manage platform trust, moderation, payments, users, reports and operational visibility for Mboa Events 237.',
       gradient: 'linear-gradient(90deg, rgba(15,23,42,.94), rgba(88,28,135,.72)), url(/hero-events.svg)',
       dashboardPath: '/admin/dashboard',
       dashboardLabel: 'Admin Dashboard',
@@ -51,7 +51,7 @@ function getRoleConfig(role) {
     return {
       eyebrow: 'Organizer profile',
       title: 'Organizer identity and event presence',
-      description: 'Keep your organizer profile ready for attendees, event moderation and communication on Mboko Events 237.',
+      description: 'Keep your organizer profile ready for attendees, event moderation and communication on Mboa Events 237.',
       gradient: 'linear-gradient(90deg, rgba(2,6,23,.92), rgba(15,118,110,.72)), url(/hero-events.svg)',
       dashboardPath: '/organizer/dashboard',
       dashboardLabel: 'Organizer Dashboard',
@@ -60,7 +60,7 @@ function getRoleConfig(role) {
 
   return {
     eyebrow: 'Attendee profile',
-    title: 'Your Mboko event profile',
+    title: 'Your Mboa event profile',
     description: 'Manage your contact details, interests, tickets and event activity across Cameroon.',
     gradient: 'linear-gradient(90deg, rgba(2,6,23,.9), rgba(15,118,110,.68)), url(/hero-events.svg)',
     dashboardPath: '/dashboard',

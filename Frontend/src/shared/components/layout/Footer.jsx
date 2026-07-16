@@ -23,15 +23,16 @@ export default function Footer() {
           <div>
             <Link to="/" className="text-xl font-black text-white">{APP_NAME}</Link>
             <p className="mt-2 text-sm font-semibold text-teal-200">{APP_TAGLINE}</p>
-            <p className="mt-4 max-w-sm text-sm leading-6 text-slate-300">Discover Mboko experiences, receive smart notifications, register with digital tickets, and manage event activity across Cameroon.</p>
+            <p className="mt-4 max-w-sm text-sm leading-6 text-slate-300">Discover Mboa experiences, receive smart notifications, register with digital tickets, and manage event activity across Cameroon.</p>
             <div className="mt-5 flex gap-2">
               {socials.map((Icon, index) => <span key={index} className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-teal-600"><Icon className="h-4 w-4" /></span>)}
             </div>
           </div>
 
           <div className="grid gap-8 sm:grid-cols-3">
-            {sections.map((section) => (
-              <div key={section.title}>
+            {sections.map((section, index) => (
+              // L'index garantit l'unicité de la clé même si deux titres sont identiques
+              <div key={`${section.title}-${index}`}>
                 <h3 className="font-bold text-white">{section.title}</h3>
                 <div className="mt-4 grid gap-3">
                   {section.links.map(([label, to]) => to.startsWith('http')
@@ -42,11 +43,12 @@ export default function Footer() {
             ))}
           </div>
 
+
           <div>
             <h3 className="font-bold text-white">Contact us</h3>
             <div className="mt-4 grid gap-3 text-sm text-slate-300">
               <p className="flex gap-2"><MapPin className="h-4 w-4 text-teal-300" /> Cameroon</p>
-              <p className="flex gap-2"><Mail className="h-4 w-4 text-teal-300" /> support@mbokoevents237.cm</p>
+              <p className="flex gap-2"><Mail className="h-4 w-4 text-teal-300" /> support@mboaevents237.cm</p>
               <p className="flex gap-2"><Phone className="h-4 w-4 text-teal-300" /> +237 6XX XXX XXX</p>
             </div>
           </div>

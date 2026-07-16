@@ -23,9 +23,9 @@ export default function AboutPage() {
         <div className="absolute inset-0 bg-cover bg-center opacity-60" style={{ backgroundImage: 'url(/hero-events.svg)' }} />
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-teal-900/60" />
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100"><Sparkles className="h-4 w-4" /> About Mboko</span>
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100"><Sparkles className="h-4 w-4" /> About Mboa</span>
           <h1 className="mt-6 max-w-4xl text-5xl font-black leading-tight md:text-7xl">Your gateway to Cameroon’s events.</h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-200">Mboko Events 237 connects attendees, organizers and administrators through personalized discovery, digital tickets, notifications and reliable event management across Cameroon.</p>
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-200">Mboa Events 237 connects attendees, organizers and administrators through personalized discovery, digital tickets, notifications and reliable event management across Cameroon.</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/events"><Button variant="light">Browse Events</Button></Link>
             <Link to="/register"><Button variant="pink">Create Account</Button></Link>
@@ -53,7 +53,7 @@ export default function AboutPage() {
             <div className="p-8 md:p-10">
               <p className="font-bold uppercase tracking-wide text-teal-700">Why it matters</p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">More than an event listing website.</h2>
-              <p className="mt-4 leading-7 text-slate-600">Mboko Events 237 is designed around discovery and action: users choose interests, organizers publish events, and the system notifies the right audience when something relevant happens.</p>
+              <p className="mt-4 leading-7 text-slate-600">Mboa Events 237 is designed around discovery and action: users choose interests, organizers publish events, and the system notifies the right audience when something relevant happens.</p>
               <div className="mt-6 grid gap-3 text-sm text-slate-700">
                 <p>✓ Personalized recommendations</p>
                 <p>✓ Event registration and tickets</p>

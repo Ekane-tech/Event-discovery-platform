@@ -89,7 +89,7 @@ export default function HomePage() {
 
   return (
     <div>
-      <section className="relative min-h-112.5 overflow-visible bg-cover bg-center text-white" style={{ backgroundImage: 'linear-gradient(90deg, rgba(2,6,23,.90), rgba(15,118,110,.62)), url(/hero-events.svg)' }}>
+      <section className="relative min-h-112.5 overflow-visible bg-cover bg-center text-white" style={{ backgroundImage: `linear-gradient(90deg, rgba(2,6,23,.90), rgba(15,118,110,.62)), url(${import.meta.env.BASE_URL}Hero-image.jpg)` }}>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(255,255,255,.22),transparent_35%)]" />
         <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-8">
           <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100 backdrop-blur"><Sparkles className="h-4 w-4" /> {t('home.badge')}</p>
@@ -119,7 +119,7 @@ export default function HomePage() {
             {categories.slice(0, 20).map((category) => (
               <Link key={category.id} to={`/events?category_id=${category.id}`} className="group relative min-h-47.5 overflow-hidden rounded-xl bg-slate-900 p-5 text-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-xl">
                 <div className="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-105" style={{ backgroundImage: `url(${category.image_url || '/hero-events.svg'})` }} />
-                <div className="absolute inset-0 bg-linear-to-t from-slate-950/55 via-slate-950/18 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-slate-950/30 via-slate-950/10 to-transparent" />
                 <div className="relative flex min-h-37.5 flex-col justify-end overflow-hidden">
                 <h3 className="text-xl max-md:text-base font-black drop-shadow-sm truncate w-full" title={category.name}>{category.name}</h3>
                   <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-50 drop-shadow-sm">{category.description}</p>

@@ -93,7 +93,6 @@ export default function AdminEmailPage() {
           <div className="mb-5 rounded-3xl bg-gradient-to-br from-teal-700 to-slate-950 p-5 text-white">
             <Mail className="h-8 w-8 text-teal-100" />
             <h2 className="mt-3 text-2xl font-black">Send test email</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-200">Use this after changing Brevo SMTP credentials or deploying to production.</p>
           </div>
 
           {success && <div className="mb-4"><Alert type="success">{success}</Alert></div>}

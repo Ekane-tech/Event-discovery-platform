@@ -138,7 +138,7 @@ export default function EditProfilePage() {
           <Avatar name={form.name} src={preview} className="h-24 w-24 text-3xl" />
           <div className="flex-1">
             <h2 className="text-xl font-black text-slate-950">Profile photo</h2>
-            <p className="mt-1 text-sm text-slate-600">Use a clear photo or logo for a stronger Mboko profile presence.</p>
+            <p className="mt-1 text-sm text-slate-600">Use a clear photo or logo for a stronger Mboa profile presence.</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-teal-50 hover:text-teal-700">
                 <Camera className="h-4 w-4" /> Upload photo

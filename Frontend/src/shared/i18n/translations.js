@@ -1,7 +1,7 @@
 export const translations = {
   en: {
     common: {
-      appName: 'Mboko Events 237',
+      appName: 'Mboa Events 237',
       loading: 'Loading...',
       save: 'Save',
       cancel: 'Cancel',
@@ -47,9 +47,9 @@ export const translations = {
       admin: 'Admin',
     },
     home: {
-      badge: 'Mboko picks for you',
+      badge: 'Mboa picks for you',
       title: 'Your gateway to Cameroon’s events.',
-      subtitle: 'Discover concerts, conferences, workshops, business forums, sports, culture, and premium Mboko experiences across Cameroon.',
+      subtitle: 'Discover concerts, conferences, workshops, business forums, sports, culture, and premium Mboa experiences across Cameroon.',
       lookingFor: 'Looking for',
       lookingForPlaceholder: 'Any event, category, or keyword',
       where: 'Where',
@@ -63,7 +63,7 @@ export const translations = {
       featuredCategories: 'Featured categories',
       featuredCategoriesDescription: 'Explore popular experiences and event types.',
       upcomingEvents: 'Upcoming events',
-      upcomingEventsDescription: 'Explore published events from Mboko Events 237.',
+      upcomingEventsDescription: 'Explore published events from Mboa Events 237.',
       providerTitle: 'Ready to take your events to the next level?',
       providerText: 'Create events, manage attendees, sell tickets, and track performance from your organizer dashboard.',
     },
@@ -108,7 +108,7 @@ export const translations = {
   },
   fr: {
     common: {
-      appName: 'Mboko Events 237',
+      appName: 'Mboa Events 237',
       loading: 'Chargement...',
       save: 'Enregistrer',
       cancel: 'Annuler',

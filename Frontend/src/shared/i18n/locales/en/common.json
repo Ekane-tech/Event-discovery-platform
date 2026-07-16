@@ -1,5 +1,5 @@
 {
-  "appName": "Mboko Events 237",
+  "appName": "Mboa Events 237",
   "loading": "Loading...",
   "save": "Save",
   "cancel": "Cancel",
@@ -42,7 +42,7 @@
     "admin": "Admin"
   },
   "home": {
-    "badge": "Discover Mboko Events",
+    "badge": "Discover Mboa Events",
     "title": "Find the right events and get notified when they matter.",
     "subtitle": "Browse concerts, conferences, workshops, business forums, sports, culture, and premium experiences across Cameroon.",
     "lookingFor": "Looking for",
@@ -63,7 +63,7 @@
     "providerText": "Create events, manage attendees, sell tickets, and track performance from your organizer dashboard."
   },
   "auth": {
-    "signIn": "Sign in",
+    "signIn": "Login",
     "signInDescription": "Access your dashboard, tickets, notifications, and event tools.",
     "secureLogin": "Secure login",
     "accountProtected": "Your account is protected",
@@ -89,7 +89,7 @@
     "preferredLanguage": "Language",
     "confirmPassword": "Confirm password",
     "welcomeBack": "Welcome back",
-    "loginHeadline": "Sign in and continue your event journey.",
+    "loginHeadline": "Login and continue your event journey.",
     "loginPanelDescription": "Access your dashboard, tickets, notifications, and event tools.",
     "signingIn": "Signing in...",
     "safeResetMessage": "If an account exists for this email, a password reset link has been sent.",
@@ -217,7 +217,7 @@
       "notLimited": "Not limited",
       "shareEvent": "Share Event",
       "galleryTitle": "Event gallery",
-      "shareText": "Discover {{title}} on Mboko Events 237.",
+      "shareText": "Discover {{title}} on Mboa Events 237.",
       "shareCopied": "Event link copied to clipboard.",
       "shareFailed": "Unable to share event right now.",
       "previousImage": "Previous cover image",
@@ -408,7 +408,7 @@
     "statistics": "Statistics",
     "contactUs": "Contact us",
     "country": "Cameroon",
-    "description": "Mboko Events 237 helps attendees and organizers find events, manage registrations, and stay informed.",
+    "description": "Mboa Events 237 helps attendees and organizers find events, manage registrations, and stay informed.",
     "allRightsReserved": "All rights reserved.",
     "terms": "Terms of service",
     "privacy": "Privacy policy",
@@ -417,7 +417,7 @@
   "about": {
     "badge": "About the platform",
     "heading": "A smarter way to discover and manage events.",
-    "description": "Mboko Events 237 connects attendees and organizers through personalized discovery, digital tickets, notifications and reliable event management.",
+    "description": "Mboa Events 237 connects attendees and organizers through personalized discovery, digital tickets, notifications and reliable event management.",
     "browseEvents": "Browse Events",
     "createAccount": "Create Account",
     "pillar1Title": "Smart discovery",
