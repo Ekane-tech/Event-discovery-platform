@@ -11,10 +11,7 @@ class DemoUserSeeder extends Seeder
 {
     public function run(): void
     {
-        $users = [
-            ['name' => 'Demo User', 'email' => 'user@example.com', 'role' => 'user', 'city' => 'Douala', 'region' => 'Littoral'],
-            ['name' => 'Demo Organizer', 'email' => 'organizer@example.com', 'role' => 'organizer', 'city' => 'Douala', 'region' => 'Littoral'],
-            ['name' => 'Demo Admin', 'email' => 'admin@example.com', 'role' => 'admin', 'city' => 'Yaoundé', 'region' => 'Centre'],
+        $users = [ ['name' => 'Ekane Bryan', 'email' => 'ekanebryan@gmail.com', 'role' => 'admin', 'city' => 'Douala', 'region' => 'Littoral'],
         ];
 
         foreach ($users as $demo) {
