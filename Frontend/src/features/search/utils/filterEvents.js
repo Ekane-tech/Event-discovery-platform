@@ -7,7 +7,6 @@ export function getActiveFilters(filters = {}) {
   })
 }
 
-// Kept for backward compatibility with older mock code. Laravel now performs event filtering.
 export function filterEvents(events = []) {
   return events
 }

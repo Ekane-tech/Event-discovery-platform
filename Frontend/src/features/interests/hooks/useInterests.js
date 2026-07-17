@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ROLES } from '../../../shared/constants/roles.js'
 import { useAuth } from '../../auth/hooks/useAuth.js'
 import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
-import { mockInterests } from '../services/mockInterests.js'
 import { interestService } from '../services/interestService.js'
 
 function normalizeInterest(interest) {
@@ -37,13 +36,6 @@ export function useInterests() {
     setError('')
 
     try {
-      if (!useApi) {
-        const storedInterests = localStorage.getItem(storageKey)
-        setInterests(mockInterests.map((interest, index) => ({ ...interest, id: Number(index + 1) })))
-        setSelectedInterestIds(storedInterests ? JSON.parse(storedInterests).map(Number) : [])
-        return
-      }
-
       const [interestsResponse, myInterestsResponse] = await Promise.all([
         interestService.getInterests(),
         interestService.getMyInterests(),
@@ -60,7 +52,7 @@ export function useInterests() {
       setLoading(false)
       setSaved(false)
     }
-  }, [storageKey, useApi])
+  }, [])
 
   useEffect(() => {
     loadInterests()
@@ -88,12 +80,7 @@ export function useInterests() {
     setError('')
 
     try {
-      if (useApi) {
-        await interestService.syncMyInterests(selectedInterestIds)
-      } else {
-        localStorage.setItem(storageKey, JSON.stringify(selectedInterestIds))
-      }
-
+      await interestService.syncMyInterests(selectedInterestIds)
       setSaved(true)
       return selectedInterestIds
     } catch (saveError) {
