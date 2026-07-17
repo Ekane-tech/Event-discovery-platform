@@ -7,7 +7,7 @@ app/Http/Controllers/Api/EventController.php
 routes/api.php
 ```
 
-## Frontend files modified
+## Frontend files modifieds
 
 ```text
 src/features/events/services/eventService.js
