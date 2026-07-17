@@ -110,6 +110,8 @@
     "verifyAccount": "Vérifier le compte",
     "verifyEmailTitle": "Vérifiez votre e-mail",
     "verifyEmailDescription": "Veuillez vérifier votre boîte de réception et cliquer sur le lien de vérification.",
+    "emailVerifiedSuccess": "E-mail vérifié avec succès !",
+    "emailVerifiedDescription": "Votre e-mail a été vérifié. Vous pouvez maintenant continuer à utiliser la plateforme.",
     "verificationEmailResent": "E-mail de vérification renvoyé.",
     "resendVerificationEmail": "Renvoyer l'e-mail de vérification",
     "chooseAccountType": "Veuillez choisir comment vous souhaitez utiliser la plateforme.",

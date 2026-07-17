@@ -29,7 +29,7 @@ export default function EmailVerificationPage() {
 
   useEffect(() => {
     if (status === 'verified') {
-      setMessage(t('auth.verifyEmailTitle'))
+      setMessage(t('auth.emailVerifiedSuccess'))
       if (isAuthenticated) refreshUser().catch(() => {})
       return
     }
@@ -76,9 +76,9 @@ export default function EmailVerificationPage() {
 
         <div className="mx-auto w-full max-w-xl">
           <AuthCard
-            eyebrow={t('auth.verifyEmailTitle')}
-            title={verified ? t('auth.verifyEmailTitle') : t('auth.verifyEmailTitle')}
-            description={verified ? t('auth.verifyEmailDescription') : t('auth.verifyEmailDescription')}
+            eyebrow={verified ? t('auth.emailVerifiedSuccess') : t('auth.verifyEmailTitle')}
+            title={verified ? t('auth.emailVerifiedSuccess') : t('auth.verifyEmailTitle')}
+            description={verified ? t('auth.emailVerifiedDescription') : t('auth.verifyEmailDescription')}
             footer={<><Link className="font-bold text-teal-700" to="/login">{t('auth.backToLogin')}</Link>{verified && <> {t('or', 'or')} <Link className="font-bold text-teal-700" to="/dashboard">{t('auth.createAccount')}</Link></>}</>}
           >
             {message && <div className="mb-5"><Alert type="success">{message}</Alert></div>}
