@@ -29,9 +29,9 @@ class UserStatusChangedNotification extends Notification
                 'name' => $notifiable->name,
                 'status' => $this->status,
                 'reason' => $this->reason,
-                'url' => $this->status === 'active' ? $this->frontendUrl('/login') : 'mailto:'.env('SUPPORT_EMAIL', 'support@mbokoevents237.cm'),
+                'url' => $this->status === 'active' ? $this->frontendUrl('/login') : 'mailto:'.env('SUPPORT_EMAIL', 'support@mboaevents237.cm'),
                 'ctaLabel' => $this->status === 'active' ? 'Sign in' : 'Contact support',
-                'supportEmail' => env('SUPPORT_EMAIL', 'support@mbokoevents237.cm'),
+                'supportEmail' => env('SUPPORT_EMAIL', 'support@mboaevents237.cm'),
             ]);
     }
 
