@@ -1,4 +1,5 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import GuestLayout from '../layouts/GuestLayout.jsx'
 import AuthLayout from '../layouts/AuthLayout.jsx'
 import UserLayout from '../layouts/UserLayout.jsx'
@@ -63,9 +64,20 @@ import PublicNotificationsPage from '../../features/public/pages/PublicNotificat
 import AboutPage from '../../features/about/pages/AboutPage.jsx'
 import FeedbackPage from '../../features/feedback/pages/FeedbackPage.jsx'
 
+function ScrollToTop() {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+
+  return null
+}
+
 export default function AppRouter() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route element={<GuestLayout />}>
           <Route path="/" element={<HomePage />} />
