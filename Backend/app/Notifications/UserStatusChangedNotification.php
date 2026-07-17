@@ -4,10 +4,11 @@ namespace App\Notifications;
 
 use App\Notifications\Concerns\UsesNotificationPreferences;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class UserStatusChangedNotification extends Notification
+class UserStatusChangedNotification extends Notification implements ShouldQueue
 {
     use Queueable, UsesNotificationPreferences;
 
