@@ -49,6 +49,7 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
+
         ResetPassword::createUrlUsing(function (object $notifiable, string $token) {
             $frontendUrl = rtrim(config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:5173')), '/');
 
