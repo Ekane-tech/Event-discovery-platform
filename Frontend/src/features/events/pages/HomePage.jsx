@@ -89,7 +89,7 @@ export default function HomePage() {
 
   return (
     <div>
-      <section className="relative min-h-112.5 overflow-visible bg-cover bg-center text-white" style={{ backgroundImage: `linear-gradient(90deg, rgba(2,6,23,.90), rgba(15,118,110,.62)), url(${import.meta.env.BASE_URL}Hero-image.jpg)` }}>
+      <section className="relative min-h-112.5 overflow-visible bg-cover bg-center text-white" style={{ backgroundImage: `linear-gradient(90deg, rgba(2,6,23,.90), rgba(15,118,110,.62)), url(/Hero-Image.jpg)` }}>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(255,255,255,.22),transparent_35%)]" />
         <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-8">
           <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100 backdrop-blur"><Sparkles className="h-4 w-4" /> {t('home.badge')}</p>
