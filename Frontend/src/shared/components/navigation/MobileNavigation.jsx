@@ -1,4 +1,5 @@
 import { Link, NavLink } from 'react-router-dom'
+import { Home } from 'lucide-react'
 import Button from '../ui/Button.jsx'
 import NavigationBadge from './NavigationBadge.jsx'
 import NavIcon from './NavIcon.jsx'
@@ -46,7 +47,13 @@ export default function MobileNavigation({ open, groups = [], unreadCount = 0, i
       </div>
       <div className="mt-5 flex gap-2">
         {isAuthenticated ? (
-          <Button variant="secondary" className="w-full" onClick={onLogout}>Logout</Button>
+          <>
+            {user?.role === 'admin' ? (
+              <Button variant="secondary" className="w-full" onClick={onLogout}>Logout</Button>
+            ) : (
+              <Link to="/" onClick={onClose} className="flex items-center justify-center gap-2 w-full"><Button variant="secondary" className="w-full"><Home className="h-4 w-4" />Home</Button></Link>
+            )}
+          </>
         ) : (
           <>
             <Link to="/login" onClick={onClose} className="flex-1"><Button variant="secondary" className="w-full">Login</Button></Link>
