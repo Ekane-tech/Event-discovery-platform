@@ -98,9 +98,11 @@ return [
         ],
 
         'brevo' => [
-            'transport' => 'brevo',
+            'transport' => 'custom',
+            'via' => 'brevo',
             'key' => env('BREVO_API_KEY'),
         ],
+
 
 
     ],
