@@ -1,8 +1,11 @@
 <?php
 
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -17,5 +20,15 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Never leak database internals (SQL, host, credentials, schema) to API
+        // clients, even when APP_DEBUG is enabled.
+        $exceptions->render(function (QueryException $e, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json([
+                    'message' => 'A database error occurred while processing your request.',
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+
+            return null;
+        });
     })->create();
