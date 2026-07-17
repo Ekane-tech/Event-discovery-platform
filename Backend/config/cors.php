@@ -8,16 +8,16 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    // CORRECTION : On ajoute '*' pour couvrir absolument TOUTES les routes (api, auth, login, etc.)
+    'paths' => ['api/*', 'sanctum/csrf-cookie', '*'],
 
-    // FIX: Set this back to '*' or specify standard HTTP methods
     'allowed_methods' => ['*'],
 
-    // FIX: Put your frontend URLs here instead
+    // SÉCURITÉ : Gardez vos localhost ET votre domaine Vercel en dur si la variable env a un raté
     'allowed_origins' => [
         'http://localhost:5173',
         'http://localhost:5174',
-        env('FRONTEND_URL'),
+        'https://vercel.app',
     ],
 
     'allowed_origins_patterns' => [],
@@ -28,7 +28,7 @@ return [
 
     'max_age' => 0,
 
-    // TIP: Change to true if you plan to use Sanctum cookies for authentication later
-    'supports_credentials' => false,
+    // CONSEIL : Passez à true car votre intercepteur Axios envoie des en-têtes d'authentification
+    'supports_credentials' => true,
 
 ];
