@@ -1,2 +1,2 @@
 web: php artisan serve --host 0.0.0.0 --port $PORT
-worker: php artisan queue:work --database=mysql --tries=3 --timeout=90
+worker: php artisan queue:work --tries=3 --timeout=90
