@@ -10,7 +10,7 @@ import RecommendedEventsGrid from '../components/RecommendedEventsGrid.jsx'
 import RecommendationSummary from '../components/RecommendationSummary.jsx'
 import { useRecommendations } from '../hooks/useRecommendations.js'
 
-export default function RecommendedEventsPage(){
+export default function RecommendedEventsPage() {
   const { selectedCount } = useInterests()
   const { recommendations, recommendationSummary, loading, error } = useRecommendations()
 
