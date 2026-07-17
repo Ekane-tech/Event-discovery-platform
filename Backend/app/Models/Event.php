@@ -10,6 +10,20 @@ class Event extends Model
 {
     use HasFactory;
 
+    /**
+     * Relations eager-loaded when returning a single event via EventResource.
+     */
+    public const DETAIL_RELATIONS = [
+        'organizer.role',
+        'organizer.profile',
+        'category',
+        'categories',
+        'region',
+        'division',
+        'city',
+        'images',
+    ];
+
     protected $fillable = [
         'organizer_id',
         'category_id',
@@ -136,5 +150,18 @@ class Event extends Model
     public function scopePublishedPublic($query)
     {
         return $query->where('status', 'published')->where('visibility', 'public');
+    }
+
+    /**
+     * Determine whether the given user may manage (edit/delete) this event.
+     */
+    public function isManageableBy(?User $user): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        return $user->hasRole('admin')
+            || ($user->hasRole('organizer') && (int) $this->organizer_id === (int) $user->id);
     }
 }

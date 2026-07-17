@@ -8,9 +8,9 @@ use App\Http\Requests\Category\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\AuditLog;
 use App\Models\Category;
+use App\Support\ImageStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class CategoryController extends Controller
@@ -39,7 +39,7 @@ class CategoryController extends Controller
     {
         $validated = $request->validated();
         $imagePath = $request->hasFile('image')
-            ? $request->file('image')->store('categories', 'public')
+            ? ImageStorage::store($request->file('image'), 'categories')
             : null;
 
         $category = Category::create([
@@ -66,15 +66,12 @@ class CategoryController extends Controller
         $imagePath = $category->image_path;
 
         if ($request->boolean('remove_image') && $imagePath) {
-            Storage::disk('public')->delete($imagePath);
+            ImageStorage::delete($imagePath);
             $imagePath = null;
         }
 
         if ($request->hasFile('image')) {
-            if ($imagePath) {
-                Storage::disk('public')->delete($imagePath);
-            }
-            $imagePath = $request->file('image')->store('categories', 'public');
+            $imagePath = ImageStorage::replace($request->file('image'), 'categories', $imagePath);
         }
 
         $category->update([
@@ -97,9 +94,7 @@ class CategoryController extends Controller
 
     public function destroy(Request $request, Category $category): JsonResponse
     {
-        if ($category->image_path) {
-            Storage::disk('public')->delete($category->image_path);
-        }
+        ImageStorage::delete($category->image_path);
 
         AuditLog::record($request->user(), 'category.deleted', $category, 'Category deleted.', [
             'name' => $category->name,

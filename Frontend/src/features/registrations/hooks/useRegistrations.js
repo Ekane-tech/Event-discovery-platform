@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
 import { normalizeEvent, normalizeEvents, extractCollection } from '../../events/utils/normalizeEvent.js'
+import { emitResourceEvent, useResourceEvent } from '../../../shared/hooks/useResourceEvent.js'
 import { registrationService } from '../services/registrationService.js'
 import { useAuth } from '../../auth/hooks/useAuth.js'
 
@@ -52,14 +53,9 @@ export function useRegistrations() {
       return
     }
     fetchRegistrations()
-
-    function handleRegistrationsUpdated() {
-      fetchRegistrations()
-    }
-
-    window.addEventListener(REGISTRATIONS_UPDATED_EVENT, handleRegistrationsUpdated)
-    return () => window.removeEventListener(REGISTRATIONS_UPDATED_EVENT, handleRegistrationsUpdated)
   }, [fetchRegistrations, isAuthenticated])
+
+  useResourceEvent(REGISTRATIONS_UPDATED_EVENT, fetchRegistrations, isAuthenticated)
 
   function getRegistration(eventId) {
     const matches = registrations.filter((registration) => Number(registration.eventId) === Number(eventId))
@@ -73,14 +69,14 @@ export function useRegistrations() {
   async function registerForEvent(event) {
     const response = await registrationService.registerForEvent(event.id)
     const registration = normalizeRegistration(response.data.registration)
-    window.dispatchEvent(new CustomEvent(REGISTRATIONS_UPDATED_EVENT))
+    emitResourceEvent(REGISTRATIONS_UPDATED_EVENT)
     await fetchRegistrations()
     return registration
   }
 
   async function cancelRegistration(eventId) {
     await registrationService.cancelRegistration(eventId)
-    window.dispatchEvent(new CustomEvent(REGISTRATIONS_UPDATED_EVENT))
+    emitResourceEvent(REGISTRATIONS_UPDATED_EVENT)
     await fetchRegistrations()
   }
 

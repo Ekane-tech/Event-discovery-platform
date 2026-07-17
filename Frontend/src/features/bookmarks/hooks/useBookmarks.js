@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
 import { extractCollection, normalizeEvents } from '../../events/utils/normalizeEvent.js'
+import { emitResourceEvent, useResourceEvent } from '../../../shared/hooks/useResourceEvent.js'
 import { bookmarkService } from '../services/bookmarkService.js'
 import { useAuth } from '../../auth/hooks/useAuth.js'
 
@@ -41,14 +42,9 @@ export function useBookmarks() {
       return
     }
     fetchBookmarks()
-
-    function handleBookmarksUpdated() {
-      fetchBookmarks()
-    }
-
-    window.addEventListener(BOOKMARKS_UPDATED_EVENT, handleBookmarksUpdated)
-    return () => window.removeEventListener(BOOKMARKS_UPDATED_EVENT, handleBookmarksUpdated)
   }, [fetchBookmarks, isAuthenticated])
+
+  useResourceEvent(BOOKMARKS_UPDATED_EVENT, fetchBookmarks, isAuthenticated)
 
   function isBookmarked(eventId) {
     return bookmarks.some((bookmark) => Number(bookmark.eventId) === Number(eventId))
@@ -56,13 +52,13 @@ export function useBookmarks() {
 
   async function addBookmark(eventId) {
     await bookmarkService.addBookmark(eventId)
-    window.dispatchEvent(new CustomEvent(BOOKMARKS_UPDATED_EVENT))
+    emitResourceEvent(BOOKMARKS_UPDATED_EVENT)
     await fetchBookmarks()
   }
 
   async function removeBookmark(eventId) {
     await bookmarkService.removeBookmark(eventId)
-    window.dispatchEvent(new CustomEvent(BOOKMARKS_UPDATED_EVENT))
+    emitResourceEvent(BOOKMARKS_UPDATED_EVENT)
     await fetchBookmarks()
   }
 
