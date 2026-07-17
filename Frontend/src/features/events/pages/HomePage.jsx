@@ -14,7 +14,7 @@ import { locationService } from '../../locations/services/locationService.js'
 import SearchSuggestInput from '../../search/components/SearchSuggestInput.jsx'
 import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
-export default function HomePage() {
+export default function HomePage()  {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const [events, setEvents] = useState([])
