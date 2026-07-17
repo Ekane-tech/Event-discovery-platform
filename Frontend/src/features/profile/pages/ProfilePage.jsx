@@ -1,4 +1,4 @@
-import { BarChart3, Bell, CalendarCheck, CheckCircle2, CreditCard, Heart, Mail, MapPin, Phone, Settings, ShieldCheck, Sparkles, Ticket, UserRound, Users, Wallet } from 'lucide-react'
+import { BarChart3, Bell, CalendarCheck, CheckCircle2, CreditCard, Heart, Mail, MapPin, Phone, Settings, ShieldCheck, Ticket, UserRound, Users, Wallet } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import Alert from '../../../shared/components/feedback/Alert.jsx'
@@ -121,7 +121,7 @@ export default function ProfilePage() {
       ['Interests', summary.interests_count || 0, Heart, 'from-pink-600 to-rose-700'],
       ['Saved events', summary.bookmarks_count || 0, CalendarCheck, 'from-teal-600 to-emerald-700'],
       ['Registrations', summary.registrations_count || 0, Ticket, 'from-blue-600 to-indigo-700'],
-      ['Recommendations', summary.recommendations_count || 0, Sparkles, 'from-purple-600 to-violet-800'],
+      ['Recommendations', summary.recommendations_count || 0, Users, 'from-purple-600 to-violet-800'],
     ]
   }, [dashboard, role])
 

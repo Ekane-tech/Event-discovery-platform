@@ -1,4 +1,4 @@
-import { Check, Sparkles } from 'lucide-react'
+import { Check } from 'lucide-react'
 
 export default function InterestCard({ interest, selected = false, onToggle }) {
   return (
@@ -15,7 +15,7 @@ export default function InterestCard({ interest, selected = false, onToggle }) {
       <div className="relative flex items-start justify-between gap-4">
         <div>
           <span className={`mb-4 flex h-11 w-11 items-center justify-center rounded-2xl ${selected ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-600'}`}>
-            <Sparkles className="h-5 w-5" />
+            {interest?.name ? interest.name.charAt(0).toUpperCase() : '?'}
           </span>
           <h3 className="font-black text-slate-950">{interest.name}</h3>
           <p className="mt-2 text-sm leading-6 text-slate-600">{interest.description}</p>

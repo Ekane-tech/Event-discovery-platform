@@ -1,4 +1,4 @@
-import { Sparkles, Target } from 'lucide-react'
+import { Target } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import Alert from '../../../shared/components/feedback/Alert.jsx'
 import Loader from '../../../shared/components/feedback/Loader.jsx'
@@ -29,7 +29,7 @@ export default function ChooseInterestsPage() {
       <Card className="my-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="flex items-center gap-2 font-bold text-slate-950"><Sparkles className="h-5 w-5 text-teal-700" /> Selected interests: {selectedCount}</h2>
+            <h2 className="flex items-center gap-2 font-bold text-slate-950">Selected interests: {selectedCount}</h2>
             <div className="mt-3"><SelectedInterestsSummary selectedInterests={selectedInterests} /></div>
           </div>
           <div className="flex flex-wrap gap-2">

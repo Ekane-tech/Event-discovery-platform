@@ -1,11 +1,11 @@
-﻿import { BellRing, CalendarCheck, ShieldCheck, Sparkles, Ticket, Users } from 'lucide-react'
+﻿import { BellRing, CalendarCheck, ShieldCheck, Star, Ticket, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Button from '../../../shared/components/ui/Button.jsx'
 import Card from '../../../shared/components/ui/Card.jsx'
 import PageContainer from '../../../shared/components/layout/PageContainer.jsx'
 
 const pillars = [
-  { title: 'Smart discovery', text: 'Find events by interests, location, date, price and activity signals.', icon: Sparkles },
+  { title: 'Smart discovery', text: 'Find events by interests, location, date, price and activity signals.', icon: Star },
   { title: 'Relevant notifications', text: 'Receive updates when events match your interests or when registrations change.', icon: BellRing },
   { title: 'Digital tickets', text: 'Register, pay when needed, and keep event tickets in one place.', icon: Ticket },
 ]
@@ -23,7 +23,7 @@ export default function AboutPage() {
         <div className="absolute inset-0 bg-cover bg-center opacity-60" style={{ backgroundImage: 'url(/hero-events.svg)' }} />
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-teal-900/60" />
         <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100"><Sparkles className="h-4 w-4" /> About Mboa</span>
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100"><Star className="h-4 w-4" /> About Mboa</span>
           <h1 className="mt-6 max-w-4xl text-5xl font-black leading-tight md:text-7xl">Your gateway to Cameroon’s events.</h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-200">Mboa Events 237 connects attendees, organizers and administrators through personalized discovery, digital tickets, notifications and reliable event management across Cameroon.</p>
           <div className="mt-8 flex flex-wrap gap-3">

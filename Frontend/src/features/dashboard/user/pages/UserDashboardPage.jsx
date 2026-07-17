@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { Bell, Bookmark, CalendarCheck, Heart, Sparkles, Ticket } from 'lucide-react'
+import { Bell, Bookmark, CalendarCheck, Heart, Ticket } from 'lucide-react'
 import PageContainer from '../../../../shared/components/layout/PageContainer.jsx'
 import Card from '../../../../shared/components/ui/Card.jsx'
 import Button from '../../../../shared/components/ui/Button.jsx'
@@ -54,7 +54,7 @@ export default function UserDashboardPage() {
   const recommendedEvents = normalizeEvents(extractCollection(dashboard || {}, 'recommended_events'))
   const cards = [
     { title: 'Interests', value: summary.interests_count || 0, to: '/my-interests', icon: Heart, gradient: 'bg-gradient-to-br from-pink-600 to-rose-700', iconBg: 'bg-white/20' },
-    { title: 'Recommendations', value: summary.recommendations_count || 0, to: '/recommendations', icon: Sparkles, gradient: 'bg-gradient-to-br from-teal-600 to-emerald-700', iconBg: 'bg-white/20' },
+    { title: 'Recommendations', value: summary.recommendations_count || 0, to: '/recommendations', icon: Heart, gradient: 'bg-gradient-to-br from-teal-600 to-emerald-700', iconBg: 'bg-white/20' },
     { title: 'Upcoming', value: summary.upcoming_registrations_count || 0, to: '/registrations', icon: Ticket, gradient: 'bg-gradient-to-br from-blue-600 to-indigo-700', iconBg: 'bg-white/20' },
     { title: 'Bookmarks', value: summary.bookmarks_count || 0, to: '/bookmarks', icon: Bookmark, gradient: 'bg-gradient-to-br from-yellow-500 to-orange-600', iconBg: 'bg-white/25' },
     { title: 'Unread', value: summary.unread_notifications_count || 0, to: '/notifications', icon: Bell, gradient: 'bg-gradient-to-br from-purple-600 to-violet-800', iconBg: 'bg-white/20' },
@@ -63,7 +63,7 @@ export default function UserDashboardPage() {
   return (
     <PageContainer>
       <section className="overflow-hidden rounded-3xl bg-slate-950 bg-cover bg-center p-8 text-white" style={{ backgroundImage: 'linear-gradient(90deg, rgba(2,6,23,.88), rgba(15,118,110,.68)), url(/hero-events.svg)' }}>
-        <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100"><Sparkles className="h-4 w-4" /> Your attendee space</span>
+        <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100">Your attendee space</span>
         <h1 className="mt-5 max-w-3xl text-4xl font-black md:text-5xl">Welcome back. Your next event is waiting.</h1>
         <p className="mt-4 max-w-2xl text-slate-200">Track tickets, saved events, notifications and recommendations in one place.</p>
         <div className="mt-6 flex flex-wrap gap-3"><Link to="/events"><Button variant="light">Browse Events</Button></Link><Link to="/interests"><Button className="bg-teal-500 text-white hover:bg-teal-600">Update Interests</Button></Link></div>

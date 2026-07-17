@@ -6,7 +6,6 @@ import {
   CalendarCheck,
   Eye,
   Radio,
-  Sparkles,
   Ticket,
   TrendingUp,
   Wallet,

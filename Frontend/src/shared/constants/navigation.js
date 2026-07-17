@@ -2,12 +2,12 @@ import { ROLES } from './roles.js'
 
 export const PUBLIC_NAV_LINKS = [
   { label: 'Browse Events', labelKey: 'nav.browseEvents', to: '/events', icon: 'calendarSearch' },
-  { label: 'About', labelKey: 'nav.about', to: '/about', icon: 'sparkles' },
+  { label: 'About', labelKey: 'nav.about', to: '/about', icon: 'star' },
 ]
 
 export const USER_NAV_LINKS = [
   { label: 'Dashboard', labelKey: 'nav.dashboard', to: '/dashboard', icon: 'layoutDashboard' },
-  { label: 'Recommendations', labelKey: 'nav.recommendations', to: '/recommendations', icon: 'sparkles' },
+  { label: 'Recommendations', labelKey: 'nav.recommendations', to: '/recommendations', icon: 'star' },
   { label: 'Events', labelKey: 'nav.events', to: '/events', icon: 'calendarDays' },
   { label: 'My Interests', labelKey: 'nav.interests', to: '/my-interests', icon: 'heart' },
   { label: 'Bookmarks', labelKey: 'nav.bookmarks', to: '/bookmarks', icon: 'bookmark' },
@@ -61,7 +61,7 @@ export function getDesktopNavbarLinks(role, isAuthenticated) {
     { label: 'Notifications', labelKey: 'nav.notifications', to: getNotificationPathByRole(role), badge: 'notifications', icon: 'bell' },
   ]
 
-  if (role === ROLES.USER) links.push({ label: 'Recommendations', labelKey: 'nav.recommendations', to: '/recommendations', icon: 'sparkles' })
+  if (role === ROLES.USER) links.push({ label: 'Recommendations', labelKey: 'nav.recommendations', to: '/recommendations', icon: 'star' })
   if (role === ROLES.ORGANIZER) links.push({ label: 'My Events', labelKey: 'nav.myEvents', to: '/organizer/events', icon: 'calendarDays' })
   if (role === ROLES.ADMIN) links.push({ label: 'Admin', labelKey: 'nav.admin', to: '/admin/dashboard', icon: 'shield' })
 

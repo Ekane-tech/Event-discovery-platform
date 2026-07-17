@@ -1,4 +1,4 @@
-import { Heart, Sparkles } from 'lucide-react'
+import { Heart } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import EmptyState from '../../../shared/components/feedback/EmptyState.jsx'
 import Alert from '../../../shared/components/feedback/Alert.jsx'
@@ -22,7 +22,7 @@ export default function MyInterestsPage() {
       </section>
       {error && <div className="my-6"><Alert type="error">{error}</Alert></div>}
       <div className="mt-6">
-        {selectedCount === 0 ? <EmptyState title="No interests selected" message="Choose interests like Technology, Business, Music, Sports, or Culture to personalize your experience." /> : <Card><div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"><div><h2 className="flex items-center gap-2 font-black text-slate-950"><Sparkles className="h-5 w-5 text-teal-700" /> {selectedCount} interest{selectedCount > 1 ? 's' : ''} selected</h2><div className="mt-4"><SelectedInterestsSummary selectedInterests={selectedInterests} /></div></div><Link to="/interests"><Button>Update Interests</Button></Link></div></Card>}
+        {selectedCount === 0 ? <EmptyState title="No interests selected" message="Choose interests like Technology, Business, Music, Sports, or Culture to personalize your experience." /> : <Card><div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"><div><h2 className="flex items-center gap-2 font-black text-slate-950">{selectedCount} interest{selectedCount > 1 ? 's' : ''} selected</h2><div className="mt-4"><SelectedInterestsSummary selectedInterests={selectedInterests} /></div></div><Link to="/interests"><Button>Update Interests</Button></Link></div></Card>}
       </div>
     </PageContainer>
   )

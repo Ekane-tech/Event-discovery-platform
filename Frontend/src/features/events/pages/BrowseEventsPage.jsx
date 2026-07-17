@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, SlidersHorizontal, Sparkles } from 'lucide-react'
+import { ChevronDown, ChevronUp, SlidersHorizontal } from 'lucide-react'
 import { useState } from 'react'
 import EmptyState from '../../../shared/components/feedback/EmptyState.jsx'
 import ErrorState from '../../../shared/components/feedback/ErrorState.jsx'
@@ -25,9 +25,7 @@ export default function BrowseEventsPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-teal-900/70" />
         <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100 backdrop-blur">
-              <Sparkles className="h-4 w-4" /> {t('appName')}
-            </span>
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100 backdrop-blur">{t('appName')}</span>
             <h1 className="mt-5 text-4xl font-black md:text-6xl">{t('events.browse.title')}</h1>
             <p className="mt-4 text-lg leading-8 text-slate-200">{t('events.browse.description')}</p>
           </div>

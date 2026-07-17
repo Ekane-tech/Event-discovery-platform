@@ -1,4 +1,4 @@
-import { Bookmark, CalendarDays, MapPin, Sparkles } from 'lucide-react'
+import { Bookmark, CalendarDays, MapPin } from 'lucide-react'
 import { toast } from 'sonner'
 import { Link, useLocation } from 'react-router-dom'
 import Button from '../../../shared/components/ui/Button.jsx'
@@ -40,7 +40,7 @@ export default function RecommendedEventCard({ event }) {
       </div>
 
       <div className="flex flex-col p-5">
-        <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-teal-700"><Sparkles className="h-4 w-4" /> Recommended for you</div>
+        <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-teal-700">Recommended for you</div>
         <h3 className="text-xl font-black leading-tight text-slate-950">{event.title}</h3>
         <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{event.description}</p>
         <RecommendationReasons reasons={event.recommendationReasons} />

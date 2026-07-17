@@ -1,9 +1,9 @@
-import { BellRing, CalendarCheck, Sparkles, Users } from 'lucide-react'
+import { BellRing, CalendarCheck, Users } from 'lucide-react'
 import { APP_NAME } from '../../../shared/constants/app.js'
 
 export default function AuthHeroPanel() {
   const features = [
-    { icon: Sparkles, title: 'Personalized discovery', text: 'Find events based on interests and location.' },
+    { icon: Users, title: 'Personalized discovery', text: 'Find events based on interests and location.' },
     { icon: BellRing, title: 'Smart notifications', text: 'Receive useful alerts when events match your preferences.' },
     { icon: CalendarCheck, title: 'Tickets', text: 'Register and keep your tickets in one place.' },
     { icon: Users, title: 'Organizer tools', text: 'Create events and monitor statistics.' },
