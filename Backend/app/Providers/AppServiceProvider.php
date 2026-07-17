@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Mail;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -40,6 +41,12 @@ class AppServiceProvider extends ServiceProvider
                 'error_message' => $event->data['message'] ?? 'Email notification failed.',
                 'metadata' => ['notification' => get_class($event->notification)],
             ]);
+        });
+
+        Mail::extend('brevo', function (array $config) {
+            return new \Symfony\Component\Mailer\Bridge\Brevo\Transport\BrevoApiTransport(
+                $config['key']
+            );
         });
 
         ResetPassword::createUrlUsing(function (object $notifiable, string $token) {
