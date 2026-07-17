@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { Star } from 'lucide-react'
 import Alert from '../../../shared/components/feedback/Alert.jsx'
 import EmptyState from '../../../shared/components/feedback/EmptyState.jsx'
 import ErrorState from '../../../shared/components/feedback/ErrorState.jsx'
@@ -21,7 +20,7 @@ export default function RecommendedEventsPage() {
         <div className="absolute inset-0 bg-cover bg-center opacity-50" style={{ backgroundImage: 'url(/hero-events.svg)' }} />
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-teal-900/70" />
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100"><Star className="h-4 w-4" /> Personalized discovery</span>
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100">Personalized discovery</span>
           <h1 className="mt-5 text-4xl font-black md:text-6xl">Recommended events</h1>
           <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-200">Events selected from your interests, location, saved activity, registrations and popularity signals.</p>
           <div className="mt-6"><Link to="/interests"><Button variant="light">Update Interests</Button></Link></div>

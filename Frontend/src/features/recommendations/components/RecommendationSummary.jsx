@@ -1,11 +1,11 @@
-import { Activity, MapPin, Star, Target } from 'lucide-react'
+import { Activity, MapPin, Target } from 'lucide-react'
 import { StatGridSkeleton } from '../../../shared/components/feedback/StatCardSkeleton.jsx'
 
 export default function RecommendationSummary({ summary, loading = false }) {
   if (loading) return <StatGridSkeleton count={4} />
 
   const cards = [
-    { label: 'Recommended events', value: summary.total || 0, icon: Star, gradient: 'from-teal-600 to-emerald-700' },
+    { label: 'Recommended events', value: summary.total || 0, icon: Target, gradient: 'from-teal-600 to-emerald-700' },
     { label: 'Interest-based', value: summary.interestBased || 0, icon: Target, gradient: 'from-pink-600 to-rose-700' },
     { label: 'Location-based', value: summary.locationBased || 0, icon: MapPin, gradient: 'from-blue-600 to-indigo-700' },
     { label: 'Activity-based', value: summary.activityBased || 0, icon: Activity, gradient: 'from-amber-500 to-orange-700' },
