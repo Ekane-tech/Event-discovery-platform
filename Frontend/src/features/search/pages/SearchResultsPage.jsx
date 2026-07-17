@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import EmptyState from '../../../shared/components/feedback/EmptyState.jsx'
+import ErrorState from '../../../shared/components/feedback/ErrorState.jsx'
 import PageContainer from '../../../shared/components/layout/PageContainer.jsx'
 import SectionHeader from '../../../shared/components/layout/SectionHeader.jsx'
 import EventGrid from '../../events/components/EventGrid.jsx'
@@ -10,10 +11,12 @@ import SearchBar from '../components/SearchBar.jsx'
 import SearchResultsHeader from '../components/SearchResultsHeader.jsx'
 import { useEventSearch } from '../hooks/useEventSearch.js'
 import { extractCollection, normalizeEvents } from '../../events/utils/normalizeEvent.js'
+import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
 
 export default function SearchResultsPage() {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const {
     filters,
     filteredEvents,
@@ -24,11 +27,12 @@ export default function SearchResultsPage() {
 
   useEffect(() => {
     async function fetchEvents() {
+      setError('')
       try {
         const response = await eventService.getEvents({ per_page: 100 })
         setEvents(normalizeEvents(extractCollection(response.data, 'events')))
-      } catch (error) {
-        console.error('Failed to fetch events:', error)
+      } catch (fetchError) {
+        setError(getApiErrorMessage(fetchError, 'Unable to load events.'))
       } finally {
         setLoading(false)
       }
@@ -61,7 +65,9 @@ export default function SearchResultsPage() {
         <ActiveFilters filters={filters} onReset={resetFilters} />
         <SearchResultsHeader totalResults={totalResults} totalEvents={events.length} />
 
-        {filteredEvents.length === 0 ? (
+        {error ? (
+          <ErrorState title="Unable to load events" message={error} />
+        ) : filteredEvents.length === 0 ? (
           <EmptyState
             title="No events found"
             message="Try changing the keyword, category, region, date, or price filter."

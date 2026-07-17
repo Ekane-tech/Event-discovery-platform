@@ -10,6 +10,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class SendEventInterestNotificationsJob implements ShouldQueue
 {
@@ -45,7 +47,15 @@ class SendEventInterestNotificationsJob implements ShouldQueue
             ->where('id', '!=', $event->organizer_id)
             ->chunkById(100, function ($users) use ($event) {
                 foreach ($users as $user) {
-                    $user->notify(new EventInterestMatchNotification($event));
+                    try {
+                        $user->notify(new EventInterestMatchNotification($event));
+                    } catch (Throwable $exception) {
+                        Log::warning('Event interest notification failed.', [
+                            'event_id' => $event->id,
+                            'user_id' => $user->id,
+                            'error' => $exception->getMessage(),
+                        ]);
+                    }
                 }
             });
     }
