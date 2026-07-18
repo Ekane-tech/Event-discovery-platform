@@ -1,0 +1,957 @@
+diff --git a/Backend/app/Http/Controllers/Api/EventController.php b/Backend/app/Http/Controllers/Api/EventController.php
+index 874bc5f..96fbce2 100644
+--- a/Backend/app/Http/Controllers/Api/EventController.php
++++ b/Backend/app/Http/Controllers/Api/EventController.php
+@@ -10,6 +10,7 @@
+ use App\Jobs\SendEventInterestNotificationsJob;
+ use App\Models\Event;
+ use App\Models\EventImage;
++use App\Models\EventTicketType;
+ use App\Models\EventView;
+ use App\Models\AuditLog;
+ use App\Notifications\EventAvailableNotification;
+@@ -28,7 +29,7 @@ class EventController extends Controller
+     public function index(Request $request): JsonResponse
+     {
+         $query = Event::query()
+-            ->with(['organizer.role', 'organizer.profile', 'category', 'region', 'division', 'city', 'images'])
++            ->with(['organizer.role', 'organizer.profile', 'category', 'region', 'division', 'city', 'images', 'ticketTypes'])
+             ->withCount(['registrations', 'bookmarks', 'reports']);
+ 
+         if (! $request->user()?->hasRole('admin')) {
+@@ -58,7 +59,7 @@ public function show(Event $event): JsonResponse
+         $this->recordUniqueView($event, request());
+ 
+         return response()->json([
+-            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images'])->loadCount(['registrations', 'bookmarks', 'reports'])),
++            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])->loadCount(['registrations', 'bookmarks', 'reports'])),
+         ]);
+     }
+ 
+@@ -69,14 +70,14 @@ public function organizerShow(Request $request, Event $event): JsonResponse
+         }
+ 
+         return response()->json([
+-            'event' => new EventResource($event->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images'])->loadCount(['registrations', 'bookmarks', 'reports'])),
++            'event' => new EventResource($event->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])->loadCount(['registrations', 'bookmarks', 'reports'])),
+         ]);
+     }
+ 
+     public function store(StoreEventRequest $request): JsonResponse
+     {
+         $validated = $request->validated();
+-        $eventData = Arr::except($validated, ['category_ids', 'images']);
++        $eventData = Arr::except($validated, ['category_ids', 'images', 'ticket_types']);
+ 
+         $event = Event::create([
+             ...$eventData,
+@@ -87,6 +88,7 @@ public function store(StoreEventRequest $request): JsonResponse
+         ]);
+ 
+         $this->syncCategories($event, $validated);
++        $this->syncTicketTypes($event, $validated['ticket_types'] ?? []);
+         $this->syncImages($event, $validated['images'] ?? []);
+ 
+         if ($event->status === 'published' && $event->visibility === 'public') {
+@@ -95,7 +97,7 @@ public function store(StoreEventRequest $request): JsonResponse
+ 
+         return response()->json([
+             'message' => 'Event created successfully.',
+-            'event' => new EventResource($event->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images'])),
++            'event' => new EventResource($event->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])),
+         ], 201);
+     }
+ 
+@@ -103,11 +105,8 @@ public function update(UpdateEventRequest $request, Event $event): JsonResponse
+     {
+         $wasAvailable = $event->status === 'published' && $event->visibility === 'public';
+         $validated = $request->validated();
+-        $eventData = Arr::except($validated, ['category_ids', 'images']);
++        $eventData = Arr::except($validated, ['category_ids', 'images', 'ticket_types']);
+ 
+-        if (! $request->user()->hasRole('admin')) {
+-            unset($eventData['status']);
+-        }
+ 
+         $event->update([
+             ...$eventData,
+@@ -116,6 +115,9 @@ public function update(UpdateEventRequest $request, Event $event): JsonResponse
+         ]);
+ 
+         $this->syncCategories($event, $validated);
++        if (array_key_exists('ticket_types', $validated)) {
++            $this->syncTicketTypes($event, $validated['ticket_types'] ?? []);
++        }
+ 
+         if (array_key_exists('images', $validated)) {
+             $event->images()->delete();
+@@ -127,7 +129,7 @@ public function update(UpdateEventRequest $request, Event $event): JsonResponse
+ 
+         return response()->json([
+             'message' => 'Event updated successfully.',
+-            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images'])),
++            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])),
+         ]);
+     }
+ 
+@@ -190,7 +192,7 @@ public function uploadImages(Request $request, Event $event): JsonResponse
+ 
+         return response()->json([
+             'message' => 'Event images uploaded successfully.',
+-            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images'])),
++            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])),
+         ]);
+     }
+ 
+@@ -225,7 +227,7 @@ public function deleteImage(Request $request, Event $event, EventImage $image):
+ 
+         return response()->json([
+             'message' => 'Event image deleted successfully.',
+-            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images'])),
++            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])),
+         ]);
+     }
+ 
+@@ -250,7 +252,7 @@ public function setCoverImage(Request $request, Event $event, EventImage $image)
+ 
+         return response()->json([
+             'message' => 'Cover image updated successfully.',
+-            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images'])),
++            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])),
+         ]);
+     }
+ 
+@@ -288,7 +290,7 @@ public function duplicate(Request $request, Event $event): JsonResponse
+ 
+         return response()->json([
+             'message' => 'Event duplicated as draft.',
+-            'event' => new EventResource($copy->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images'])),
++            'event' => new EventResource($copy->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])),
+         ], 201);
+     }
+ 
+@@ -332,7 +334,7 @@ public function myEvents(Request $request): JsonResponse
+     {
+         $events = Event::query()
+             ->where('organizer_id', $request->user()->id)
+-            ->with(['category', 'region', 'division', 'city', 'images'])
++            ->with(['category', 'region', 'division', 'city', 'images', 'ticketTypes'])
+             ->withCount(['registrations', 'bookmarks', 'reports'])
+             ->latest()
+             ->paginate(min((int) $request->input('per_page', 12), 50));
+@@ -518,6 +520,42 @@ private function syncCategories(Event $event, array $validated): void
+         $event->categories()->sync(array_unique($categoryIds));
+     }
+ 
++    private function syncTicketTypes(Event $event, array $ticketTypes): void
++    {
++        if (empty($ticketTypes)) {
++            return;
++        }
++
++        $keptIds = [];
++
++        foreach (array_values($ticketTypes) as $index => $ticketType) {
++            $payload = [
++                'name' => $ticketType['name'],
++                'description' => $ticketType['description'] ?? null,
++                'price' => $ticketType['price'] ?? 0,
++                'quantity' => $ticketType['quantity'] ?? null,
++                'is_active' => $ticketType['is_active'] ?? true,
++                'sort_order' => $index,
++            ];
++
++            if (! empty($ticketType['id'])) {
++                $model = $event->ticketTypes()->whereKey($ticketType['id'])->first();
++                if ($model) {
++                    $model->update($payload);
++                    $keptIds[] = $model->id;
++                    continue;
++                }
++            }
++
++            $model = $event->ticketTypes()->create($payload);
++            $keptIds[] = $model->id;
++        }
++
++        if (! empty($keptIds)) {
++            $event->ticketTypes()->whereNotIn('id', $keptIds)->update(['is_active' => false]);
++        }
++    }
++
+     private function syncImages(Event $event, array $images): void
+     {
+         foreach ($images as $image) {
+diff --git a/Backend/app/Http/Controllers/Api/RegistrationController.php b/Backend/app/Http/Controllers/Api/RegistrationController.php
+index 8931982..5cf995b 100644
+--- a/Backend/app/Http/Controllers/Api/RegistrationController.php
++++ b/Backend/app/Http/Controllers/Api/RegistrationController.php
+@@ -5,6 +5,7 @@
+ use App\Http\Controllers\Controller;
+ use App\Http\Resources\RegistrationResource;
+ use App\Models\Event;
++use App\Models\EventTicketType;
+ use App\Models\Payment;
+ use App\Models\Registration;
+ use App\Models\AuditLog;
+@@ -18,7 +19,7 @@ public function index(Request $request): JsonResponse
+     {
+         $registrations = Registration::query()
+             ->where('user_id', $request->user()->id)
+-            ->with(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'checkedInBy.role', 'checkedInBy.profile'])
++            ->with(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
+             ->latest()
+             ->paginate(min((int) $request->input('per_page', 12), 50));
+ 
+@@ -35,7 +36,7 @@ public function show(Request $request, Registration $registration): JsonResponse
+ 
+         return response()->json([
+             'registration' => new RegistrationResource(
+-                $registration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'checkedInBy.role', 'checkedInBy.profile'])
++                $registration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
+             ),
+         ]);
+     }
+@@ -45,6 +46,14 @@ public function store(Request $request, Event $event): JsonResponse
+         $this->ensureEventCanBeRegistered($event);
+         $this->ensureCapacityIsAvailable($event);
+ 
++        $validated = $request->validate([
++            'ticket_type_id' => ['nullable', 'integer', 'exists:event_ticket_types,id'],
++        ]);
++
++        $ticketType = $this->resolveTicketType($event, $validated['ticket_type_id'] ?? null);
++        $ticketPrice = $ticketType ? (float) $ticketType->price : (float) $event->price;
++        $this->ensureTicketTypeCapacityIsAvailable($ticketType);
++
+         $activeRegistration = Registration::query()
+             ->where('user_id', $request->user()->id)
+             ->where('event_id', $event->id)
+@@ -58,16 +67,17 @@ public function store(Request $request, Event $event): JsonResponse
+                     ? 'You are already registered for this event.'
+                     : 'You already have a pending payment for this event.',
+                 'registration' => new RegistrationResource(
+-                    $activeRegistration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'checkedInBy.role', 'checkedInBy.profile'])
++                    $activeRegistration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
+                 ),
+             ], $activeRegistration->status === 'pending_payment' ? 202 : 200);
+         }
+ 
+-        $isPaidEvent = (float) $event->price > 0;
++        $isPaidEvent = $ticketPrice > 0;
+ 
+         $registration = Registration::create([
+             'user_id' => $request->user()->id,
+             'event_id' => $event->id,
++            'ticket_type_id' => $ticketType?->id,
+             'status' => $isPaidEvent ? 'pending_payment' : 'confirmed',
+             'ticket_number' => $this->generateTicketNumber($event),
+             'registered_at' => now(),
+@@ -84,11 +94,11 @@ public function store(Request $request, Event $event): JsonResponse
+                     'status' => 'pending',
+                 ],
+                 [
+-                    'amount' => $event->price,
++                    'amount' => $ticketPrice,
+                     'currency' => 'XAF',
+                     'provider' => env('PAYMENT_PROVIDER', 'mock'),
+                     'reference' => $this->generatePaymentReference($event),
+-                    'metadata' => ['registration_attempt_id' => $registration->id],
++                    'metadata' => ['registration_attempt_id' => $registration->id, 'ticket_type_name' => $ticketType?->name],
+                 ]
+             );
+         }
+@@ -97,7 +107,7 @@ public function store(Request $request, Event $event): JsonResponse
+             'message' => $isPaidEvent ? 'Payment is required to complete this registration.' : 'Registered for event successfully.',
+             'payment_required' => $isPaidEvent,
+             'registration' => new RegistrationResource(
+-                $registration->fresh()->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'checkedInBy.role', 'checkedInBy.profile'])
++                $registration->fresh()->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
+             ),
+             'payment' => $payment ? new \App\Http\Resources\PaymentResource($payment->load(['event', 'registration'])) : null,
+         ], $isPaidEvent ? 202 : 201);
+@@ -108,7 +118,7 @@ public function verifyTicket(string $ticketNumber): JsonResponse
+     {
+         $registration = Registration::query()
+             ->where('ticket_number', $ticketNumber)
+-            ->with(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'user.profile', 'checkedInBy.profile'])
++            ->with(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'user.profile', 'ticketType', 'checkedInBy.profile'])
+             ->first();
+ 
+         if (! $registration) {
+@@ -134,6 +144,11 @@ public function verifyTicket(string $ticketNumber): JsonResponse
+                 'registration_id' => $registration->id,
+                 'ticket_number' => $registration->ticket_number,
+                 'status' => $registration->status,
++                'ticket_type' => $registration->ticketType ? [
++                    'id' => $registration->ticketType->id,
++                    'name' => $registration->ticketType->name,
++                    'price' => $registration->ticketType->price,
++                ] : null,
+                 'registered_at' => $registration->registered_at,
+                 'checked_in_at' => $registration->checked_in_at,
+                 'checked_in_by' => $registration->checkedInBy?->name,
+@@ -236,6 +251,33 @@ public function destroy(Request $request, Event $event): JsonResponse
+         ]);
+     }
+ 
++
++    private function resolveTicketType(Event $event, ?int $ticketTypeId): ?EventTicketType
++    {
++        $query = $event->ticketTypes()->where('is_active', true);
++
++        if ($ticketTypeId) {
++            return (clone $query)->whereKey($ticketTypeId)->firstOrFail();
++        }
++
++        return $query->orderBy('sort_order')->orderBy('price')->first();
++    }
++
++    private function ensureTicketTypeCapacityIsAvailable(?EventTicketType $ticketType): void
++    {
++        if (! $ticketType || ! $ticketType->quantity) {
++            return;
++        }
++
++        $reservedRegistrations = $ticketType->registrations()
++            ->whereIn('status', ['confirmed', 'pending_payment'])
++            ->count();
++
++        if ($reservedRegistrations >= $ticketType->quantity) {
++            abort(422, 'This ticket type is sold out.');
++        }
++    }
++
+     private function ensureEventCanBeRegistered(Event $event): void
+     {
+         if ($event->status !== 'published' || $event->visibility !== 'public') {
+diff --git a/Backend/app/Http/Requests/Event/StoreEventRequest.php b/Backend/app/Http/Requests/Event/StoreEventRequest.php
+index d2620c3..ee044e7 100644
+--- a/Backend/app/Http/Requests/Event/StoreEventRequest.php
++++ b/Backend/app/Http/Requests/Event/StoreEventRequest.php
+@@ -37,6 +37,13 @@ public function rules(): array
+             'images.*.path' => ['required_with:images', 'string', 'max:2048'],
+             'images.*.type' => ['nullable', 'string', 'max:50'],
+             'images.*.is_cover' => ['nullable', 'boolean'],
++            'ticket_types' => ['nullable', 'array', 'max:6'],
++            'ticket_types.*.id' => ['nullable', 'integer', 'exists:event_ticket_types,id'],
++            'ticket_types.*.name' => ['required_with:ticket_types', 'string', 'max:80'],
++            'ticket_types.*.description' => ['nullable', 'string', 'max:500'],
++            'ticket_types.*.price' => ['required_with:ticket_types', 'numeric', 'min:0'],
++            'ticket_types.*.quantity' => ['nullable', 'integer', 'min:1'],
++            'ticket_types.*.is_active' => ['nullable', 'boolean'],
+         ];
+     }
+ }
+diff --git a/Backend/app/Http/Requests/Event/UpdateEventRequest.php b/Backend/app/Http/Requests/Event/UpdateEventRequest.php
+index faaf765..78ae943 100644
+--- a/Backend/app/Http/Requests/Event/UpdateEventRequest.php
++++ b/Backend/app/Http/Requests/Event/UpdateEventRequest.php
+@@ -44,6 +44,13 @@ public function rules(): array
+             'images.*.path' => ['required_with:images', 'string', 'max:2048'],
+             'images.*.type' => ['nullable', 'string', 'max:50'],
+             'images.*.is_cover' => ['nullable', 'boolean'],
++            'ticket_types' => ['nullable', 'array', 'max:6'],
++            'ticket_types.*.id' => ['nullable', 'integer', 'exists:event_ticket_types,id'],
++            'ticket_types.*.name' => ['required_with:ticket_types', 'string', 'max:80'],
++            'ticket_types.*.description' => ['nullable', 'string', 'max:500'],
++            'ticket_types.*.price' => ['required_with:ticket_types', 'numeric', 'min:0'],
++            'ticket_types.*.quantity' => ['nullable', 'integer', 'min:1'],
++            'ticket_types.*.is_active' => ['nullable', 'boolean'],
+         ];
+     }
+ }
+diff --git a/Backend/app/Http/Resources/EventResource.php b/Backend/app/Http/Resources/EventResource.php
+index de0c097..90cf9f1 100644
+--- a/Backend/app/Http/Resources/EventResource.php
++++ b/Backend/app/Http/Resources/EventResource.php
+@@ -40,6 +40,7 @@ public function toArray(Request $request): array
+             'division' => new DivisionResource($this->whenLoaded('division')),
+             'city' => new CityResource($this->whenLoaded('city')),
+             'images' => EventImageResource::collection($this->whenLoaded('images')),
++            'ticket_types' => EventTicketTypeResource::collection($this->whenLoaded('ticketTypes')),
+             'created_at' => $this->created_at,
+             'updated_at' => $this->updated_at,
+         ];
+diff --git a/Backend/app/Http/Resources/RegistrationResource.php b/Backend/app/Http/Resources/RegistrationResource.php
+index 0c3590a..7e229e5 100644
+--- a/Backend/app/Http/Resources/RegistrationResource.php
++++ b/Backend/app/Http/Resources/RegistrationResource.php
+@@ -14,6 +14,8 @@ public function toArray(Request $request): array
+             'user_id' => $this->user_id,
+             'event_id' => $this->event_id,
+             'status' => $this->status,
++            'ticket_type_id' => $this->ticket_type_id,
++            'ticket_type' => new EventTicketTypeResource($this->whenLoaded('ticketType')),
+             'ticket_number' => $this->ticket_number,
+             'registered_at' => $this->registered_at,
+             'checked_in_at' => $this->checked_in_at,
+diff --git a/Backend/app/Models/Event.php b/Backend/app/Models/Event.php
+index 9a90cc5..d28dab2 100644
+--- a/Backend/app/Models/Event.php
++++ b/Backend/app/Models/Event.php
+@@ -113,6 +113,11 @@ public function images()
+         return $this->hasMany(EventImage::class);
+     }
+ 
++    public function ticketTypes()
++    {
++        return $this->hasMany(EventTicketType::class)->orderBy('sort_order')->orderBy('price');
++    }
++
+     public function registrations()
+     {
+         return $this->hasMany(Registration::class);
+diff --git a/Backend/app/Models/Registration.php b/Backend/app/Models/Registration.php
+index 5235405..cf986ef 100644
+--- a/Backend/app/Models/Registration.php
++++ b/Backend/app/Models/Registration.php
+@@ -12,6 +12,7 @@ class Registration extends Model
+     protected $fillable = [
+         'user_id',
+         'event_id',
++        'ticket_type_id',
+         'status',
+         'ticket_number',
+         'registered_at',
+@@ -42,6 +43,11 @@ public function payment()
+         return $this->hasOne(Payment::class);
+     }
+ 
++    public function ticketType()
++    {
++        return $this->belongsTo(EventTicketType::class, 'ticket_type_id');
++    }
++
+     public function checkedInBy()
+     {
+         return $this->belongsTo(User::class, 'checked_in_by');
+diff --git a/Frontend/src/features/events/components/EventActionPanel.jsx b/Frontend/src/features/events/components/EventActionPanel.jsx
+index 1e10b01..cd7953c 100644
+--- a/Frontend/src/features/events/components/EventActionPanel.jsx
++++ b/Frontend/src/features/events/components/EventActionPanel.jsx
+@@ -1,5 +1,5 @@
+ import { toast } from 'sonner'
+-import { useState } from 'react'
++import { useMemo, useState } from 'react'
+ import { Link, useNavigate } from 'react-router-dom'
+ import Alert from '../../../shared/components/feedback/Alert.jsx'
+ import Button from '../../../shared/components/ui/Button.jsx'
+@@ -9,6 +9,7 @@ import { useAuth } from '../../auth/hooks/useAuth.js'
+ import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
+ import { useBookmarks } from '../../bookmarks/hooks/useBookmarks.js'
+ import { useRegistrations } from '../../registrations/hooks/useRegistrations.js'
++import { formatPrice } from '../../../shared/utils/currency.js'
+ import ReportEventModal from '../../reports/components/ReportEventModal.jsx'
+ import { useTranslation } from '../../../shared/i18n/useTranslation.js'
+ 
+@@ -16,6 +17,7 @@ function canCancelRegistration(event, registration) {
+   return event?.status === 'published'
+     && event?.visibility === 'public'
+     && registration?.status === 'confirmed'
++    && !registration?.checkedInAt
+ }
+ 
+ export default function EventActionPanel({ event }) {
+@@ -24,6 +26,11 @@ export default function EventActionPanel({ event }) {
+   const { isAuthenticated, role } = useAuth()
+   const { isBookmarked, toggleBookmark } = useBookmarks()
+   const { isRegistered, getRegistration, registerForEvent, cancelRegistration } = useRegistrations()
++  const ticketOptions = useMemo(() => {
++    if (event.ticketTypes?.length) return event.ticketTypes.filter((ticket) => ticket.isActive !== false)
++    return [{ id: null, name: Number(event.price || 0) > 0 ? 'Classic' : 'Free', description: 'Standard access', price: Number(event.price || 0) }]
++  }, [event])
++  const [selectedTicketTypeId, setSelectedTicketTypeId] = useState(ticketOptions[0]?.id ? String(ticketOptions[0].id) : '')
+   const [message, setMessage] = useState('')
+   const [error, setError] = useState('')
+   const [busy, setBusy] = useState(false)
+@@ -33,6 +40,7 @@ export default function EventActionPanel({ event }) {
+   const registration = getRegistration(event.id)
+   const registered = isRegistered(event.id)
+   const cancellationAllowed = canCancelRegistration(event, registration)
++  const selectedTicket = ticketOptions.find((ticket) => String(ticket.id || '') === String(selectedTicketTypeId)) || ticketOptions[0]
+ 
+   async function handleBookmark() {
+     setBusy(true)
+@@ -56,7 +64,7 @@ export default function EventActionPanel({ event }) {
+     setError('')
+     setMessage('')
+     try {
+-      const nextRegistration = await registerForEvent(event)
++      const nextRegistration = await registerForEvent(event, selectedTicket?.id ? { ticket_type_id: selectedTicket.id } : {})
+       if (nextRegistration.payment) {
+         toast.info(t('eventAction.paymentRequired'))
+         navigate(`/payments/${nextRegistration.payment.id}`)
+@@ -122,16 +130,34 @@ export default function EventActionPanel({ event }) {
+   return (
+     <Card className="mt-6">
+       <h2 className="font-bold text-slate-950">{t('eventAction.title')}</h2>
+-
+       {error && <div className="mt-4"><Alert type="error">{error}</Alert></div>}
+       {message && <div className="mt-4"><Alert type="success">{message}</Alert></div>}
+       {registered && registration && (
+-        <div className="mt-4"><Alert type="success">{t('eventAction.registeredMessage', { ticketNumber: registration.ticketNumber })}</Alert></div>
++        <div className="mt-4"><Alert type="success">{t('eventAction.registeredMessage', { ticketNumber: registration.ticketNumber })}{registration.ticketType?.name ? ` (${registration.ticketType.name})` : ''}</Alert></div>
+       )}
+       {registration && !registered && registration.status === 'cancelled_by_event' && (
+         <div className="mt-4"><Alert type="info">{t('eventAction.registrationCancelled')}</Alert></div>
+       )}
+ 
++      {!registered && (
++        <div className="mt-5">
++          <p className="mb-2 text-sm font-bold text-slate-800">Choose ticket type</p>
++          <div className="grid gap-3">
++            {ticketOptions.map((ticket) => {
++              const active = String(ticket.id || '') === String(selectedTicketTypeId)
++              return (
++                <button key={ticket.id || ticket.name} type="button" onClick={() => setSelectedTicketTypeId(ticket.id ? String(ticket.id) : '')} className={`rounded-2xl border p-4 text-left transition ${active ? 'border-teal-600 bg-teal-50 ring-2 ring-teal-100' : 'border-slate-200 bg-white hover:border-teal-200'}`}>
++                  <div className="flex items-start justify-between gap-3">
++                    <div><p className="font-black text-slate-950">{ticket.name}</p><p className="mt-1 text-sm text-slate-600">{ticket.description || 'Event access'}</p></div>
++                    <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-black text-slate-800">{formatPrice(ticket.price)}</span>
++                  </div>
++                </button>
++              )
++            })}
++          </div>
++        </div>
++      )}
++
+       <div className="mt-5 flex flex-wrap gap-3">
+         {registered ? (
+           <>
+@@ -139,7 +165,7 @@ export default function EventActionPanel({ event }) {
+             {cancellationAllowed && <Button type="button" variant="danger" disabled={busy} onClick={handleCancelRegistration}>{t('eventAction.cancelRegistration')}</Button>}
+           </>
+         ) : (
+-          <Button type="button" disabled={busy} onClick={handleRegister}>{busy ? t('eventAction.processing') : t('eventAction.registerForEvent')}</Button>
++          <Button type="button" disabled={busy} onClick={handleRegister}>{busy ? t('eventAction.processing') : `Register - ${formatPrice(selectedTicket?.price || 0)}`}</Button>
+         )}
+ 
+         <Button type="button" disabled={busy} variant={bookmarked ? 'outline' : 'secondary'} onClick={handleBookmark}>
+diff --git a/Frontend/src/features/events/components/EventForm.jsx b/Frontend/src/features/events/components/EventForm.jsx
+index c72305b..a605a75 100644
+--- a/Frontend/src/features/events/components/EventForm.jsx
++++ b/Frontend/src/features/events/components/EventForm.jsx
+@@ -206,6 +206,29 @@ export default function EventForm({
+   function updateValue(name, value) {
+     setForm((current) => ({ ...current, [name]: value, ...(name === 'region_id' ? { city_id: '' } : {}) }))
+   }
++  function updateTicketType(index, field, value) {
++    setForm((current) => ({
++      ...current,
++      ticketTypes: (current.ticketTypes || []).map((ticket, ticketIndex) => ticketIndex === index ? { ...ticket, [field]: value } : ticket),
++    }))
++  }
++
++  function addTicketType() {
++    setForm((current) => ({
++      ...current,
++      ticketTypes: [
++        ...(current.ticketTypes || []),
++        { name: '', description: '', price: '0', quantity: '', is_active: true },
++      ].slice(0, 6),
++    }))
++  }
++
++  function removeTicketType(index) {
++    setForm((current) => ({
++      ...current,
++      ticketTypes: (current.ticketTypes || []).filter((_, ticketIndex) => ticketIndex !== index),
++    }))
++  }
+ 
+   async function handleDeleteImage(image) {
+     if (!onDeleteExistingImage) return
+@@ -243,6 +266,9 @@ export default function EventForm({
+     if (!form.startDate) return setError('Start date is required.')
+     if (!form.coverImage && !form.existingCoverImage) return setError('Please upload or choose a cover photo.')
+     if (existingGalleryCount + selectedGalleryCount > MAX_GALLERY_IMAGES) return setError(`Gallery images are limited to ${MAX_GALLERY_IMAGES}.`)
++    const validTicketTypes = (form.ticketTypes || []).filter((ticket) => ticket.name?.trim())
++    if (validTicketTypes.length === 0) return setError('Add at least one ticket type, for example Classic or Free.')
++    if (validTicketTypes.some((ticket) => Number(ticket.price || 0) < 0)) return setError('Ticket type prices cannot be negative.')
+     return true
+   }
+ 
+@@ -289,11 +315,37 @@ export default function EventForm({
+           <DateTimeField label="Start date and time" name="startDate" value={form.startDate} onChange={updateTextField} helper="When the event begins." required />
+           <DateTimeField label="End date and time" name="endDate" value={form.endDate} onChange={updateTextField} helper="Optional, but recommended for longer events." />
+         </div>
+-        <div className="mt-4 grid gap-4 md:grid-cols-3">
+-          <FormInput label="Price (XAF)" name="price" type="number" value={form.price} onChange={updateTextField} placeholder="0" min="0" />
++        <div className="mt-4 grid gap-4 md:grid-cols-2">
+           <FormInput label="Maximum participants" name="maximumParticipants" type="number" value={form.maximumParticipants} onChange={updateTextField} placeholder="500" min="1" />
+           <DateTimeField label="Registration deadline" name="registrationDeadline" value={form.registrationDeadline} onChange={updateTextField} helper="Last moment attendees can register." />
+         </div>
++        <p className="mt-3 rounded-2xl bg-slate-50 p-3 text-sm text-slate-600">Event price is calculated from the ticket types below. Use price 0 for free tickets.</p>
++      </Card>
++
++      <Card>
++        <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
++          <div>
++            <h2 className="text-xl font-black text-slate-950">Ticket types</h2>
++            <p className="text-sm text-slate-600">Create free, Classic, VIP or VVIP tickets. The price selected by the attendee will be used for payment.</p>
++          </div>
++          <Button type="button" variant="secondary" onClick={addTicketType} disabled={(form.ticketTypes || []).length >= 6}>Add ticket type</Button>
++        </div>
++        <div className="grid gap-4">
++          {(form.ticketTypes || []).map((ticket, index) => (
++            <div key={ticket.id || index} className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
++              <div className="grid gap-3 md:grid-cols-[1.2fr_1fr_130px_130px_auto] md:items-end">
++                <FormInput label="Ticket name" value={ticket.name} onChange={(event) => updateTicketType(index, 'name', event.target.value)} placeholder={index === 0 ? 'Classic' : 'VIP'} />
++                <FormInput label="Description" value={ticket.description || ''} onChange={(event) => updateTicketType(index, 'description', event.target.value)} placeholder="Access details" />
++                <FormInput label="Price (XAF)" type="number" min="0" value={ticket.price} onChange={(event) => updateTicketType(index, 'price', event.target.value)} />
++                <FormInput label="Quantity" type="number" min="1" value={ticket.quantity || ''} onChange={(event) => updateTicketType(index, 'quantity', event.target.value)} placeholder="Unlimited" />
++                <Button type="button" variant="danger" onClick={() => removeTicketType(index)} disabled={(form.ticketTypes || []).length <= 1}><Trash2 className="mr-2 h-4 w-4" />Remove</Button>
++              </div>
++            </div>
++          ))}
++        </div>
++        <div className="mt-4 rounded-2xl bg-teal-50 p-4 text-sm leading-6 text-teal-900">
++          Tip: use <strong>Free</strong> with price 0 for free access, then add <strong>Classic</strong>, <strong>VIP</strong> or <strong>VVIP</strong> as needed.
++        </div>
+       </Card>
+ 
+       <Card>
+diff --git a/Frontend/src/features/events/pages/CreateEventPage.jsx b/Frontend/src/features/events/pages/CreateEventPage.jsx
+index c7ddaf6..8e5d778 100644
+--- a/Frontend/src/features/events/pages/CreateEventPage.jsx
++++ b/Frontend/src/features/events/pages/CreateEventPage.jsx
+@@ -23,7 +23,7 @@ export default function CreateEventPage() {
+       const eventId = response.data.event.id
+       const files = extractEventFiles(payload)
+       if (hasEventFiles(files)) await eventService.uploadImages(eventId, buildEventImagesFormData(files))
+-      toast.success(status === 'draft' ? t('events.create.draftSaved') : t('events.create.successMessage'))
++      toast.success(status === 'draft' ? t('events.create.draftSaved') : 'Event published successfully.')
+       navigate('/organizer/events')
+     } catch (createError) {
+       const message = getApiErrorMessage(createError, t('events.create.errorMessage'))
+@@ -42,8 +42,8 @@ export default function CreateEventPage() {
+       </section>
+       <EventForm
+         initialValues={createEmptyEventForm()}
+-        submitLabel={t('events.create.submitButton')}
+-        onSubmit={(payload) => saveEvent(payload, 'pending')}
++        submitLabel="Publish Event"
++        onSubmit={(payload) => saveEvent(payload, 'published')}
+         onDraft={(payload) => saveEvent(payload, 'draft')}
+         submitting={submitting}
+         serverError={error}
+diff --git a/Frontend/src/features/events/pages/EditEventPage.jsx b/Frontend/src/features/events/pages/EditEventPage.jsx
+index 98e56c9..44cd273 100644
+--- a/Frontend/src/features/events/pages/EditEventPage.jsx
++++ b/Frontend/src/features/events/pages/EditEventPage.jsx
+@@ -43,7 +43,7 @@ export default function EditEventPage() {
+       await eventService.updateEvent(id, formValuesToApiPayload(payload, status))
+       const files = extractEventFiles(payload)
+       if (hasEventFiles(files)) await eventService.uploadImages(id, buildEventImagesFormData(files))
+-      toast.success(status === 'draft' ? t('events.edit.draftSaved') : t('events.edit.successMessage'))
++      toast.success(status === 'draft' ? t('events.edit.draftSaved') : 'Event published successfully.')
+       navigate('/organizer/events')
+     } catch (updateError) {
+       const message = getApiErrorMessage(updateError, t('events.edit.errorMessage'))
+@@ -89,8 +89,8 @@ export default function EditEventPage() {
+       </section>
+       <EventForm
+         initialValues={eventToFormValues(event)}
+-        submitLabel={t('events.edit.submitButton')}
+-        onSubmit={(payload) => handleUpdateEvent(payload, 'pending')}
++        submitLabel="Publish Event"
++        onSubmit={(payload) => handleUpdateEvent(payload, 'published')}
+         onDraft={(payload) => handleUpdateEvent(payload, 'draft')}
+         submitting={submitting}
+         serverError={submitError}
+diff --git a/Frontend/src/features/events/utils/eventDefaults.js b/Frontend/src/features/events/utils/eventDefaults.js
+index ad2ee6d..bbf4b67 100644
+--- a/Frontend/src/features/events/utils/eventDefaults.js
++++ b/Frontend/src/features/events/utils/eventDefaults.js
+@@ -21,6 +21,9 @@ export function createEmptyEventForm() {
+     startDate: '',
+     endDate: '',
+     price: '0',
++    ticketTypes: [
++      { name: 'Classic', description: 'Standard access', price: '0', quantity: '', is_active: true },
++    ],
+     maximumParticipants: '100',
+     registrationDeadline: '',
+     visibility: 'public',
+diff --git a/Frontend/src/features/events/utils/normalizeEvent.js b/Frontend/src/features/events/utils/normalizeEvent.js
+index 3723390..0a9c5a1 100644
+--- a/Frontend/src/features/events/utils/normalizeEvent.js
++++ b/Frontend/src/features/events/utils/normalizeEvent.js
+@@ -6,6 +6,20 @@ function getStorageUrl(path) {
+   return `${baseUrl}/storage/${path}`
+ }
+ 
++function normalizeTicketType(ticketType) {
++  return {
++    id: ticketType.id,
++    eventId: ticketType.event_id,
++    name: ticketType.name,
++    description: ticketType.description || '',
++    price: Number(ticketType.price || 0),
++    quantity: ticketType.quantity || '',
++    isActive: ticketType.is_active ?? true,
++    remainingQuantity: ticketType.remaining_quantity,
++    raw: ticketType,
++  }
++}
++
+ function normalizeImage(image) {
+   return {
+     id: image.id,
+@@ -71,6 +85,7 @@ export function normalizeEvent(apiEvent) {
+     popularity: apiEvent.views ? Math.min(100, Math.round(Number(apiEvent.views) / 10)) : 0,
+     images: (apiEvent.images || []).map(normalizeImage),
+     coverImage: (apiEvent.images || []).map(normalizeImage).find((image) => image.isCover) || null,
++    ticketTypes: (apiEvent.ticket_types || []).map(normalizeTicketType),
+     raw: apiEvent,
+   }
+ }
+@@ -99,10 +114,21 @@ export function eventToFormValues(event) {
+     visibility: event?.visibility || 'public',
+     existingCoverImage: event?.coverImage || null,
+     existingGalleryImages: event?.images?.filter((image) => !image.isCover) || [],
++    ticketTypes: event?.ticketTypes?.length ? event.ticketTypes.map((ticketType) => ({
++      id: ticketType.id,
++      name: ticketType.name,
++      description: ticketType.description || '',
++      price: String(ticketType.price ?? 0),
++      quantity: ticketType.quantity ? String(ticketType.quantity) : '',
++      is_active: ticketType.isActive ?? true,
++    })) : [{ name: 'Classic', description: 'Standard access', price: String(event?.price ?? 0), quantity: '', is_active: true }],
+   }
+ }
+ 
+ export function formValuesToApiPayload(form, status = 'pending') {
++  const validTicketTypes = (form.ticketTypes || []).filter((ticket) => ticket.name?.trim())
++  const basePrice = validTicketTypes.length ? Math.min(...validTicketTypes.map((ticket) => Number(ticket.price || 0))) : Number(form.price || 0)
++
+   return {
+     title: form.title,
+     description: form.description,
+@@ -115,10 +141,18 @@ export function formValuesToApiPayload(form, status = 'pending') {
+     start_date: form.startDate,
+     end_date: form.endDate || null,
+     registration_deadline: form.registrationDeadline || null,
+-    price: Number(form.price || 0),
++    price: basePrice,
+     maximum_participants: form.maximumParticipants ? Number(form.maximumParticipants) : null,
+     status,
+     visibility: form.visibility || 'public',
++    ticket_types: validTicketTypes.map((ticket) => ({
++      id: ticket.id || null,
++      name: ticket.name,
++      description: ticket.description || null,
++      price: Number(ticket.price || 0),
++      quantity: ticket.quantity ? Number(ticket.quantity) : null,
++      is_active: ticket.is_active ?? true,
++    })),
+   }
+ }
+ 
+diff --git a/Frontend/src/features/registrations/hooks/useRegistrations.js b/Frontend/src/features/registrations/hooks/useRegistrations.js
+index f0985d9..9ec70ba 100644
+--- a/Frontend/src/features/registrations/hooks/useRegistrations.js
++++ b/Frontend/src/features/registrations/hooks/useRegistrations.js
+@@ -18,6 +18,7 @@ function normalizeRegistration(apiRegistration) {
+     checkedInBy: apiRegistration.checked_in_by_user?.name || apiRegistration.checked_in_by || '',
+     event: apiRegistration.event ? normalizeEvent(apiRegistration.event) : null,
+     payment: apiRegistration.payment || null,
++    ticketType: apiRegistration.ticket_type || null,
+     raw: apiRegistration,
+   }
+ }
+@@ -70,8 +71,8 @@ export function useRegistrations() {
+     return getRegistration(eventId)?.status === 'confirmed'
+   }
+ 
+-  async function registerForEvent(event) {
+-    const response = await registrationService.registerForEvent(event.id)
++  async function registerForEvent(event, payload = {}) {
++    const response = await registrationService.registerForEvent(event.id, payload)
+     const registration = normalizeRegistration(response.data.registration)
+     window.dispatchEvent(new CustomEvent(REGISTRATIONS_UPDATED_EVENT))
+     await fetchRegistrations()
+diff --git a/Frontend/src/features/registrations/pages/TicketPage.jsx b/Frontend/src/features/registrations/pages/TicketPage.jsx
+index 918f75d..4a5fa26 100644
+--- a/Frontend/src/features/registrations/pages/TicketPage.jsx
++++ b/Frontend/src/features/registrations/pages/TicketPage.jsx
+@@ -8,6 +8,7 @@ import Alert from '../../../shared/components/feedback/Alert.jsx'
+ import Button from '../../../shared/components/ui/Button.jsx'
+ import PageContainer from '../../../shared/components/layout/PageContainer.jsx'
+ import { formatDate } from '../../../shared/utils/formatDate.js'
++import { APP_NAME } from '../../../shared/constants/app.js'
+ import { useRegistrations } from '../hooks/useRegistrations.js'
+ 
+ function canViewPublicEvent(event, registration) {
+@@ -40,6 +41,7 @@ export default function TicketPage() {
+                 <p className="mt-2 flex items-center gap-2 text-slate-200"><CalendarDays className="h-4 w-4"/> {formatDate(event.startDate)}</p>
+               </div>
+               <div className="rounded-2xl bg-white p-4 text-slate-950 shadow-xl">
++                <div className="mb-3 flex items-center justify-center gap-2 text-xs font-black text-teal-700"><ShieldCheck className="h-4 w-4" /> {APP_NAME}</div>
+                 <QRCodeSVG value={verificationUrl} size={120} level="M" includeMargin />
+               </div>
+             </div>
+@@ -51,6 +53,7 @@ export default function TicketPage() {
+             <div className="grid gap-5 md:grid-cols-2">
+               <div><p className="text-sm text-slate-500">Ticket number</p><p className="mt-1 text-2xl font-black tracking-wide text-slate-950">{registration.ticketNumber}</p></div>
+               <div><p className="text-sm text-slate-500">Status</p><p className="mt-1 text-2xl font-black capitalize text-slate-950">{registration.checkedInAt ? 'Checked in' : registration.status}</p></div>
++              {registration.ticketType?.name && <div><p className="text-sm text-slate-500">Ticket type</p><p className="mt-1 text-2xl font-black capitalize text-slate-950">{registration.ticketType.name}</p></div>}
+               <p className="flex gap-2 text-slate-700"><MapPin className="h-5 w-5 text-teal-700"/> {event.venue}, {event.city}, {event.region}</p>
+               <p className="flex gap-2 text-slate-700"><QrCode className="h-5 w-5 text-teal-700"/> Scan this QR code to verify the ticket.</p>
+             </div>
+diff --git a/Frontend/src/features/registrations/services/registrationService.js b/Frontend/src/features/registrations/services/registrationService.js
+index a11dc89..1253956 100644
+--- a/Frontend/src/features/registrations/services/registrationService.js
++++ b/Frontend/src/features/registrations/services/registrationService.js
+@@ -3,6 +3,6 @@ import axiosClient from '../../../shared/api/axiosClient.js'
+ export const registrationService = {
+   getRegistrations: (params = {}) => axiosClient.get('/registrations', { params }),
+   getRegistration: (registrationId) => axiosClient.get(`/registrations/${registrationId}`),
+-  registerForEvent: (eventId) => axiosClient.post(`/events/${eventId}/register`),
++  registerForEvent: (eventId, payload = {}) => axiosClient.post(`/events/${eventId}/register`, payload),
+   cancelRegistration: (eventId) => axiosClient.delete(`/events/${eventId}/registration`),
+ }
+diff --git a/Backend/app/Http/Resources/EventTicketTypeResource.php b/Backend/app/Http/Resources/EventTicketTypeResource.php
+new file mode 100644
+index 0000000..f80cad1
+--- /dev/null
++++ b/Backend/app/Http/Resources/EventTicketTypeResource.php
+@@ -0,0 +1,26 @@
++<?php
++
++namespace App\Http\Resources;
++
++use Illuminate\Http\Request;
++use Illuminate\Http\Resources\Json\JsonResource;
++
++class EventTicketTypeResource extends JsonResource
++{
++    public function toArray(Request $request): array
++    {
++        return [
++            'id' => $this->id,
++            'event_id' => $this->event_id,
++            'name' => $this->name,
++            'description' => $this->description,
++            'price' => $this->price,
++            'quantity' => $this->quantity,
++            'is_active' => (bool) $this->is_active,
++            'sort_order' => $this->sort_order,
++            'remaining_quantity' => $this->when(isset($this->remaining_quantity), $this->remaining_quantity),
++            'created_at' => $this->created_at,
++            'updated_at' => $this->updated_at,
++        ];
++    }
++}
+diff --git a/Backend/app/Models/EventTicketType.php b/Backend/app/Models/EventTicketType.php
+new file mode 100644
+index 0000000..08ea033
+--- /dev/null
++++ b/Backend/app/Models/EventTicketType.php
+@@ -0,0 +1,41 @@
++<?php
++
++namespace App\Models;
++
++use Illuminate\Database\Eloquent\Factories\HasFactory;
++use Illuminate\Database\Eloquent\Model;
++
++class EventTicketType extends Model
++{
++    use HasFactory;
++
++    protected $fillable = [
++        'event_id',
++        'name',
++        'description',
++        'price',
++        'quantity',
++        'is_active',
++        'sort_order',
++    ];
++
++    protected function casts(): array
++    {
++        return [
++            'price' => 'decimal:2',
++            'quantity' => 'integer',
++            'is_active' => 'boolean',
++            'sort_order' => 'integer',
++        ];
++    }
++
++    public function event()
++    {
++        return $this->belongsTo(Event::class);
++    }
++
++    public function registrations()
++    {
++        return $this->hasMany(Registration::class, 'ticket_type_id');
++    }
++}
+diff --git a/Backend/database/migrations/2026_07_16_000001_create_event_ticket_types_table.php b/Backend/database/migrations/2026_07_16_000001_create_event_ticket_types_table.php
+new file mode 100644
+index 0000000..b20ec22
+--- /dev/null
++++ b/Backend/database/migrations/2026_07_16_000001_create_event_ticket_types_table.php
+@@ -0,0 +1,29 @@
++<?php
++
++use Illuminate\Database\Migrations\Migration;
++use Illuminate\Database\Schema\Blueprint;
++use Illuminate\Support\Facades\Schema;
++
++return new class extends Migration
++{
++    public function up(): void
++    {
++        Schema::create('event_ticket_types', function (Blueprint $table) {
++            $table->id();
++            $table->foreignId('event_id')->constrained('events')->cascadeOnDelete();
++            $table->string('name', 80);
++            $table->string('description', 500)->nullable();
++            $table->decimal('price', 12, 2)->default(0);
++            $table->unsignedInteger('quantity')->nullable();
++            $table->boolean('is_active')->default(true);
++            $table->unsignedInteger('sort_order')->default(0);
++            $table->timestamps();
++            $table->index(['event_id', 'is_active', 'sort_order']);
++        });
++    }
++
++    public function down(): void
++    {
++        Schema::dropIfExists('event_ticket_types');
++    }
++};
+diff --git a/Backend/database/migrations/2026_07_16_000002_add_ticket_type_id_to_registrations_table.php b/Backend/database/migrations/2026_07_16_000002_add_ticket_type_id_to_registrations_table.php
+new file mode 100644
+index 0000000..36f7c6d
+--- /dev/null
++++ b/Backend/database/migrations/2026_07_16_000002_add_ticket_type_id_to_registrations_table.php
+@@ -0,0 +1,23 @@
++<?php
++
++use Illuminate\Database\Migrations\Migration;
++use Illuminate\Database\Schema\Blueprint;
++use Illuminate\Support\Facades\Schema;
++
++return new class extends Migration
++{
++    public function up(): void
++    {
++        Schema::table('registrations', function (Blueprint $table) {
++            $table->foreignId('ticket_type_id')->nullable()->after('event_id')->constrained('event_ticket_types')->nullOnDelete();
++            $table->index(['ticket_type_id', 'status']);
++        });
++    }
++
++    public function down(): void
++    {
++        Schema::table('registrations', function (Blueprint $table) {
++            $table->dropConstrainedForeignId('ticket_type_id');
++        });
++    }
++};

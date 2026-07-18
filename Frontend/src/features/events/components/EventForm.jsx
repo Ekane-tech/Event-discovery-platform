@@ -206,6 +206,29 @@ export default function EventForm({
   function updateValue(name, value) {
     setForm((current) => ({ ...current, [name]: value, ...(name === 'region_id' ? { city_id: '' } : {}) }))
   }
+  function updateTicketType(index, field, value) {
+    setForm((current) => ({
+      ...current,
+      ticketTypes: (current.ticketTypes || []).map((ticket, ticketIndex) => ticketIndex === index ? { ...ticket, [field]: value } : ticket),
+    }))
+  }
+
+  function addTicketType() {
+    setForm((current) => ({
+      ...current,
+      ticketTypes: [
+        ...(current.ticketTypes || []),
+        { name: '', description: '', price: '0', quantity: '', is_active: true },
+      ].slice(0, 6),
+    }))
+  }
+
+  function removeTicketType(index) {
+    setForm((current) => ({
+      ...current,
+      ticketTypes: (current.ticketTypes || []).filter((_, ticketIndex) => ticketIndex !== index),
+    }))
+  }
 
   async function handleDeleteImage(image) {
     if (!onDeleteExistingImage) return
@@ -243,6 +266,9 @@ export default function EventForm({
     if (!form.startDate) return setError('Start date is required.')
     if (!form.coverImage && !form.existingCoverImage) return setError('Please upload or choose a cover photo.')
     if (existingGalleryCount + selectedGalleryCount > MAX_GALLERY_IMAGES) return setError(`Gallery images are limited to ${MAX_GALLERY_IMAGES}.`)
+    const validTicketTypes = (form.ticketTypes || []).filter((ticket) => ticket.name?.trim())
+    if (validTicketTypes.length === 0) return setError('Add at least one ticket type, for example Classic or Free.')
+    if (validTicketTypes.some((ticket) => Number(ticket.price || 0) < 0)) return setError('Ticket type prices cannot be negative.')
     return true
   }
 
@@ -289,10 +315,36 @@ export default function EventForm({
           <DateTimeField label="Start date and time" name="startDate" value={form.startDate} onChange={updateTextField} helper="When the event begins." required />
           <DateTimeField label="End date and time" name="endDate" value={form.endDate} onChange={updateTextField} helper="Optional, but recommended for longer events." />
         </div>
-        <div className="mt-4 grid gap-4 md:grid-cols-3">
-          <FormInput label="Price (XAF)" name="price" type="number" value={form.price} onChange={updateTextField} placeholder="0" min="0" />
+        <div className="mt-4 grid gap-4 md:grid-cols-2">
           <FormInput label="Maximum participants" name="maximumParticipants" type="number" value={form.maximumParticipants} onChange={updateTextField} placeholder="500" min="1" />
           <DateTimeField label="Registration deadline" name="registrationDeadline" value={form.registrationDeadline} onChange={updateTextField} helper="Last moment attendees can register." />
+        </div>
+        <p className="mt-3 rounded-2xl bg-slate-50 p-3 text-sm text-slate-600">Event price is calculated from the ticket types below. Use price 0 for free tickets.</p>
+      </Card>
+
+      <Card>
+        <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h2 className="text-xl font-black text-slate-950">Ticket types</h2>
+            <p className="text-sm text-slate-600">Create free, Classic, VIP or VVIP tickets. The price selected by the attendee will be used for payment.</p>
+          </div>
+          <Button type="button" variant="secondary" onClick={addTicketType} disabled={(form.ticketTypes || []).length >= 6}>Add ticket type</Button>
+        </div>
+        <div className="grid gap-4">
+          {(form.ticketTypes || []).map((ticket, index) => (
+            <div key={ticket.id || index} className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+              <div className="grid gap-3 md:grid-cols-[1.2fr_1fr_130px_130px_auto] md:items-end">
+                <FormInput label="Ticket name" value={ticket.name} onChange={(event) => updateTicketType(index, 'name', event.target.value)} placeholder={index === 0 ? 'Classic' : 'VIP'} />
+                <FormInput label="Description" value={ticket.description || ''} onChange={(event) => updateTicketType(index, 'description', event.target.value)} placeholder="Access details" />
+                <FormInput label="Price (XAF)" type="number" min="0" value={ticket.price} onChange={(event) => updateTicketType(index, 'price', event.target.value)} />
+                <FormInput label="Quantity" type="number" min="1" value={ticket.quantity || ''} onChange={(event) => updateTicketType(index, 'quantity', event.target.value)} placeholder="Unlimited" />
+                <Button type="button" variant="danger" onClick={() => removeTicketType(index)} disabled={(form.ticketTypes || []).length <= 1}><Trash2 className="mr-2 h-4 w-4" />Remove</Button>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 rounded-2xl bg-teal-50 p-4 text-sm leading-6 text-teal-900">
+          Tip: use <strong>Free</strong> with price 0 for free access, then add <strong>Classic</strong>, <strong>VIP</strong> or <strong>VVIP</strong> as needed.
         </div>
       </Card>
 

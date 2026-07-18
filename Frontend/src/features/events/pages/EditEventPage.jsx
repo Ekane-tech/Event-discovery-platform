@@ -43,7 +43,7 @@ export default function EditEventPage() {
       await eventService.updateEvent(id, formValuesToApiPayload(payload, status))
       const files = extractEventFiles(payload)
       if (hasEventFiles(files)) await eventService.uploadImages(id, buildEventImagesFormData(files))
-      toast.success(status === 'draft' ? t('events.edit.draftSaved') : t('events.edit.successMessage'))
+      toast.success(status === 'draft' ? t('events.edit.draftSaved') : 'Event published successfully.')
       navigate('/organizer/events')
     } catch (updateError) {
       const message = getApiErrorMessage(updateError, t('events.edit.errorMessage'))
@@ -89,8 +89,8 @@ export default function EditEventPage() {
       </section>
       <EventForm
         initialValues={eventToFormValues(event)}
-        submitLabel={t('events.edit.submitButton')}
-        onSubmit={(payload) => handleUpdateEvent(payload, 'pending')}
+        submitLabel="Publish Event"
+        onSubmit={(payload) => handleUpdateEvent(payload, 'published')}
         onDraft={(payload) => handleUpdateEvent(payload, 'draft')}
         submitting={submitting}
         serverError={submitError}

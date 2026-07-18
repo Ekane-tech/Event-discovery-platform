@@ -10,6 +10,7 @@ use App\Http\Resources\RegistrationResource;
 use App\Jobs\SendEventInterestNotificationsJob;
 use App\Models\Event;
 use App\Models\EventImage;
+use App\Models\EventTicketType;
 use App\Models\EventView;
 use App\Models\AuditLog;
 use App\Notifications\EventAvailableNotification;
@@ -28,7 +29,7 @@ class EventController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = Event::query()
-            ->with(['organizer.role', 'organizer.profile', 'category', 'region', 'division', 'city', 'images'])
+            ->with(['organizer.role', 'organizer.profile', 'category', 'region', 'division', 'city', 'images', 'ticketTypes'])
             ->withCount(['registrations', 'bookmarks', 'reports']);
 
         if (! $request->user()?->hasRole('admin')) {
@@ -58,7 +59,7 @@ class EventController extends Controller
         $this->recordUniqueView($event, request());
 
         return response()->json([
-            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images'])->loadCount(['registrations', 'bookmarks', 'reports'])),
+            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])->loadCount(['registrations', 'bookmarks', 'reports'])),
         ]);
     }
 
@@ -69,14 +70,14 @@ class EventController extends Controller
         }
 
         return response()->json([
-            'event' => new EventResource($event->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images'])->loadCount(['registrations', 'bookmarks', 'reports'])),
+            'event' => new EventResource($event->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])->loadCount(['registrations', 'bookmarks', 'reports'])),
         ]);
     }
 
     public function store(StoreEventRequest $request): JsonResponse
     {
         $validated = $request->validated();
-        $eventData = Arr::except($validated, ['category_ids', 'images']);
+        $eventData = Arr::except($validated, ['category_ids', 'images', 'ticket_types']);
 
         $event = Event::create([
             ...$eventData,
@@ -87,6 +88,7 @@ class EventController extends Controller
         ]);
 
         $this->syncCategories($event, $validated);
+        $this->syncTicketTypes($event, $validated['ticket_types'] ?? []);
         $this->syncImages($event, $validated['images'] ?? []);
 
         if ($event->status === 'published' && $event->visibility === 'public') {
@@ -95,7 +97,7 @@ class EventController extends Controller
 
         return response()->json([
             'message' => 'Event created successfully.',
-            'event' => new EventResource($event->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images'])),
+            'event' => new EventResource($event->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])),
         ], 201);
     }
 
@@ -103,11 +105,8 @@ class EventController extends Controller
     {
         $wasAvailable = $event->status === 'published' && $event->visibility === 'public';
         $validated = $request->validated();
-        $eventData = Arr::except($validated, ['category_ids', 'images']);
+        $eventData = Arr::except($validated, ['category_ids', 'images', 'ticket_types']);
 
-        if (! $request->user()->hasRole('admin')) {
-            unset($eventData['status']);
-        }
 
         $event->update([
             ...$eventData,
@@ -116,6 +115,9 @@ class EventController extends Controller
         ]);
 
         $this->syncCategories($event, $validated);
+        if (array_key_exists('ticket_types', $validated)) {
+            $this->syncTicketTypes($event, $validated['ticket_types'] ?? []);
+        }
 
         if (array_key_exists('images', $validated)) {
             $event->images()->delete();
@@ -127,7 +129,7 @@ class EventController extends Controller
 
         return response()->json([
             'message' => 'Event updated successfully.',
-            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images'])),
+            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])),
         ]);
     }
 
@@ -190,7 +192,7 @@ class EventController extends Controller
 
         return response()->json([
             'message' => 'Event images uploaded successfully.',
-            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images'])),
+            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])),
         ]);
     }
 
@@ -225,7 +227,7 @@ class EventController extends Controller
 
         return response()->json([
             'message' => 'Event image deleted successfully.',
-            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images'])),
+            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])),
         ]);
     }
 
@@ -250,7 +252,7 @@ class EventController extends Controller
 
         return response()->json([
             'message' => 'Cover image updated successfully.',
-            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images'])),
+            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])),
         ]);
     }
 
@@ -288,7 +290,7 @@ class EventController extends Controller
 
         return response()->json([
             'message' => 'Event duplicated as draft.',
-            'event' => new EventResource($copy->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images'])),
+            'event' => new EventResource($copy->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])),
         ], 201);
     }
 
@@ -332,7 +334,7 @@ class EventController extends Controller
     {
         $events = Event::query()
             ->where('organizer_id', $request->user()->id)
-            ->with(['category', 'region', 'division', 'city', 'images'])
+            ->with(['category', 'region', 'division', 'city', 'images', 'ticketTypes'])
             ->withCount(['registrations', 'bookmarks', 'reports'])
             ->latest()
             ->paginate(min((int) $request->input('per_page', 12), 50));
@@ -516,6 +518,42 @@ class EventController extends Controller
         $categoryIds = $validated['category_ids'] ?? [];
         $categoryIds[] = $validated['category_id'];
         $event->categories()->sync(array_unique($categoryIds));
+    }
+
+    private function syncTicketTypes(Event $event, array $ticketTypes): void
+    {
+        if (empty($ticketTypes)) {
+            return;
+        }
+
+        $keptIds = [];
+
+        foreach (array_values($ticketTypes) as $index => $ticketType) {
+            $payload = [
+                'name' => $ticketType['name'],
+                'description' => $ticketType['description'] ?? null,
+                'price' => $ticketType['price'] ?? 0,
+                'quantity' => $ticketType['quantity'] ?? null,
+                'is_active' => $ticketType['is_active'] ?? true,
+                'sort_order' => $index,
+            ];
+
+            if (! empty($ticketType['id'])) {
+                $model = $event->ticketTypes()->whereKey($ticketType['id'])->first();
+                if ($model) {
+                    $model->update($payload);
+                    $keptIds[] = $model->id;
+                    continue;
+                }
+            }
+
+            $model = $event->ticketTypes()->create($payload);
+            $keptIds[] = $model->id;
+        }
+
+        if (! empty($keptIds)) {
+            $event->ticketTypes()->whereNotIn('id', $keptIds)->update(['is_active' => false]);
+        }
     }
 
     private function syncImages(Event $event, array $images): void

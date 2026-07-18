@@ -23,7 +23,7 @@ export default function CreateEventPage() {
       const eventId = response.data.event.id
       const files = extractEventFiles(payload)
       if (hasEventFiles(files)) await eventService.uploadImages(eventId, buildEventImagesFormData(files))
-      toast.success(status === 'draft' ? t('events.create.draftSaved') : t('events.create.successMessage'))
+      toast.success(status === 'draft' ? t('events.create.draftSaved') : 'Event published successfully.')
       navigate('/organizer/events')
     } catch (createError) {
       const message = getApiErrorMessage(createError, t('events.create.errorMessage'))
@@ -42,8 +42,8 @@ export default function CreateEventPage() {
       </section>
       <EventForm
         initialValues={createEmptyEventForm()}
-        submitLabel={t('events.create.submitButton')}
-        onSubmit={(payload) => saveEvent(payload, 'pending')}
+        submitLabel="Publish Event"
+        onSubmit={(payload) => saveEvent(payload, 'published')}
         onDraft={(payload) => saveEvent(payload, 'draft')}
         submitting={submitting}
         serverError={error}

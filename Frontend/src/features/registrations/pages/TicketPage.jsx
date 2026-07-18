@@ -8,6 +8,7 @@ import Alert from '../../../shared/components/feedback/Alert.jsx'
 import Button from '../../../shared/components/ui/Button.jsx'
 import PageContainer from '../../../shared/components/layout/PageContainer.jsx'
 import { formatDate } from '../../../shared/utils/formatDate.js'
+import { APP_NAME } from '../../../shared/constants/app.js'
 import { useRegistrations } from '../hooks/useRegistrations.js'
 
 function canViewPublicEvent(event, registration) {
@@ -40,6 +41,7 @@ export default function TicketPage() {
                 <p className="mt-2 flex items-center gap-2 text-slate-200"><CalendarDays className="h-4 w-4"/> {formatDate(event.startDate)}</p>
               </div>
               <div className="rounded-2xl bg-white p-4 text-slate-950 shadow-xl">
+                <div className="mb-3 flex items-center justify-center gap-2 text-xs font-black text-teal-700"><ShieldCheck className="h-4 w-4" /> {APP_NAME}</div>
                 <QRCodeSVG value={verificationUrl} size={120} level="M" includeMargin />
               </div>
             </div>
@@ -51,6 +53,7 @@ export default function TicketPage() {
             <div className="grid gap-5 md:grid-cols-2">
               <div><p className="text-sm text-slate-500">Ticket number</p><p className="mt-1 text-2xl font-black tracking-wide text-slate-950">{registration.ticketNumber}</p></div>
               <div><p className="text-sm text-slate-500">Status</p><p className="mt-1 text-2xl font-black capitalize text-slate-950">{registration.checkedInAt ? 'Checked in' : registration.status}</p></div>
+              {registration.ticketType?.name && <div><p className="text-sm text-slate-500">Ticket type</p><p className="mt-1 text-2xl font-black capitalize text-slate-950">{registration.ticketType.name}</p></div>}
               <p className="flex gap-2 text-slate-700"><MapPin className="h-5 w-5 text-teal-700"/> {event.venue}, {event.city}, {event.region}</p>
               <p className="flex gap-2 text-slate-700"><QrCode className="h-5 w-5 text-teal-700"/> Scan this QR code to verify the ticket.</p>
             </div>

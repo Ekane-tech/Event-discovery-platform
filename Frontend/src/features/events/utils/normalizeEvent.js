@@ -6,6 +6,20 @@ function getStorageUrl(path) {
   return `${baseUrl}/storage/${path}`
 }
 
+function normalizeTicketType(ticketType) {
+  return {
+    id: ticketType.id,
+    eventId: ticketType.event_id,
+    name: ticketType.name,
+    description: ticketType.description || '',
+    price: Number(ticketType.price || 0),
+    quantity: ticketType.quantity || '',
+    isActive: ticketType.is_active ?? true,
+    remainingQuantity: ticketType.remaining_quantity,
+    raw: ticketType,
+  }
+}
+
 function normalizeImage(image) {
   return {
     id: image.id,
@@ -71,6 +85,7 @@ export function normalizeEvent(apiEvent) {
     popularity: apiEvent.views ? Math.min(100, Math.round(Number(apiEvent.views) / 10)) : 0,
     images: (apiEvent.images || []).map(normalizeImage),
     coverImage: (apiEvent.images || []).map(normalizeImage).find((image) => image.isCover) || null,
+    ticketTypes: (apiEvent.ticket_types || []).map(normalizeTicketType),
     raw: apiEvent,
   }
 }
@@ -99,10 +114,21 @@ export function eventToFormValues(event) {
     visibility: event?.visibility || 'public',
     existingCoverImage: event?.coverImage || null,
     existingGalleryImages: event?.images?.filter((image) => !image.isCover) || [],
+    ticketTypes: event?.ticketTypes?.length ? event.ticketTypes.map((ticketType) => ({
+      id: ticketType.id,
+      name: ticketType.name,
+      description: ticketType.description || '',
+      price: String(ticketType.price ?? 0),
+      quantity: ticketType.quantity ? String(ticketType.quantity) : '',
+      is_active: ticketType.isActive ?? true,
+    })) : [{ name: 'Classic', description: 'Standard access', price: String(event?.price ?? 0), quantity: '', is_active: true }],
   }
 }
 
 export function formValuesToApiPayload(form, status = 'pending') {
+  const validTicketTypes = (form.ticketTypes || []).filter((ticket) => ticket.name?.trim())
+  const basePrice = validTicketTypes.length ? Math.min(...validTicketTypes.map((ticket) => Number(ticket.price || 0))) : Number(form.price || 0)
+
   return {
     title: form.title,
     description: form.description,
@@ -115,10 +141,18 @@ export function formValuesToApiPayload(form, status = 'pending') {
     start_date: form.startDate,
     end_date: form.endDate || null,
     registration_deadline: form.registrationDeadline || null,
-    price: Number(form.price || 0),
+    price: basePrice,
     maximum_participants: form.maximumParticipants ? Number(form.maximumParticipants) : null,
     status,
     visibility: form.visibility || 'public',
+    ticket_types: validTicketTypes.map((ticket) => ({
+      id: ticket.id || null,
+      name: ticket.name,
+      description: ticket.description || null,
+      price: Number(ticket.price || 0),
+      quantity: ticket.quantity ? Number(ticket.quantity) : null,
+      is_active: ticket.is_active ?? true,
+    })),
   }
 }
 

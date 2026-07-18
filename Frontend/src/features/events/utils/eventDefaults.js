@@ -21,6 +21,9 @@ export function createEmptyEventForm() {
     startDate: '',
     endDate: '',
     price: '0',
+    ticketTypes: [
+      { name: 'Classic', description: 'Standard access', price: '0', quantity: '', is_active: true },
+    ],
     maximumParticipants: '100',
     registrationDeadline: '',
     visibility: 'public',

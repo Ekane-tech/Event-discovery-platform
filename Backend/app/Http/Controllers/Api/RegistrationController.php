@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\RegistrationResource;
 use App\Models\Event;
+use App\Models\EventTicketType;
 use App\Models\Payment;
 use App\Models\Registration;
 use App\Models\AuditLog;
@@ -18,7 +19,7 @@ class RegistrationController extends Controller
     {
         $registrations = Registration::query()
             ->where('user_id', $request->user()->id)
-            ->with(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'checkedInBy.role', 'checkedInBy.profile'])
+            ->with(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
             ->latest()
             ->paginate(min((int) $request->input('per_page', 12), 50));
 
@@ -35,7 +36,7 @@ class RegistrationController extends Controller
 
         return response()->json([
             'registration' => new RegistrationResource(
-                $registration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'checkedInBy.role', 'checkedInBy.profile'])
+                $registration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
             ),
         ]);
     }
@@ -44,6 +45,14 @@ class RegistrationController extends Controller
     {
         $this->ensureEventCanBeRegistered($event);
         $this->ensureCapacityIsAvailable($event);
+
+        $validated = $request->validate([
+            'ticket_type_id' => ['nullable', 'integer', 'exists:event_ticket_types,id'],
+        ]);
+
+        $ticketType = $this->resolveTicketType($event, $validated['ticket_type_id'] ?? null);
+        $ticketPrice = $ticketType ? (float) $ticketType->price : (float) $event->price;
+        $this->ensureTicketTypeCapacityIsAvailable($ticketType);
 
         $activeRegistration = Registration::query()
             ->where('user_id', $request->user()->id)
@@ -58,16 +67,17 @@ class RegistrationController extends Controller
                     ? 'You are already registered for this event.'
                     : 'You already have a pending payment for this event.',
                 'registration' => new RegistrationResource(
-                    $activeRegistration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'checkedInBy.role', 'checkedInBy.profile'])
+                    $activeRegistration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
                 ),
             ], $activeRegistration->status === 'pending_payment' ? 202 : 200);
         }
 
-        $isPaidEvent = (float) $event->price > 0;
+        $isPaidEvent = $ticketPrice > 0;
 
         $registration = Registration::create([
             'user_id' => $request->user()->id,
             'event_id' => $event->id,
+            'ticket_type_id' => $ticketType?->id,
             'status' => $isPaidEvent ? 'pending_payment' : 'confirmed',
             'ticket_number' => $this->generateTicketNumber($event),
             'registered_at' => now(),
@@ -84,11 +94,11 @@ class RegistrationController extends Controller
                     'status' => 'pending',
                 ],
                 [
-                    'amount' => $event->price,
+                    'amount' => $ticketPrice,
                     'currency' => 'XAF',
                     'provider' => env('PAYMENT_PROVIDER', 'mock'),
                     'reference' => $this->generatePaymentReference($event),
-                    'metadata' => ['registration_attempt_id' => $registration->id],
+                    'metadata' => ['registration_attempt_id' => $registration->id, 'ticket_type_name' => $ticketType?->name],
                 ]
             );
         }
@@ -97,7 +107,7 @@ class RegistrationController extends Controller
             'message' => $isPaidEvent ? 'Payment is required to complete this registration.' : 'Registered for event successfully.',
             'payment_required' => $isPaidEvent,
             'registration' => new RegistrationResource(
-                $registration->fresh()->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'checkedInBy.role', 'checkedInBy.profile'])
+                $registration->fresh()->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
             ),
             'payment' => $payment ? new \App\Http\Resources\PaymentResource($payment->load(['event', 'registration'])) : null,
         ], $isPaidEvent ? 202 : 201);
@@ -108,7 +118,7 @@ class RegistrationController extends Controller
     {
         $registration = Registration::query()
             ->where('ticket_number', $ticketNumber)
-            ->with(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'user.profile', 'checkedInBy.profile'])
+            ->with(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'user.profile', 'ticketType', 'checkedInBy.profile'])
             ->first();
 
         if (! $registration) {
@@ -134,6 +144,11 @@ class RegistrationController extends Controller
                 'registration_id' => $registration->id,
                 'ticket_number' => $registration->ticket_number,
                 'status' => $registration->status,
+                'ticket_type' => $registration->ticketType ? [
+                    'id' => $registration->ticketType->id,
+                    'name' => $registration->ticketType->name,
+                    'price' => $registration->ticketType->price,
+                ] : null,
                 'registered_at' => $registration->registered_at,
                 'checked_in_at' => $registration->checked_in_at,
                 'checked_in_by' => $registration->checkedInBy?->name,
@@ -234,6 +249,33 @@ class RegistrationController extends Controller
             'message' => 'Event registration cancelled successfully.',
             'status' => $registration->status,
         ]);
+    }
+
+
+    private function resolveTicketType(Event $event, ?int $ticketTypeId): ?EventTicketType
+    {
+        $query = $event->ticketTypes()->where('is_active', true);
+
+        if ($ticketTypeId) {
+            return (clone $query)->whereKey($ticketTypeId)->firstOrFail();
+        }
+
+        return $query->orderBy('sort_order')->orderBy('price')->first();
+    }
+
+    private function ensureTicketTypeCapacityIsAvailable(?EventTicketType $ticketType): void
+    {
+        if (! $ticketType || ! $ticketType->quantity) {
+            return;
+        }
+
+        $reservedRegistrations = $ticketType->registrations()
+            ->whereIn('status', ['confirmed', 'pending_payment'])
+            ->count();
+
+        if ($reservedRegistrations >= $ticketType->quantity) {
+            abort(422, 'This ticket type is sold out.');
+        }
     }
 
     private function ensureEventCanBeRegistered(Event $event): void

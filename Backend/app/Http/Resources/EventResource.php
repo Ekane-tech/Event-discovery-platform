@@ -40,6 +40,7 @@ class EventResource extends JsonResource
             'division' => new DivisionResource($this->whenLoaded('division')),
             'city' => new CityResource($this->whenLoaded('city')),
             'images' => EventImageResource::collection($this->whenLoaded('images')),
+            'ticket_types' => EventTicketTypeResource::collection($this->whenLoaded('ticketTypes')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

@@ -113,6 +113,11 @@ class Event extends Model
         return $this->hasMany(EventImage::class);
     }
 
+    public function ticketTypes()
+    {
+        return $this->hasMany(EventTicketType::class)->orderBy('sort_order')->orderBy('price');
+    }
+
     public function registrations()
     {
         return $this->hasMany(Registration::class);
