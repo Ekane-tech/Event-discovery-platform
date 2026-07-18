@@ -45,16 +45,15 @@ export default function AppShell({ section = 'user' }) {
             <div className="flex min-w-0 items-center gap-3">
               <button type="button" onClick={() => setMobileMenuOpen((current) => !current)} className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 xl:hidden" aria-label="Toggle navigation menu"><Menu className="h-5 w-5" /></button>
               <button type="button" onClick={() => setSidebarCollapsed((current) => !current)} className="hidden h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 transition hover:bg-teal-50 hover:text-teal-700 xl:inline-flex" aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>{sidebarCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}</button>
-              <Link to="/" className="font-bold text-teal-700 xl:hidden">{APP_NAME}</Link>
               <div className="hidden min-w-0 xl:block"><p className="truncate text-sm font-semibold capitalize text-slate-500">{section} area</p><h1 className="truncate text-lg font-bold text-slate-950">Welcome back, {user?.name}</h1></div>
             </div>
 
             <div className="flex items-center gap-3">
               <Link to="/" className="hidden h-11 items-center gap-2 rounded-2xl bg-slate-100 px-4 text-sm font-semibold text-slate-700 transition hover:bg-teal-50 hover:text-teal-700 xl:inline-flex"><Home className="h-4 w-4" /> Home</Link>
-              <Link to={getNotificationPathByRole(role)} className="relative inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700"><span className="sr-only">Notifications</span><Bell className="h-5 w-5" /><span className="absolute -right-1 -top-1"><NavigationBadge count={unreadCount} /></span></Link>
+              <Link to={getNotificationPathByRole(role)} className="relative hidden xl:inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700"><span className="sr-only">Notifications</span><Bell className="h-5 w-5" /><span className="absolute -right-1 -top-1"><NavigationBadge count={unreadCount} /></span></Link>
               <Link to="/profile" className="rounded-full focus:outline-none focus:ring-4 focus:ring-teal-100" title="Open profile"><Avatar name={user?.name} src={user?.avatar} /></Link>
               <Link to="/profile" className="hidden text-right md:block"><p className="text-sm font-bold text-slate-950 hover:text-teal-700">{user?.name}</p><p className="text-xs capitalize text-slate-500">{role}</p></Link>
-              <Button variant="secondary" onClick={handleLogout}>Logout</Button>
+              <Button variant="secondary" onClick={handleLogout} className="hidden xl:inline-flex">Logout</Button>
             </div>
           </div>
           <MobileNavigation open={mobileMenuOpen} groups={mobileGroups} unreadCount={unreadCount} isAuthenticated={isAuthenticated} user={user} onLogout={handleLogout} onClose={() => setMobileMenuOpen(false)} />

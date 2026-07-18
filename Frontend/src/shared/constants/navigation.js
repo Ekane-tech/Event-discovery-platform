@@ -12,6 +12,7 @@ export const USER_NAV_LINKS = [
   { label: 'My Interests', labelKey: 'nav.interests', to: '/my-interests', icon: 'heart' },
   { label: 'Bookmarks', labelKey: 'nav.bookmarks', to: '/bookmarks', icon: 'bookmark' },
   { label: 'Registrations', labelKey: 'nav.registrations', to: '/registrations', icon: 'ticket' },
+  { label: 'Notifications', labelKey: 'nav.notifications', to: '/notifications', badge: 'notifications', icon: 'bell' },
   { label: 'My Reports', labelKey: 'nav.reports', to: '/reports', icon: 'barChart3' },
   { label: 'Settings', labelKey: 'nav.settings', to: '/settings', icon: 'settings' },
 ]
@@ -24,6 +25,7 @@ export const ORGANIZER_NAV_LINKS = [
   { label: 'Organizer Dashboard', labelKey: 'nav.organizerDashboard', to: '/organizer/dashboard', icon: 'layoutDashboard' },
   { label: 'My Events', labelKey: 'nav.myEvents', to: '/organizer/events', icon: 'calendarDays' },
   { label: 'Statistics', labelKey: 'nav.statistics', to: '/organizer/statistics', icon: 'barChart3' },
+  { label: 'Notifications', labelKey: 'nav.notifications', to: '/notifications', badge: 'notifications', icon: 'bell' },
 ]
 
 export const ADMIN_NAV_LINKS = [
