@@ -63,6 +63,8 @@ import OrganizerEventDetailsPage from '../../features/dashboard/organizer/pages/
 import PublicNotificationsPage from '../../features/public/pages/PublicNotificationsPage.jsx'
 import AboutPage from '../../features/about/pages/AboutPage.jsx'
 import FeedbackPage from '../../features/feedback/pages/FeedbackPage.jsx'
+import TermsOfServicePage from '../../features/legal/pages/TermsOfServicePage.jsx'
+import PrivacyPolicyPage from '../../features/legal/pages/PrivacyPolicyPage.jsx'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -87,6 +89,8 @@ export default function AppRouter() {
           <Route path="/feedback" element={<FeedbackPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/public-notifications" element={<PublicNotificationsPage />} />
+          <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
           <Route path="/tickets/verify/:ticketNumber" element={<TicketVerificationPage />} />
         </Route>
 

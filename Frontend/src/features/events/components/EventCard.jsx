@@ -49,7 +49,7 @@ export default function EventCard({ event }) {
           <p className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-teal-200" /> {formatDate(event.startDate)}</p>
         </div>
         <Link to={`/events/${event.id}`} state={{ from: `${location.pathname}${location.search}` }} className="mt-5">
-          <Button className="w-auto rounded-full bg-white px-5 text-slate-950 hover:bg-slate-100">View Details</Button>
+          <Button className="w-auto rounded-full bg-teal-600 px-5 text-white hover:bg-teal-700">View Details</Button>
         </Link>
       </div>
     </article>

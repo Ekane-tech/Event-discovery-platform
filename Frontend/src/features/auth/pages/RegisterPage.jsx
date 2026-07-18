@@ -10,7 +10,7 @@ import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 import { useAuth } from '../hooks/useAuth.js'
 import { getDashboardPathByRole } from '../utils/authRedirects.js'
 
-const TERMS_URL = 'terms-of-service'
+const TERMS_URL = '/terms-of-service'
 const PRIVACY_URL = '/privacy-policy'
 
 const ACCOUNT_TYPES = [

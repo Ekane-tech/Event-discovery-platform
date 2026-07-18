@@ -50,7 +50,7 @@ export default function RecommendedEventCard({ event }) {
           <p className="font-semibold text-slate-900">{formatPrice(event.price)} • {event.organizer}</p>
         </div>
         <Link to={`/events/${event.id}`} state={{ from: `${location.pathname}${location.search}` }} className="mt-auto pt-5 block">
-          <Button className="w-full rounded-full">View Details</Button>
+          <Button className="w-full rounded-full bg-teal-600 text-white hover:bg-teal-700">View Details</Button>
         </Link>
       </div>
     </article>

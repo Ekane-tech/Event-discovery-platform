@@ -57,7 +57,7 @@ export default function Footer() {
         <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-slate-400 md:flex-row md:items-center md:justify-between">
           <p>© {new Date().getFullYear()} {APP_NAME}. All rights reserved.</p>
           <div className="flex items-center gap-4">
-            <div className="flex gap-4"><span>Terms</span><span>Privacy</span><span>Cookies</span></div>
+            <div className="flex gap-4"><Link to="/terms-of-service" className="hover:text-teal-300">Terms</Link><Link to="/privacy-policy" className="hover:text-teal-300">Privacy</Link><span>Cookies</span></div>
             <LanguageSwitcher />
           </div>
         </div>
