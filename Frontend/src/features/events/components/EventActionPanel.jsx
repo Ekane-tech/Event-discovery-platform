@@ -6,7 +6,7 @@ import Button from '../../../shared/components/ui/Button.jsx'
 import Card from '../../../shared/components/ui/Card.jsx'
 import { ROLES } from '../../../shared/constants/roles.js'
 import { useAuth } from '../../auth/hooks/useAuth.js'
-import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
+import { getApiErrorMessage, isEmailVerificationError } from '../../auth/utils/normalizeAuthUser.js'
 import { useBookmarks } from '../../bookmarks/hooks/useBookmarks.js'
 import { useRegistrations } from '../../registrations/hooks/useRegistrations.js'
 import { formatPrice } from '../../../shared/utils/currency.js'
@@ -75,7 +75,7 @@ export default function EventActionPanel({ event }) {
     } catch (registrationError) {
       const message = getApiErrorMessage(registrationError, t('eventAction.registrationFailed'))
       toast.error(message)
-      setError(message)
+      setError(registrationError)
     } finally {
       setBusy(false)
     }
@@ -130,7 +130,16 @@ export default function EventActionPanel({ event }) {
   return (
     <Card className="mt-6">
       <h2 className="font-bold text-slate-950">{t('eventAction.title')}</h2>
-      {error && <div className="mt-4"><Alert type="error">{error}</Alert></div>}
+      {error && (
+        <div className="mt-4">
+          <Alert type="error">{getApiErrorMessage(error, t('eventAction.registrationFailed'))}</Alert>
+          {isEmailVerificationError(error) && (
+            <Link to="/verify-email?status=required" className="mt-2 inline-block text-sm font-bold text-red-700 hover:text-red-900">
+              Verify your email →
+            </Link>
+          )}
+        </div>
+      )}
       {message && <div className="mt-4"><Alert type="success">{message}</Alert></div>}
       {registered && registration && (
         <div className="mt-4"><Alert type="success">{t('eventAction.registeredMessage', { ticketNumber: registration.ticketNumber })}{registration.ticketType?.name ? ` (${registration.ticketType.name})` : ''}</Alert></div>
