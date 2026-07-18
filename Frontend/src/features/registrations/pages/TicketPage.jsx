@@ -41,7 +41,7 @@ export default function TicketPage() {
                 <p className="mt-2 flex items-center gap-2 text-slate-200"><CalendarDays className="h-4 w-4"/> {formatDate(event.startDate)}</p>
               </div>
               <div className="rounded-2xl bg-white p-4 text-slate-950 shadow-xl">
-                <div className="mb-3 flex items-center justify-center gap-2 text-xs font-black text-teal-700"><ShieldCheck className="h-4 w-4" /> {APP_NAME}</div>
+                <div className="mb-3 flex items-center justify-center gap-2 text-xs font-black text-teal-700"><img src="/applogo.png" alt={APP_NAME} className="h-7 w-7 rounded-lg object-cover" /> {APP_NAME}</div>
                 <QRCodeSVG value={verificationUrl} size={120} level="M" includeMargin />
               </div>
             </div>

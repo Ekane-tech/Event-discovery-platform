@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Bell, Menu, ShieldCheck, X, Home } from 'lucide-react'
+import { Bell, Menu, X, Home } from 'lucide-react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { APP_NAME } from '../../constants/app.js'
 import { useAuth } from '../../../features/auth/hooks/useAuth.js'
@@ -33,7 +33,7 @@ export default function Navbar() {
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
         <Link to="/" className="flex items-center gap-3 font-black text-slate-950">
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-600 text-white shadow-lg shadow-teal-100"><ShieldCheck className="h-5 w-5" /></span>
+          <img src="/applogo.png" alt={APP_NAME} className="h-12 w-12 rounded-2xl object-cover shadow-lg shadow-teal-100" />
           <span className="hidden sm:inline">{APP_NAME}</span>
         </Link>
         <nav className="hidden items-center gap-1 lg:flex">
