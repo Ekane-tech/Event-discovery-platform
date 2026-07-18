@@ -62,6 +62,7 @@ export default function UserDashboardPage() {
 
   return (
     <PageContainer>
+
       <section className="overflow-hidden rounded-3xl bg-slate-950 bg-cover bg-center p-8 text-white" style={{ backgroundImage: 'linear-gradient(90deg, rgba(2,6,23,.88), rgba(15,118,110,.68)), url(/hero-events.svg)' }}>
         <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100">Your attendee space</span>
         <h1 className="mt-5 max-w-3xl text-4xl font-black md:text-5xl">Welcome back. Your next event is waiting.</h1>
