@@ -69,7 +69,7 @@ export default function UserDashboardPage() {
         <div className="mt-6 flex flex-wrap gap-3"><Link to="/events"><Button variant="light">Browse Events</Button></Link><Link to="/interests"><Button className="bg-teal-500 text-white hover:bg-teal-600">Update Interests</Button></Link></div>
       </section>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-5">
         {loading ? Array.from({ length: 5 }).map((_, index) => <StatCardSkeleton key={index} />) : cards.map((item) => <StatCard key={item.title} {...item} />)}
       </div>
 

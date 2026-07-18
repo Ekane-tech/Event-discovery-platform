@@ -16,15 +16,11 @@ export default function RecommendedEventsPage() {
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-slate-950 text-white">
-        <div className="absolute inset-0 bg-cover bg-center opacity-50" style={{ backgroundImage: 'url(/hero-events.svg)' }} />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-teal-900/70" />
-        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100">Personalized discovery</span>
-          <h1 className="mt-5 text-4xl font-black md:text-6xl">Recommended events</h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-200">Events selected from your interests, location, saved activity, registrations and popularity signals.</p>
-          <div className="mt-6"><Link to="/interests"><Button variant="light">Update Interests</Button></Link></div>
-        </div>
+      <section className="overflow-hidden rounded-3xl bg-slate-950 bg-cover bg-center p-8 text-white" style={{ backgroundImage: 'linear-gradient(90deg, rgba(2,6,23,.88), rgba(15,118,110,.68)), url(/hero-events.svg)' }}>
+        <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100">Personalized discovery</span>
+        <h1 className="mt-5 max-w-3xl text-4xl font-black md:text-5xl">Recommended events</h1>
+        <p className="mt-4 max-w-2xl text-slate-200">Events selected from your interests, location, saved activity, registrations and popularity signals.</p>
+        <div className="mt-6 flex flex-wrap gap-3"><Link to="/events"><Button variant="light">Browse Events</Button></Link><Link to="/interests"><Button className="bg-teal-500 text-white hover:bg-teal-600">Update Interests</Button></Link></div>
       </section>
 
       <PageContainer>
