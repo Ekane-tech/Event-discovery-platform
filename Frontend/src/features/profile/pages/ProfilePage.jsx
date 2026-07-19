@@ -29,7 +29,7 @@ function MetricCard({ label, value, icon: Icon, gradient }) {
     <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm`}>
       <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/15" />
       <Icon className="relative h-6 w-6" />
-      <p className="relative mt-3 text-3xl font-black">{value}</p>
+      <p className="relative mt-3 text-2xl font-black md:text-3xl">{value}</p>
       <p className="relative text-sm text-white/85">{label}</p>
     </div>
   )
@@ -151,7 +151,7 @@ export default function ProfilePage() {
       {error && <div className="mt-6"><Alert type="error">{error}</Alert></div>}
       {dashboardError && <div className="mt-6"><Alert type="warning">{dashboardError}</Alert></div>}
 
-      <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-6 grid grid-cols-2 gap-4 xl:grid-cols-4">
         {metrics.map(([label, value, Icon, gradient]) => <MetricCard key={label} label={label} value={value} icon={Icon} gradient={gradient} />)}
       </div>
 

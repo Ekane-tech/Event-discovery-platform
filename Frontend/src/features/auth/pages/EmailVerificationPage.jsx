@@ -50,7 +50,7 @@ export default function EmailVerificationPage() {
   async function resendEmail() {
     setSending(true)
     setError('')
-    setMessage('')t(auth.vERe)
+    setMessage('')
     try {
       const response = await authService.resendVerificationEmail()
       setMessage(response.data.message || 'Verification email sent successfully.')

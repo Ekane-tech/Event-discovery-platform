@@ -255,13 +255,13 @@ export default function OrganizerStatisticsPage() {
 
       <section className="mt-6">
         {loading ? (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
             {Array.from({ length: 6 }).map((_, index) => (
               <StatCardSkeleton key={index} />
             ))}
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
             {metrics.map((metric) => (
               <MetricCard key={metric.label} {...metric} />
             ))}

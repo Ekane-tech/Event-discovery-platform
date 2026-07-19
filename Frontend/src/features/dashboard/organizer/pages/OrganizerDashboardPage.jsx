@@ -12,7 +12,7 @@ import { extractCollection, normalizeEvents } from '../../../events/utils/normal
 import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
 
 function StatCard({ title, value, icon: Icon, gradient }) {
-  return <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl`}><div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/15"/><span className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20"><Icon className="h-5 w-5"/></span><p className="relative mt-4 text-sm text-white/80">{title}</p><p className="relative mt-1 text-3xl font-black">{value}</p></div>
+  return <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl`}><div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/15"/><span className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20"><Icon className="h-5 w-5"/></span><p className="relative mt-4 text-sm text-white/80">{title}</p><p className="relative mt-1 text-2xl font-black md:text-3xl">{value}</p></div>
 }
 
 export default function OrganizerDashboardPage() {
