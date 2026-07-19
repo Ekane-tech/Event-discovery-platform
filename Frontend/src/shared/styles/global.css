@@ -111,3 +111,15 @@ select {
   .mboa-datepicker-popper .react-datepicker__time-container,
   .mboa-datepicker-popper .react-datepicker__time-box { width: 86px !important; }
 }
+
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

@@ -49,7 +49,7 @@ export default function AppShell({ section = 'user' }) {
             </div>
 
             <div className="flex items-center gap-3">
-              <Link to="/" className="hidden h-11 items-center gap-2 rounded-2xl bg-slate-100 px-4 text-sm font-semibold text-slate-700 transition hover:bg-teal-50 hover:text-teal-700 xl:inline-flex"><Home className="h-4 w-4" /> Home</Link>
+              <Link to="/" className="inline-flex h-11 items-center gap-2 rounded-2xl bg-slate-100 px-3 text-sm font-semibold text-slate-700 transition hover:bg-teal-50 hover:text-teal-700 sm:px-4"><Home className="h-4 w-4" /><span className="hidden sm:inline">Home</span></Link>
               <Link to={getNotificationPathByRole(role)} className="relative hidden xl:inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700"><span className="sr-only">Notifications</span><Bell className="h-5 w-5" /><span className="absolute -right-1 -top-1"><NavigationBadge count={unreadCount} /></span></Link>
               <Link to="/profile" className="rounded-full focus:outline-none focus:ring-4 focus:ring-teal-100" title="Open profile"><Avatar name={user?.name} src={user?.avatar} /></Link>
               <Link to="/profile" className="hidden text-right md:block"><p className="text-sm font-bold text-slate-950 hover:text-teal-700">{user?.name}</p><p className="text-xs capitalize text-slate-500">{role}</p></Link>
