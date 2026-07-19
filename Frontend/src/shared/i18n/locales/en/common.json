@@ -114,6 +114,7 @@
     "verifyEmailDescription": "Please check your inbox and click the verification link.",
     "emailVerifiedSuccess": "Email verified successfully!",
     "emailVerifiedDescription": "Your email has been verified. You can now continue using the platform.",
+    "verificationEmailSent": "Verification email sent successfully.",
     "verificationEmailResent": "Verification email resent.",
     "resendVerificationEmail": "Resend verification email",
     "chooseAccountType": "Please choose how you want to use the platform.",

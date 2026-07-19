@@ -61,7 +61,7 @@ export default function RegisterPage() {
     setSubmitting(true)
     try {
       const user = await register(form)
-      navigate(user.emailVerifiedAt ? getDashboardPathByRole(user.role) : '/verify-email?status=sent', { replace: true })
+      navigate(user.emailVerifiedAt ? getDashboardPathByRole(user.role) : '/verify-email?status=initial', { replace: true })
     } catch (registerError) {
       setError(registerError.message)
     } finally {
