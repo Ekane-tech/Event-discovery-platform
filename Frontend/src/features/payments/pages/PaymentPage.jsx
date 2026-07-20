@@ -106,7 +106,7 @@ export default function PaymentPage() {
         setPayment(response.data.payment)
         if (response.data.payment.status === 'paid') toast.success('Payment completed successfully.')
       } catch {}
-    }, 60000)
+    }, 20000)
     return () => window.clearInterval(timer)
   }, [id, payment?.status])
 
