@@ -37,9 +37,9 @@ export default function AppShell({ section = 'user' }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex xl:flex">
+    <div className="min-h-screen bg-slate-50 xl:flex">
       <RoleSidebar section={section} collapsed={sidebarCollapsed} />
-      <div className="min-w-0 flex-1 w-1/2 xl:w-auto">
+      <div className="min-w-0 flex-1">
         <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
           <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
             <div className="flex min-w-0 items-center gap-3">

@@ -35,7 +35,7 @@ export default function RoleSidebar({ section = 'user', collapsed = false }) {
     return 0
   }
   return (
-    <aside className={`sticky top-0 h-screen shrink-0 overflow-hidden border-r border-slate-200 bg-white transition-all duration-300 flex flex-col w-1/2 ${collapsed ? 'xl:w-24' : 'xl:w-72'}`}>
+    <aside className={`sticky top-0 hidden h-screen shrink-0 overflow-hidden border-r border-slate-200 bg-white transition-all duration-300 xl:flex xl:flex-col ${collapsed ? 'w-24' : 'w-72'}`}>
       <div className={`flex items-center gap-3 border-b border-slate-100 px-5 py-5 ${collapsed ? 'justify-center' : 'justify-start'}`}>
         <div className="flex min-w-0 items-center gap-3">
           <img src="/applogo.png" alt={APP_NAME} className="h-12 w-12 shrink-0 rounded-2xl object-cover shadow-lg shadow-teal-200" />

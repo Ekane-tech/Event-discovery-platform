@@ -16,7 +16,7 @@ export default function MobileNavigation({ open, groups = [], unreadCount = 0, i
   return (
     <div className="fixed inset-0 z-[9999] xl:hidden">
       <button type="button" aria-label="Close navigation" className="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px]" onClick={onClose} />
-      <aside className="relative flex h-full w-[62vw] min-w-[260px] max-w-[340px] animate-[slideInLeft_.22s_ease-out] flex-col overflow-hidden border-r border-slate-200 bg-white shadow-2xl">
+      <aside className="relative flex h-full w-1/2 min-w-[260px] max-w-[340px] animate-[slideInLeft_.22s_ease-out] flex-col overflow-hidden border-r border-slate-200 bg-white shadow-2xl">
         <div className="border-b border-slate-100 p-4">
           {isAuthenticated ? (
             <div className="rounded-2xl bg-teal-50 p-4">
