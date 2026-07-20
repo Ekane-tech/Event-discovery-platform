@@ -55,8 +55,8 @@ export default function AppShell({ section = 'user' }) {
               <Link to="/profile" className="hidden text-right md:block"><p className="text-sm font-bold text-slate-950 hover:text-teal-700">{user?.name}</p><p className="text-xs capitalize text-slate-500">{role}</p></Link>
             </div>
           </div>
-          <MobileNavigation open={mobileMenuOpen} groups={mobileGroups} unreadCount={unreadCount} isAuthenticated={isAuthenticated} user={user} onLogout={handleLogout} onClose={() => setMobileMenuOpen(false)} />
         </header>
+        <MobileNavigation open={mobileMenuOpen} groups={mobileGroups} unreadCount={unreadCount} isAuthenticated={isAuthenticated} user={user} onLogout={handleLogout} onClose={() => setMobileMenuOpen(false)} />
         <Outlet />
       </div>
     </div>
