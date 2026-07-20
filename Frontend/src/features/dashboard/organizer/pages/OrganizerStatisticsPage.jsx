@@ -214,14 +214,14 @@ export default function OrganizerStatisticsPage() {
       value: Number(stats.revenue || 0) === 0 ? '0' : formatPrice(stats.revenue),
       icon: Wallet,
       gradient: 'from-amber-500 to-orange-700',
-      description: 'Estimated paid registrations',
+      description: 'Paid confirmed registrations',
     },
     {
       label: 'Attendance rate',
       value: `${stats.attendance_rate || 0}%`,
       icon: Activity,
       gradient: 'from-pink-600 to-rose-700',
-      description: 'Confirmed registrations vs capacity',
+      description: 'Checked-in vs confirmed',
     },
   ]
 
