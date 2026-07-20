@@ -48,14 +48,13 @@ export default function Navbar() {
           {/* <LanguageSwitcher compact /> */}
           {isAuthenticated ? (
             <>
+              <Link to="/" className="inline-flex h-11 items-center gap-2 rounded-2xl bg-slate-100 px-4 text-sm font-semibold text-slate-700 transition hover:bg-teal-50 hover:text-teal-700"><Home className="h-4 w-4" />Home</Link>
               <Link to="/public-notifications" className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700"><Bell className="h-5 w-5" /></Link>
               <Link to="/profile" className="rounded-full focus:outline-none focus:ring-4 focus:ring-teal-100" title="Open profile"><Avatar name={user?.name} src={user?.avatar} /></Link>
               <Link to="/profile" className="max-w-48 truncate text-sm text-slate-600 hover:text-teal-700">{user?.name} <span className="text-slate-400">({role})</span></Link>
-              <Button variant="secondary" onClick={handleLogout}>Logout</Button>
             </>
           ) : (
             <>
-              <Link to="/" className="hidden h-11 items-center gap-2 rounded-2xl bg-slate-100 px-4 text-sm font-semibold text-slate-700 transition hover:bg-teal-50 hover:text-teal-700 xl:inline-flex"><Home className="h-4 w-4" />Home</Link>
               <Link to="/public-notifications" className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700"><Bell className="h-5 w-5" /></Link>
               <Link to="/feedback"><Button variant="secondary">Feedback</Button></Link>
               <Link to="/login"><Button variant="secondary">Login</Button></Link>

@@ -37,9 +37,9 @@ export default function AppShell({ section = 'user' }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 xl:flex">
+    <div className="min-h-screen bg-slate-50 flex xl:flex">
       <RoleSidebar section={section} collapsed={sidebarCollapsed} />
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 w-1/2 xl:w-auto">
         <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
           <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
             <div className="flex min-w-0 items-center gap-3">
@@ -53,7 +53,6 @@ export default function AppShell({ section = 'user' }) {
               <Link to={getNotificationPathByRole(role)} className="relative hidden xl:inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700"><span className="sr-only">Notifications</span><Bell className="h-5 w-5" /><span className="absolute -right-1 -top-1"><NavigationBadge count={unreadCount} /></span></Link>
               <Link to="/profile" className="rounded-full focus:outline-none focus:ring-4 focus:ring-teal-100" title="Open profile"><Avatar name={user?.name} src={user?.avatar} /></Link>
               <Link to="/profile" className="hidden text-right md:block"><p className="text-sm font-bold text-slate-950 hover:text-teal-700">{user?.name}</p><p className="text-xs capitalize text-slate-500">{role}</p></Link>
-              <Button variant="secondary" onClick={handleLogout} className="hidden xl:inline-flex">Logout</Button>
             </div>
           </div>
           <MobileNavigation open={mobileMenuOpen} groups={mobileGroups} unreadCount={unreadCount} isAuthenticated={isAuthenticated} user={user} onLogout={handleLogout} onClose={() => setMobileMenuOpen(false)} />
