@@ -40,7 +40,7 @@ function MetricCard({ label, value, icon: Icon, gradient, description }) {
 
       <p className="relative mt-5 text-sm font-bold text-white/90 sm:text-base">{label}</p>
       {description && (
-        <p className="relative mt-1 text-xs text-white/75">{description}</p>
+        <p className="relative mt-1 text-xs text-white/75">{description} </p>
       )}
     </div>
   )
