@@ -67,7 +67,16 @@ export default function Navbar() {
           {isAuthenticated && <NavigationBadge count={unreadCount} />}
         </button>
       </div>
-      <MobileNavigation variant="dropdown" open={mobileMenuOpen} groups={mobileGroups} unreadCount={unreadCount} isAuthenticated={isAuthenticated} user={user} onLogout={handleLogout} onClose={() => setMobileMenuOpen(false)} />
+      <MobileNavigation
+        variant={isAuthenticated ? 'drawer' : 'dropdown'}
+        open={mobileMenuOpen}
+        groups={mobileGroups}
+        unreadCount={unreadCount}
+        isAuthenticated={isAuthenticated}
+        user={user}
+        onLogout={handleLogout}
+        onClose={() => setMobileMenuOpen(false)}
+      />
     </header>
   )
 }
