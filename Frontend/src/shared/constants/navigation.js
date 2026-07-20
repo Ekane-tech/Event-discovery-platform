@@ -4,7 +4,6 @@ export const PUBLIC_NAV_LINKS = [
   { label: 'Browse Events', labelKey: 'nav.browseEvents', to: '/events', icon: 'calendarSearch' },
   { label: 'About', labelKey: 'nav.about', to: '/about', icon: 'calendarSearch' },
   { label: 'Feedback', labelKey: 'nav.feedback', to: '/feedback', icon: 'heart' },
-  { label: 'Notifications', labelKey: 'nav.publicNotifications', to: '/public-notifications', icon: 'bell' },
 ]
 
 export const USER_NAV_LINKS = [
