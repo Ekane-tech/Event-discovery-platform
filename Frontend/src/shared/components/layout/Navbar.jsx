@@ -16,7 +16,7 @@ const navLinkClass = ({ isActive }) =>
   `inline-flex items-center rounded-full px-3 py-2 text-sm font-semibold transition ${isActive ? 'bg-teal-50 text-teal-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950'}`
 
 export default function Navbar() {
-  const t = useTranslation()
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { isAuthenticated, user, role, logout } = useAuth()
