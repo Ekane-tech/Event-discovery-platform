@@ -128,7 +128,7 @@ export default function OrganizerAttendeesPage() {
           ['Available places', summary.available_places ?? 'Unlimited', 'from-amber-500 to-orange-700'],
         ].map(([label, value, gradient]) => (
           <div key={label} className={`rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm`}>
-            <p className="text-sm text-white/80">{label}</p><p className="mt-2 text-2xl font-black">{value}</p>
+            <p className="text-sm text-white/80">{label}</p><p className="mt-2 text-xl font-black sm:text-2xl">{value}</p>
           </div>
         ))}
       </div>
