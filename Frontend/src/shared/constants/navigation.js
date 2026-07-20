@@ -61,7 +61,6 @@ export function getDesktopNavbarLinks(role, isAuthenticated) {
   const links = [
     ...PUBLIC_NAV_LINKS,
     { label: 'Dashboard', labelKey: 'nav.dashboard', to: getPrimaryDashboardPath(role), icon: 'layoutDashboard' },
-    { label: 'Notifications', labelKey: 'nav.notifications', to: getNotificationPathByRole(role), badge: 'notifications', icon: 'bell' },
   ]
 
   if (role === ROLES.USER) links.push({ label: 'Recommendations', labelKey: 'nav.recommendations', to: '/recommendations', icon: 'calendarSearch' })
