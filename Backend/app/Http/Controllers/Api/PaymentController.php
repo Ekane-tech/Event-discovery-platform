@@ -9,6 +9,7 @@ use App\Models\Payment;
 use App\Services\Payments\MobileMoneyPaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class PaymentController extends Controller
@@ -50,6 +51,27 @@ class PaymentController extends Controller
             'operator' => ['required', Rule::in(['mtn', 'orange'])],
             'phone_number' => ['required', 'string', 'regex:/^(\+?237)?6[0-9]{8}$/'],
         ]);
+
+        if ($payment->status === 'failed') {
+            $payment->update([
+                'status' => 'pending',
+                'reference' => $this->generatePaymentReference($payment),
+                'external_reference' => null,
+                'provider_reference' => null,
+                'failure_reason' => null,
+                'callback_payload' => null,
+                'metadata' => [
+                    ...($payment->metadata ?? []),
+                    'retry_started_at' => now()->toISOString(),
+                ],
+            ]);
+
+            if ($payment->registration && $payment->registration->status === 'payment_failed') {
+                $payment->registration->update(['status' => 'pending_payment']);
+            }
+
+            $payment->refresh();
+        }
 
         $payment = $paymentService->initiate($payment, $validated['operator'], $this->normalizePhoneNumber($validated['phone_number']));
 
@@ -161,6 +183,16 @@ class PaymentController extends Controller
         if ((int) $payment->user_id !== (int) $request->user()->id) {
             abort(403, 'You do not have permission to access this payment.');
         }
+    }
+
+
+    private function generatePaymentReference(Payment $payment): string
+    {
+        do {
+            $reference = 'PAY-EVT-'.$payment->event_id.'-'.Str::upper(Str::random(10));
+        } while (Payment::where('reference', $reference)->where('id', '!=', $payment->id)->exists());
+
+        return $reference;
     }
 
     private function normalizePhoneNumber(string $phoneNumber): string

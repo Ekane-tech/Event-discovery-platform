@@ -298,7 +298,7 @@ class AdminController extends Controller
     public function payments(Request $request): JsonResponse
     {
         $query = Payment::query()
-            ->with(['user.role', 'user.profile', 'event.category', 'event.city', 'registration'])
+            ->with(['user', 'user.role', 'user.profile', 'event.category', 'event.city', 'registration'])
             ->latest();
 
         if ($request->filled('status')) {
