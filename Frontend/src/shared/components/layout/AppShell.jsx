@@ -44,6 +44,10 @@ export default function AppShell({ section = 'user' }) {
           <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
             <div className="flex min-w-0 items-center gap-3">
               <button type="button" onClick={() => setMobileMenuOpen((current) => !current)} className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 xl:hidden" aria-label="Toggle navigation menu"><Menu className="h-5 w-5" /></button>
+              <Link to="/" className="flex min-w-0 items-center gap-2 font-black text-slate-950 xl:hidden">
+                <img src="/applogo.png" alt={APP_NAME} className="h-10 w-10 shrink-0 rounded-2xl object-cover shadow-md shadow-teal-100" />
+                <span className="hidden max-w-[150px] truncate sm:inline">{APP_NAME}</span>
+              </Link>
               <button type="button" onClick={() => setSidebarCollapsed((current) => !current)} className="hidden h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 transition hover:bg-teal-50 hover:text-teal-700 xl:inline-flex" aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>{sidebarCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}</button>
               <div className="hidden min-w-0 xl:block"><p className="truncate text-sm font-semibold capitalize text-slate-500">{section} area</p><h1 className="truncate text-lg font-bold text-slate-950">Welcome back, {user?.name}</h1></div>
             </div>

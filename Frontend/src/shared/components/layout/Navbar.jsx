@@ -32,10 +32,16 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-        <Link to="/" className="flex items-center gap-3 font-black text-slate-950">
-          <img src="/applogo.png" alt={APP_NAME} className="h-12 w-12 rounded-2xl object-cover shadow-lg shadow-teal-100" />
-          <span className="hidden sm:inline">{APP_NAME}</span>
-        </Link>
+        <div className="flex min-w-0 items-center gap-3">
+          <button type="button" onClick={() => setMobileMenuOpen((current) => !current)} className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold text-slate-700 lg:hidden" aria-label="Toggle navigation menu">
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {isAuthenticated && <NavigationBadge count={unreadCount} />}
+          </button>
+          <Link to="/" className="flex min-w-0 items-center gap-3 font-black text-slate-950">
+            <img src="/applogo.png" alt={APP_NAME} className="h-12 w-12 shrink-0 rounded-2xl object-cover shadow-lg shadow-teal-100" />
+            <span className="hidden max-w-[190px] truncate sm:inline">{APP_NAME}</span>
+          </Link>
+        </div>
         <nav className="hidden items-center gap-1 lg:flex">
           {desktopLinks.map((link) => (
             <NavLink key={link.to} to={link.to} className={navLinkClass}>
@@ -62,10 +68,7 @@ export default function Navbar() {
             </>
           )}
         </div>
-        <button type="button" onClick={() => setMobileMenuOpen((current) => !current)} className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold text-slate-700 lg:hidden" aria-label="Toggle navigation menu">
-          {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          {isAuthenticated && <NavigationBadge count={unreadCount} />}
-        </button>
+
       </div>
       <MobileNavigation open={mobileMenuOpen} groups={mobileGroups} unreadCount={unreadCount} isAuthenticated={isAuthenticated} user={user} onLogout={handleLogout} onClose={() => setMobileMenuOpen(false)} />
     </header>
