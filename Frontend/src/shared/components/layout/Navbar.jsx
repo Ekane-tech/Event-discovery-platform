@@ -79,7 +79,6 @@ export default function Navbar() {
             )}
           </div>
           
-          <Link to="/" ><Button variant="secondary"><Home className="h-5 w-5" /></Button></Link>
           <button type="button" onClick={() => setMobileMenuOpen((current) => !current)} className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold text-slate-700 lg:hidden" aria-label="Toggle navigation menu">
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             {isAuthenticated && <NavigationBadge count={unreadCount} />}
