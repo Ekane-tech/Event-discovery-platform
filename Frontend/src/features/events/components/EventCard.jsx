@@ -1,7 +1,8 @@
-import { Bookmark, CalendarDays, MapPin } from 'lucide-react'
+import { BadgeCheck, Bookmark, CalendarDays, MapPin } from 'lucide-react'
 import { toast } from 'sonner'
 import { Link, useLocation } from 'react-router-dom'
 import Badge from '../../../shared/components/ui/Badge.jsx'
+import Avatar from '../../../shared/components/ui/Avatar.jsx'
 import Button from '../../../shared/components/ui/Button.jsx'
 import { ROLES } from '../../../shared/constants/roles.js'
 import { useAuth } from '../../auth/hooks/useAuth.js'
@@ -48,6 +49,14 @@ export default function EventCard({ event }) {
           <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-teal-200" /> {event.city || 'Unknown city'}, {event.region || 'Unknown region'}</p>
           <p className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-teal-200" /> {formatDate(event.startDate)}</p>
         </div>
+        <Link to={event.organizerId ? `/organizers/${event.organizerId}` : '#'} onClick={(clickEvent) => clickEvent.stopPropagation()} className="mt-4 flex items-center gap-2 rounded-2xl bg-white/15 p-2 backdrop-blur transition hover:bg-white/25">
+          <Avatar name={event.organizerName || event.organizer} src={event.organizerAvatar} className="h-9 w-9 text-xs" />
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-200">Organized by</p>
+            <p className="truncate text-sm font-black text-white">{event.organizerName || event.organizer || 'Organizer'}</p>
+          </div>
+          {event.organizerVerified && <span className="inline-flex items-center gap-1 rounded-full bg-teal-300 px-2 py-1 text-[10px] font-black text-slate-950"><BadgeCheck className="h-3 w-3" />Verified</span>}
+        </Link>
         <Link to={`/events/${event.id}`} state={{ from: `${location.pathname}${location.search}` }} className="mt-5">
           <Button className="w-auto rounded-full bg-teal-600 px-5 text-white hover:bg-teal-700">View Details</Button>
         </Link>

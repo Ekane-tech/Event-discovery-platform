@@ -50,6 +50,10 @@ export function extractCollection(payload, key) {
 export function normalizeEvent(apiEvent) {
   if (!apiEvent) return null
 
+  const organizerProfile = apiEvent.organizer?.profile || {}
+  const organizerName = organizerProfile.organization_name || apiEvent.organizer?.name || ''
+  const organizerAvatar = getStorageUrl(organizerProfile.avatar)
+
   return {
     id: apiEvent.id,
     organizerId: apiEvent.organizer_id,
@@ -74,6 +78,10 @@ export function normalizeEvent(apiEvent) {
     price: Number(apiEvent.price || 0),
     maximumParticipants: apiEvent.maximum_participants || '',
     organizer: apiEvent.organizer?.name || '',
+    organizerId: apiEvent.organizer?.id || apiEvent.organizer_id,
+    organizerName,
+    organizerAvatar,
+    organizerVerified: Boolean(organizerProfile.is_verified_organizer),
     status: apiEvent.status || 'draft',
     visibility: apiEvent.visibility || 'public',
     views: apiEvent.views || 0,

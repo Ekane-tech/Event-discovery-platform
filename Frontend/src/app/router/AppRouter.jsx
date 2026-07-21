@@ -63,6 +63,8 @@ import OrganizerEventDetailsPage from '../../features/dashboard/organizer/pages/
 import PublicNotificationsPage from '../../features/public/pages/PublicNotificationsPage.jsx'
 import AboutPage from '../../features/about/pages/AboutPage.jsx'
 import FeedbackPage from '../../features/feedback/pages/FeedbackPage.jsx'
+import OrganizersPage from '../../features/organizers/pages/OrganizersPage.jsx'
+import OrganizerPublicProfilePage from '../../features/organizers/pages/OrganizerPublicProfilePage.jsx'
 import TermsOfServicePage from '../../features/legal/pages/TermsOfServicePage.jsx'
 import PrivacyPolicyPage from '../../features/legal/pages/PrivacyPolicyPage.jsx'
 
@@ -88,6 +90,8 @@ export default function AppRouter() {
           <Route path="/search" element={<Navigate to="/events" replace />} />
           <Route path="/feedback" element={<FeedbackPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/organizers" element={<OrganizersPage />} />
+          <Route path="/organizers/:id" element={<OrganizerPublicProfilePage />} />
           <Route path="/public-notifications" element={<PublicNotificationsPage />} />
           <Route path="/terms-of-service" element={<TermsOfServicePage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />

@@ -86,6 +86,20 @@ export default function AdminUsersPage() {
       await fetchUsers()
     } catch (statusError) { toast.error(getApiErrorMessage(statusError, 'Unable to update user status.')) } finally { setActionLoading(false) }
   }
+  async function toggleOrganizerVerification(targetUser) {
+    setActionLoading(true)
+    try {
+      const nextValue = !Boolean(targetUser.profile?.is_verified_organizer)
+      await adminService.updateOrganizerVerification(targetUser.id, nextValue)
+      toast.success(nextValue ? 'Organizer verified successfully.' : 'Organizer verification removed.')
+      await fetchUsers()
+    } catch (verificationError) {
+      toast.error(getApiErrorMessage(verificationError, 'Unable to update organizer verification.'))
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
   async function updateRole(userId, role) { setActionLoading(true); try { await adminService.updateUserRole(userId, role); toast.success('User role updated successfully.'); await fetchUsers() } catch (roleError) { toast.error(getApiErrorMessage(roleError, 'Unable to update user role.')) } finally { setActionLoading(false) } }
 
   const metrics = useMemo(() => ({ total: users.length, active: users.filter((user) => user.status === 'active').length, suspended: users.filter((user) => user.status === 'suspended').length, organizers: users.filter((user) => user.role?.name === 'organizer').length }), [users])
@@ -95,11 +109,11 @@ export default function AdminUsersPage() {
       id: user.id,
       user: <div className="flex items-center gap-3"><Avatar name={user.name} src={user.profile?.avatar}/><div><p className="font-bold text-slate-950">{user.name}{isSelf && <span className="ml-2 rounded-full bg-purple-50 px-2 py-0.5 text-xs text-purple-700">You</span>}</p><p className="text-xs text-slate-500">#{user.id}</p></div></div>,
       email: <span className="text-slate-600">{user.email}</span>,
-      role: <RoleBadge role={user.role?.name} />,
+      role: <div className="flex flex-wrap gap-1"><RoleBadge role={user.role?.name} />{user.role?.name === 'organizer' && user.profile?.is_verified_organizer && <span className="rounded-full bg-teal-50 px-2 py-1 text-xs font-black text-teal-700">Verified</span>}</div>,
       location: <span className="text-slate-600">{user.profile?.city || '—'}{user.profile?.region ? `, ${user.profile.region}` : ''}</span>,
       status: <AdminStatusBadge status={user.status} />,
       joined: <span className="text-slate-500">{user.created_at ? new Date(user.created_at).toLocaleDateString() : '—'}</span>,
-      actions: isSelf ? <span className="text-xs font-semibold text-slate-400">Own status protected</span> : <AdminPageActions>{user.status !== 'active' && <AdminActionButton disabled={actionLoading} onClick={() => openStatusModal(user, 'active')}>Activate</AdminActionButton>}{user.status !== 'suspended' && <AdminActionButton disabled={actionLoading} onClick={() => openStatusModal(user, 'suspended')}>Suspend</AdminActionButton>}{user.role?.name !== 'user' && <AdminActionButton disabled={actionLoading} onClick={() => updateRole(user.id, 'user')}>Make User</AdminActionButton>}{user.role?.name !== 'organizer' && <AdminActionButton disabled={actionLoading} onClick={() => updateRole(user.id, 'organizer')}>Make Organizer</AdminActionButton>}</AdminPageActions>,
+      actions: isSelf ? <span className="text-xs font-semibold text-slate-400">Own status protected</span> : <AdminPageActions>{user.status !== 'active' && <AdminActionButton disabled={actionLoading} onClick={() => openStatusModal(user, 'active')}>Activate</AdminActionButton>}{user.status !== 'suspended' && <AdminActionButton disabled={actionLoading} onClick={() => openStatusModal(user, 'suspended')}>Suspend</AdminActionButton>}{user.role?.name !== 'user' && <AdminActionButton disabled={actionLoading} onClick={() => updateRole(user.id, 'user')}>Make User</AdminActionButton>}{user.role?.name === 'organizer' && <AdminActionButton disabled={actionLoading} onClick={() => toggleOrganizerVerification(user)}>{user.profile?.is_verified_organizer ? 'Unverify Organizer' : 'Verify Organizer'}</AdminActionButton>}{user.role?.name !== 'organizer' && <AdminActionButton disabled={actionLoading} onClick={() => updateRole(user.id, 'organizer')}>Make Organizer</AdminActionButton>}</AdminPageActions>,
     }
   })
 
