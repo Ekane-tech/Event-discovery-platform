@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\PaymentResource;
 use App\Models\AuditLog;
 use App\Models\Payment;
+use App\Models\Registration;
 use App\Services\Payments\MobileMoneyPaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -66,9 +67,10 @@ class PaymentController extends Controller
                 ],
             ]);
 
-            if ($payment->registration && $payment->registration->status === 'payment_failed') {
-                $payment->registration->update(['status' => 'pending_payment']);
-            }
+            $registrationIds = $payment->metadata['registration_ids'] ?? [$payment->registration_id];
+            Registration::whereIn('id', array_filter($registrationIds))
+                ->where('status', 'payment_failed')
+                ->update(['status' => 'pending_payment']);
 
             $payment->refresh();
         }
@@ -124,9 +126,8 @@ class PaymentController extends Controller
             ],
         ]);
 
-        if ($payment->registration) {
-            $payment->registration->update(['status' => 'confirmed']);
-        }
+        $registrationIds = $payment->metadata['registration_ids'] ?? [$payment->registration_id];
+        Registration::whereIn('id', array_filter($registrationIds))->update(['status' => 'confirmed']);
 
         AuditLog::record($request->user(), 'payment.confirmed', $payment, 'Payment confirmed.', [
             'provider' => $payment->provider,

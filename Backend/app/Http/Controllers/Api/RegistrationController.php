@@ -11,6 +11,7 @@ use App\Models\Registration;
 use App\Models\AuditLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class RegistrationController extends Controller
@@ -44,75 +45,90 @@ class RegistrationController extends Controller
     public function store(Request $request, Event $event): JsonResponse
     {
         $this->ensureEventCanBeRegistered($event);
-        $this->ensureCapacityIsAvailable($event);
 
         $validated = $request->validate([
             'ticket_type_id' => ['nullable', 'integer', 'exists:event_ticket_types,id'],
+            'quantity' => ['nullable', 'integer', 'min:1', 'max:10'],
         ]);
 
+        $quantity = (int) ($validated['quantity'] ?? 1);
         $ticketType = $this->resolveTicketType($event, $validated['ticket_type_id'] ?? null);
         $ticketPrice = $ticketType ? (float) $ticketType->price : (float) $event->price;
-        $this->ensureTicketTypeCapacityIsAvailable($ticketType);
+        $totalPrice = $ticketPrice * $quantity;
 
-        $activeRegistration = Registration::query()
+        $this->ensureCapacityIsAvailable($event, $quantity);
+        $this->ensureTicketTypeCapacityIsAvailable($ticketType, $quantity);
+
+        $pendingRegistration = Registration::query()
             ->where('user_id', $request->user()->id)
             ->where('event_id', $event->id)
-            ->whereIn('status', ['confirmed', 'pending_payment'])
+            ->where('status', 'pending_payment')
             ->latest()
             ->first();
 
-        if ($activeRegistration) {
+        if ($pendingRegistration) {
             return response()->json([
-                'message' => $activeRegistration->status === 'confirmed'
-                    ? 'You are already registered for this event.'
-                    : 'You already have a pending payment for this event.',
+                'message' => 'You already have a pending payment for this event.',
                 'registration' => new RegistrationResource(
-                    $activeRegistration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
+                    $pendingRegistration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
                 ),
-            ], $activeRegistration->status === 'pending_payment' ? 202 : 200);
+            ], 202);
         }
 
-        $isPaidEvent = $ticketPrice > 0;
-
-        $registration = Registration::create([
-            'user_id' => $request->user()->id,
-            'event_id' => $event->id,
-            'ticket_type_id' => $ticketType?->id,
-            'status' => $isPaidEvent ? 'pending_payment' : 'confirmed',
-            'ticket_number' => $this->generateTicketNumber($event),
-            'registered_at' => now(),
-        ]);
-
+        $isPaidEvent = $totalPrice > 0;
         $payment = null;
 
-        if ($isPaidEvent) {
-            $payment = Payment::updateOrCreate(
-                [
+        [$primaryRegistration, $registrations] = DB::transaction(function () use ($request, $event, $ticketType, $quantity, $isPaidEvent, $totalPrice, &$payment) {
+            $registrations = collect();
+
+            for ($index = 0; $index < $quantity; $index++) {
+                $registrations->push(Registration::create([
                     'user_id' => $request->user()->id,
                     'event_id' => $event->id,
-                    'registration_id' => $registration->id,
-                    'status' => 'pending',
-                ],
-                [
-                    'amount' => $ticketPrice,
+                    'ticket_type_id' => $ticketType?->id,
+                    'status' => $isPaidEvent ? 'pending_payment' : 'confirmed',
+                    'ticket_number' => $this->generateTicketNumber($event),
+                    'registered_at' => now(),
+                ]));
+            }
+
+            $primaryRegistration = $registrations->first();
+
+            if ($isPaidEvent) {
+                $payment = Payment::create([
+                    'user_id' => $request->user()->id,
+                    'event_id' => $event->id,
+                    'registration_id' => $primaryRegistration->id,
+                    'amount' => $totalPrice,
                     'currency' => 'XAF',
+                    'status' => 'pending',
                     'provider' => env('PAYMENT_PROVIDER', 'mock'),
                     'reference' => $this->generatePaymentReference($event),
-                    'metadata' => ['registration_attempt_id' => $registration->id, 'ticket_type_name' => $ticketType?->name],
-                ]
-            );
-        }
+                    'metadata' => [
+                        'registration_attempt_id' => $primaryRegistration->id,
+                        'registration_ids' => $registrations->pluck('id')->values()->all(),
+                        'quantity' => $quantity,
+                        'unit_price' => $totalPrice / $quantity,
+                        'ticket_type_id' => $ticketType?->id,
+                        'ticket_type_name' => $ticketType?->name,
+                    ],
+                ]);
+            }
+
+            return [$primaryRegistration, $registrations];
+        });
 
         return response()->json([
             'message' => $isPaidEvent ? 'Payment is required to complete this registration.' : 'Registered for event successfully.',
             'payment_required' => $isPaidEvent,
+            'quantity' => $quantity,
             'registration' => new RegistrationResource(
-                $registration->fresh()->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
+                $primaryRegistration->fresh()->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
             ),
+            'registrations' => RegistrationResource::collection($registrations->load(['ticketType'])),
             'payment' => $payment ? new \App\Http\Resources\PaymentResource($payment->load(['event', 'registration'])) : null,
         ], $isPaidEvent ? 202 : 201);
     }
-
 
     public function verifyTicket(string $ticketNumber): JsonResponse
     {
@@ -263,7 +279,7 @@ class RegistrationController extends Controller
         return $query->orderBy('sort_order')->orderBy('price')->first();
     }
 
-    private function ensureTicketTypeCapacityIsAvailable(?EventTicketType $ticketType): void
+    private function ensureTicketTypeCapacityIsAvailable(?EventTicketType $ticketType, int $requestedQuantity = 1): void
     {
         if (! $ticketType || ! $ticketType->quantity) {
             return;
@@ -273,8 +289,8 @@ class RegistrationController extends Controller
             ->whereIn('status', ['confirmed', 'pending_payment'])
             ->count();
 
-        if ($reservedRegistrations >= $ticketType->quantity) {
-            abort(422, 'This ticket type is sold out.');
+        if ($reservedRegistrations + $requestedQuantity > $ticketType->quantity) {
+            abort(422, 'This ticket type does not have enough remaining tickets.');
         }
     }
 
@@ -293,16 +309,16 @@ class RegistrationController extends Controller
         }
     }
 
-    private function ensureCapacityIsAvailable(Event $event): void
+    private function ensureCapacityIsAvailable(Event $event, int $requestedQuantity = 1): void
     {
         if (! $event->maximum_participants) {
             return;
         }
 
-        $confirmedRegistrations = $event->registrations()->where('status', 'confirmed')->count();
+        $confirmedRegistrations = $event->registrations()->whereIn('status', ['confirmed', 'pending_payment'])->count();
 
-        if ($confirmedRegistrations >= $event->maximum_participants) {
-            abort(422, 'This event is already full.');
+        if ($confirmedRegistrations + $requestedQuantity > $event->maximum_participants) {
+            abort(422, 'This event does not have enough remaining places.');
         }
     }
 

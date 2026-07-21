@@ -31,6 +31,8 @@ export default function EventActionPanel({ event }) {
     return [{ id: null, name: Number(event.price || 0) > 0 ? 'Classic' : 'Free', description: 'Standard access', price: Number(event.price || 0) }]
   }, [event])
   const [selectedTicketTypeId, setSelectedTicketTypeId] = useState(ticketOptions[0]?.id ? String(ticketOptions[0].id) : '')
+  const [quantity, setQuantity] = useState(1)
+  const [buyingMore, setBuyingMore] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
@@ -41,6 +43,9 @@ export default function EventActionPanel({ event }) {
   const registered = isRegistered(event.id)
   const cancellationAllowed = canCancelRegistration(event, registration)
   const selectedTicket = ticketOptions.find((ticket) => String(ticket.id || '') === String(selectedTicketTypeId)) || ticketOptions[0]
+  const showPurchaseForm = !registered || buyingMore
+  const selectedQuantity = Math.max(1, Number(quantity || 1))
+  const totalAmount = Number(selectedTicket?.price || 0) * selectedQuantity
 
   async function handleBookmark() {
     setBusy(true)
@@ -64,14 +69,15 @@ export default function EventActionPanel({ event }) {
     setError('')
     setMessage('')
     try {
-      const nextRegistration = await registerForEvent(event, selectedTicket?.id ? { ticket_type_id: selectedTicket.id } : {})
+      const nextRegistration = await registerForEvent(event, { ...(selectedTicket?.id ? { ticket_type_id: selectedTicket.id } : {}), quantity: selectedQuantity })
       if (nextRegistration.payment) {
         toast.info(t('eventAction.paymentRequired'))
         navigate(`/payments/${nextRegistration.payment.id}`)
         return
       }
       toast.success(t('eventAction.registrationSuccess'))
-      setMessage(t('eventAction.registrationSuccessTicket', { ticketNumber: nextRegistration.ticketNumber }))
+      setBuyingMore(false)
+      setMessage(selectedQuantity > 1 ? `${selectedQuantity} tickets registered successfully.` : t('eventAction.registrationSuccessTicket', { ticketNumber: nextRegistration.ticketNumber }))
     } catch (registrationError) {
       const message = getApiErrorMessage(registrationError, t('eventAction.registrationFailed'))
       toast.error(message)
@@ -148,9 +154,12 @@ export default function EventActionPanel({ event }) {
         <div className="mt-4"><Alert type="info">{t('eventAction.registrationCancelled')}</Alert></div>
       )}
 
-      {!registered && (
+      {showPurchaseForm && (
         <div className="mt-5">
-          <p className="mb-2 text-sm font-bold text-slate-800">Choose ticket type</p>
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <p className="text-sm font-bold text-slate-800">Choose ticket type</p>
+            {registered && <button type="button" onClick={() => setBuyingMore(false)} className="text-xs font-bold text-slate-500 hover:text-slate-800">Cancel</button>}
+          </div>
           <div className="grid gap-3">
             {ticketOptions.map((ticket) => {
               const active = String(ticket.id || '') === String(selectedTicketTypeId)
@@ -164,17 +173,23 @@ export default function EventActionPanel({ event }) {
               )
             })}
           </div>
+          <label className="mt-4 block">
+            <span className="mb-1 block text-sm font-bold text-slate-800">Number of tickets</span>
+            <input type="number" min="1" max="10" value={quantity} onChange={(event) => setQuantity(event.target.value)} className="h-12 w-32 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100" />
+            <p className="mt-2 text-sm text-slate-600">Total: <strong>{formatPrice(totalAmount)}</strong></p>
+          </label>
         </div>
       )}
 
       <div className="mt-5 flex flex-wrap gap-3">
-        {registered ? (
+        {registered && !buyingMore ? (
           <>
             <Link to={`/tickets/${event.id}`}><Button disabled={busy}>{t('eventAction.viewTicket')}</Button></Link>
+            <Button type="button" variant="secondary" disabled={busy} onClick={() => setBuyingMore(true)}>Buy more tickets</Button>
             {cancellationAllowed && <Button type="button" variant="danger" disabled={busy} onClick={handleCancelRegistration}>{t('eventAction.cancelRegistration')}</Button>}
           </>
         ) : (
-          <Button type="button" disabled={busy} onClick={handleRegister}>{busy ? t('eventAction.processing') : `Register - ${formatPrice(selectedTicket?.price || 0)}`}</Button>
+          <Button type="button" disabled={busy} onClick={handleRegister}>{busy ? t('eventAction.processing') : `${selectedQuantity > 1 ? 'Buy tickets' : 'Register'} - ${formatPrice(totalAmount)}`}</Button>
         )}
 
         <Button type="button" disabled={busy} variant={bookmarked ? 'outline' : 'secondary'} onClick={handleBookmark}>
