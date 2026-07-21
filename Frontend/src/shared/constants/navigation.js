@@ -27,6 +27,7 @@ export const ORGANIZER_NAV_LINKS = [
   { label: 'My Events', labelKey: 'nav.myEvents', to: '/organizer/events', icon: 'calendarDays' },
   { label: 'Statistics', labelKey: 'nav.statistics', to: '/organizer/statistics', icon: 'barChart3' },
   { label: 'Notifications', labelKey: 'nav.notifications', to: '/notifications', badge: 'notifications', icon: 'bell' },
+  { label: 'Settings', labelKey: 'nav.settings', to: '/settings', icon: 'settings' },
 ]
 
 export const ADMIN_NAV_LINKS = [
