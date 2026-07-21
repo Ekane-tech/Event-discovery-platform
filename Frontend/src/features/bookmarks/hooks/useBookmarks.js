@@ -55,15 +55,38 @@ export function useBookmarks() {
   }
 
   async function addBookmark(eventId) {
-    await bookmarkService.addBookmark(eventId)
-    window.dispatchEvent(new CustomEvent(BOOKMARKS_UPDATED_EVENT))
-    await fetchBookmarks()
+    const currentlyBookmarked = isBookmarked(eventId)
+    if (currentlyBookmarked) return true
+
+    setBookmarks((prev) => [...prev, { id: Date.now(), eventId, event: null, createdAt: new Date().toISOString() }])
+    
+    try {
+      await bookmarkService.addBookmark(eventId)
+      window.dispatchEvent(new CustomEvent(BOOKMARKS_UPDATED_EVENT))
+      await fetchBookmarks()
+      return true
+    } catch (error) {
+      setBookmarks((prev) => prev.filter((b) => b.eventId !== eventId))
+      throw error
+    }
   }
 
   async function removeBookmark(eventId) {
-    await bookmarkService.removeBookmark(eventId)
-    window.dispatchEvent(new CustomEvent(BOOKMARKS_UPDATED_EVENT))
-    await fetchBookmarks()
+    const currentlyBookmarked = isBookmarked(eventId)
+    if (!currentlyBookmarked) return false
+
+    const previousBookmarks = [...bookmarks]
+    setBookmarks((prev) => prev.filter((b) => b.eventId !== eventId))
+    
+    try {
+      await bookmarkService.removeBookmark(eventId)
+      window.dispatchEvent(new CustomEvent(BOOKMARKS_UPDATED_EVENT))
+      await fetchBookmarks()
+      return false
+    } catch (error) {
+      setBookmarks(previousBookmarks)
+      throw error
+    }
   }
 
   async function toggleBookmark(eventId) {
