@@ -78,21 +78,22 @@ class RegistrationController extends Controller
         $isPaidEvent = $totalPrice > 0;
         $payment = null;
 
-        [$primaryRegistration, $registrations] = DB::transaction(function () use ($request, $event, $ticketType, $quantity, $isPaidEvent, $totalPrice, &$payment) {
-            $registrations = collect();
+        [$primaryRegistration, $registrationIds] = DB::transaction(function () use ($request, $event, $ticketType, $quantity, $isPaidEvent, $totalPrice, &$payment) {
+            $registrationIds = collect();
 
             for ($index = 0; $index < $quantity; $index++) {
-                $registrations->push(Registration::create([
+                $registration = Registration::create([
                     'user_id' => $request->user()->id,
                     'event_id' => $event->id,
                     'ticket_type_id' => $ticketType?->id,
                     'status' => $isPaidEvent ? 'pending_payment' : 'confirmed',
                     'ticket_number' => $this->generateTicketNumber($event),
                     'registered_at' => now(),
-                ]));
+                ]);
+                $registrationIds->push($registration->id);
             }
 
-            $primaryRegistration = $registrations->first();
+            $primaryRegistration = Registration::find($registrationIds->first());
 
             if ($isPaidEvent) {
                 $payment = Payment::create([
@@ -106,7 +107,7 @@ class RegistrationController extends Controller
                     'reference' => $this->generatePaymentReference($event),
                     'metadata' => [
                         'registration_attempt_id' => $primaryRegistration->id,
-                        'registration_ids' => $registrations->pluck('id')->values()->all(),
+                        'registration_ids' => $registrationIds->values()->all(),
                         'quantity' => $quantity,
                         'unit_price' => $totalPrice / $quantity,
                         'ticket_type_id' => $ticketType?->id,
@@ -115,8 +116,10 @@ class RegistrationController extends Controller
                 ]);
             }
 
-            return [$primaryRegistration, $registrations];
+            return [$primaryRegistration, $registrationIds];
         });
+
+        $registrations = Registration::whereIn('id', $registrationIds)->get()->load(['ticketType']);
 
         return response()->json([
             'message' => $isPaidEvent ? 'Payment is required to complete this registration.' : 'Registered for event successfully.',
@@ -125,7 +128,7 @@ class RegistrationController extends Controller
             'registration' => new RegistrationResource(
                 $primaryRegistration->fresh()->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
             ),
-            'registrations' => RegistrationResource::collection($registrations->load(['ticketType'])),
+            'registrations' => RegistrationResource::collection($registrations),
             'payment' => $payment ? new \App\Http\Resources\PaymentResource($payment->load(['event', 'registration'])) : null,
         ], $isPaidEvent ? 202 : 201);
     }
