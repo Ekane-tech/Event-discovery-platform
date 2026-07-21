@@ -12,6 +12,7 @@ import PageContainer from '../../../shared/components/layout/PageContainer.jsx'
 import { formatPrice } from '../../../shared/utils/currency.js'
 import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
 import { paymentService } from '../services/paymentService.js'
+import { useAuth } from '../../auth/hooks/useAuth.js'
 
 const OPERATORS = [
   { value: 'mtn', label: 'MTN Mobile Money', logo: '/payments/mtn-momo.svg', hint: 'Confirm the prompt with your MoMo PIN.' },
@@ -22,7 +23,7 @@ function normalizeCameroonPhone(value) { return value.replace(/\s+/g, '') }
 function detectOperator(phone) { const digits = phone.replace(/\D+/g, ''); const local = digits.startsWith('237') ? digits.slice(3) : digits; if (/^(67|650|651|652|653|654|680|681|682|683|684)/.test(local)) return 'mtn'; if (/^(69|655|656|657|658|659)/.test(local)) return 'orange'; return '' }
 function statusLabel(status) { if (status === 'paid') return 'Paid'; if (status === 'processing') return 'Awaiting phone confirmation'; if (status === 'failed') return 'Failed'; return 'Pending' }
 
-function StatusPanel({ payment, checking, onCheck }) {
+function StatusPanel({ payment, checking, onCheck, pollingStopped }) {
   if (payment.status === 'paid') {
     return (
       <Card className="border-green-100 bg-green-50">
@@ -45,7 +46,11 @@ function StatusPanel({ payment, checking, onCheck }) {
           <Loader2 className="h-10 w-10 shrink-0 animate-spin text-amber-700" />
           <div>
             <h2 className="text-2xl font-black text-amber-950">Awaiting phone confirmation</h2>
-            <p className="mt-2 text-sm leading-6 text-amber-900">A payment request has been sent to your phone. Confirm it with your mobile money PIN, then wait for automatic update or check manually.</p>
+            {pollingStopped ? (
+              <p className="mt-2 text-sm leading-6 text-amber-900">We're still waiting for the payment provider. You can leave this page and come back later, or click 'Check payment status' to manually refresh.</p>
+            ) : (
+              <p className="mt-2 text-sm leading-6 text-amber-900">A payment request has been sent to your phone. Confirm it with your mobile money PIN, then wait for automatic update or check manually.</p>
+            )}
             <Button type="button" variant="secondary" className="mt-4" onClick={onCheck} disabled={checking}><RefreshCw className="mr-2 h-4 w-4" />{checking ? 'Checking...' : 'Check payment status'}</Button>
           </div>
         </div>
@@ -72,6 +77,7 @@ function StatusPanel({ payment, checking, onCheck }) {
 
 export default function PaymentPage() {
   const { id } = useParams()
+  const { user } = useAuth()
   const [payment, setPayment] = useState(null)
   const [operator, setOperator] = useState('mtn')
   const [phoneNumber, setPhoneNumber] = useState('')
@@ -80,6 +86,10 @@ export default function PaymentPage() {
   const [checking, setChecking] = useState(false)
   const [error, setError] = useState('')
   const [info, setInfo] = useState('')
+  const [pollingStopped, setPollingStopped] = useState(false)
+
+  const POLLING_TIMEOUT_MS = 5 * 60 * 1000 // 10 minutes
+  const POLLING_INTERVAL_MS = 20000 // 20 seconds
 
   const selectedOperator = useMemo(() => OPERATORS.find((item) => item.value === operator), [operator])
   const providerIsLive = payment?.provider === 'campay'
@@ -99,14 +109,38 @@ export default function PaymentPage() {
   useEffect(() => { fetchPayment() }, [id])
 
   useEffect(() => {
-    if (!payment || !['pending', 'processing'].includes(payment.status)) return undefined
+    if (user?.phone && !phoneNumber) {
+      setPhoneNumber(user.phone)
+      const detected = detectOperator(user.phone)
+      if (detected) setOperator(detected)
+    }
+  }, [user, phoneNumber])
+
+  useEffect(() => {
+    if (!payment || !['pending', 'processing'].includes(payment.status)) {
+      setPollingStopped(false)
+      return undefined
+    }
+    
+    setPollingStopped(false)
+    const startTime = Date.now()
+    
     const timer = window.setInterval(async () => {
+      const elapsed = Date.now() - startTime
+      
+      if (elapsed >= POLLING_TIMEOUT_MS) {
+        window.clearInterval(timer)
+        setPollingStopped(true)
+        return
+      }
+      
       try {
         const response = await paymentService.getPaymentStatus(id)
         setPayment(response.data.payment)
         if (response.data.payment.status === 'paid') toast.success('Payment completed successfully.')
       } catch {}
-    }, 20000)
+    }, POLLING_INTERVAL_MS)
+    
     return () => window.clearInterval(timer)
   }, [id, payment?.status])
 
@@ -152,7 +186,7 @@ export default function PaymentPage() {
       <div className="mx-auto grid max-w-5xl gap-6 lg:grid-cols-[1fr_1.2fr]">
         <div className="grid gap-4">
           <Card><h2 className="font-bold text-slate-950">Payment summary</h2><div className="mt-4 grid gap-3 text-sm text-slate-700"><p><strong>Event:</strong> {payment.event?.title || 'Event payment'}</p><p><strong>Amount:</strong> {formatPrice(payment.amount)} {payment.currency}</p><p><strong>Reference:</strong> {payment.reference}</p><p><strong>Status:</strong> <span className="capitalize">{statusLabel(payment.status)}</span></p>{payment.phone_number && <p><strong>Phone:</strong> {payment.phone_number}</p>}{payment.operator && <p><strong>Operator:</strong> {payment.operator.toUpperCase()}</p>}{payment.metadata?.ussd_code && <p><strong>USSD:</strong> {payment.metadata.ussd_code}</p>}</div>{providerIsLive && <div className="mt-4 rounded-2xl bg-teal-50 p-4 text-sm leading-6 text-teal-900">This transaction is processed by the mobile money provider. Complete the prompt on your phone to finish payment.</div>}</Card>
-          <StatusPanel payment={payment} checking={checking} onCheck={checkPaymentStatus} />
+          <StatusPanel payment={payment} checking={checking} onCheck={checkPaymentStatus} pollingStopped={pollingStopped} />
         </div>
 
         <Card className="relative overflow-hidden">
