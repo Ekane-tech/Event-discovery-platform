@@ -181,16 +181,16 @@ export default function EventDetailsPage() {
 
                 <div className="grid gap-4 sm:grid-cols-2 lg:hidden">
                   {visibleGalleryMobile.map((image, index) => (
-                    <a key={`${image.id}-mobile-${index}`} href={image.url} target="_blank" rel="noreferrer" className="group block overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-xl">
-                      <img src={image.url} alt={event.title} className="h-56 w-full object-cover transition duration-500 group-hover:scale-105" />
+                    <a key={`${image.id}-mobile-${index}`} href={image.url} target="_blank" rel="noreferrer" className="group block overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-lg">
+                      <img src={image.url} alt={event.title} className="h-56 w-full object-cover transition duration-500 group-hover:scale-102" />
                     </a>
                   ))}
                 </div>
 
                 <div className="hidden gap-5 lg:grid lg:grid-cols-3">
                   {visibleGalleryDesktop.map((image, index) => (
-                    <a key={`${image.id}-desktop-${index}`} href={image.url} target="_blank" rel="noreferrer" className="group block overflow-hidden rounded-4xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-xl">
-                      <img src={image.url} alt={event.title} className="h-72 w-full object-cover transition duration-500 group-hover:scale-105" />
+                    <a key={`${image.id}-desktop-${index}`} href={image.url} target="_blank" rel="noreferrer" className="group block overflow-hidden rounded-4xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-lg">
+                      <img src={image.url} alt={event.title} className="h-72 w-full object-cover transition duration-500 group-hover:scale-102" />
                     </a>
                   ))}
                 </div>
