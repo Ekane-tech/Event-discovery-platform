@@ -88,7 +88,7 @@ export default function PaymentPage() {
   const [info, setInfo] = useState('')
   const [pollingStopped, setPollingStopped] = useState(false)
 
-  const POLLING_TIMEOUT_MS = 5 * 60 * 1000 // 10 minutes
+  const POLLING_TIMEOUT_MS = 5 * 60 * 1000 // 05 minutes
   const POLLING_INTERVAL_MS = 20000 // 20 seconds
 
   const selectedOperator = useMemo(() => OPERATORS.find((item) => item.value === operator), [operator])
