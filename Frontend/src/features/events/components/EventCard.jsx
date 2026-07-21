@@ -50,20 +50,22 @@ export default function EventCard({ event }) {
           <p className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-teal-200" /> {formatDate(event.startDate)}</p>
         </div>
         <div className="mt-auto flex flex-col gap-3 pt-4">
-          <Link to={event.organizerId ? `/organizers/${event.organizerId}` : '#'} onClick={(clickEvent) => clickEvent.stopPropagation()} className="flex items-center gap-2 rounded-2xl bg-white/15 p-2 backdrop-blur transition hover:bg-white/25">
-            <div className="relative shrink-0">
+          <div className="flex items-center gap-2 rounded-2xl bg-white/15 p-2 backdrop-blur">
+            <Link to={event.organizerId ? `/organizers/${event.organizerId}` : '#'} onClick={(clickEvent) => clickEvent.stopPropagation()} className="relative shrink-0">
               <Avatar name={event.organizerName || event.organizer} src={event.organizerAvatar} className="h-9 w-9 text-xs" />
               {event.organizerVerified && (
                 <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-teal-500 text-white shadow-md">
                   <BadgeCheck className="h-2.5 w-2.5" />
                 </div>
               )}
-            </div>
+            </Link>
             <div className="min-w-0 flex-1">
               <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-200">Organized by</p>
-              <p className="truncate text-sm font-black text-white">{event.organizerName || event.organizer || 'Organizer'}</p>
+              <Link to={event.organizerId ? `/organizers/${event.organizerId}` : '#'} onClick={(clickEvent) => clickEvent.stopPropagation()} className="truncate text-sm font-black text-white hover:underline">
+                {event.organizerName || event.organizer || 'Organizer'}
+              </Link>
             </div>
-          </Link>
+          </div>
           <Link to={`/events/${event.id}`} state={{ from: `${location.pathname}${location.search}` }}>
             <Button className="w-auto rounded-full bg-teal-600 px-5 text-white hover:bg-teal-700">View Details</Button>
           </Link>
