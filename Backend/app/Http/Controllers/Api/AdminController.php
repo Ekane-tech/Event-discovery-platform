@@ -242,6 +242,32 @@ class AdminController extends Controller
         ]);
     }
 
+
+    public function updateOrganizerVerification(Request $request, User $user): JsonResponse
+    {
+        if (! $user->hasRole('organizer')) {
+            return response()->json([
+                'message' => 'Only organizer accounts can be verified as organizers.',
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'is_verified_organizer' => ['required', 'boolean'],
+        ]);
+
+        $profile = $user->profile()->firstOrCreate(['user_id' => $user->id]);
+        $profile->update(['is_verified_organizer' => $validated['is_verified_organizer']]);
+
+        AuditLog::record($request->user(), 'organizer.verification.updated', $user, 'Organizer verification updated.', [
+            'is_verified_organizer' => $profile->is_verified_organizer,
+        ]);
+
+        return response()->json([
+            'message' => $profile->is_verified_organizer ? 'Organizer verified successfully.' : 'Organizer verification removed.',
+            'user' => new UserResource($user->fresh()->load(['role', 'profile'])),
+        ]);
+    }
+
     public function events(Request $request): JsonResponse
     {
         $query = Event::query()

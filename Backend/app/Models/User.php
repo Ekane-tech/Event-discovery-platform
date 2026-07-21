@@ -66,6 +66,11 @@ class User extends Authenticatable implements MustVerifyEmailContract
         return $this->hasMany(Registration::class);
     }
 
+    public function organizedEvents()
+    {
+        return $this->hasMany(Event::class, 'organizer_id');
+    }
+
     public function registeredEvents()
     {
         return $this->belongsToMany(Event::class, 'registrations')

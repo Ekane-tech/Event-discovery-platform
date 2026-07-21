@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\FeedbackController;
 use App\Http\Controllers\Api\InterestController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\OrganizerController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\RecommendationController;
@@ -47,6 +48,8 @@ Route::get('/cities/{city}', [LocationController::class, 'showCity'])->middlewar
 Route::get('/events', [EventController::class, 'index'])->middleware('throttle:public-read');
 Route::get('/events/{event}', [EventController::class, 'show'])->middleware('throttle:public-read');
 Route::get('/tickets/verify/{ticketNumber}', [RegistrationController::class, 'verifyTicket'])->middleware('throttle:ticket-verify');
+Route::get('/organizers', [OrganizerController::class, 'index'])->middleware('throttle:public-read');
+Route::get('/organizers/{organizer}', [OrganizerController::class, 'show'])->middleware('throttle:public-read');
 
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:auth-register');
@@ -130,6 +133,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/users', [AdminController::class, 'users'])->middleware('throttle:admin-actions');
         Route::patch('/admin/users/{user}/role', [AdminController::class, 'updateUserRole'])->middleware('throttle:admin-actions');
         Route::patch('/admin/users/{user}/status', [AdminController::class, 'updateUserStatus'])->middleware('throttle:admin-actions');
+        Route::patch('/admin/users/{user}/organizer-verification', [AdminController::class, 'updateOrganizerVerification'])->middleware('throttle:admin-actions');
 
         Route::get('/admin/events', [AdminController::class, 'events'])->middleware('throttle:admin-actions');
 
