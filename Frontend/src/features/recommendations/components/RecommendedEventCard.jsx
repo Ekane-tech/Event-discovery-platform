@@ -27,7 +27,7 @@ export default function RecommendedEventCard({ event }) {
   }
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-2xl">
+    <Link to={`/events/${event.id}`} state={{ from: `${location.pathname}${location.search}` }} className="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-2xl">
       <div className="relative h-52 overflow-hidden bg-slate-900 shrink-0">
         <div className="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-105" style={{ backgroundImage: `url(${bg})` }} />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent" />
@@ -68,12 +68,10 @@ export default function RecommendedEventCard({ event }) {
           </div>
           <div className="flex items-center justify-between gap-2">
             <span className="font-semibold text-slate-900">{formatPrice(event.price)}</span>
-            <Link to={`/events/${event.id}`} state={{ from: `${location.pathname}${location.search}` }}>
-              <Button className="rounded-full bg-teal-600 px-5 text-white hover:bg-teal-700">View Details</Button>
-            </Link>
+            <Button className="rounded-full bg-teal-600 px-5 text-white hover:bg-teal-700">View Details</Button>
           </div>
         </div>
       </div>
-    </article>
+    </Link>
   )
 }

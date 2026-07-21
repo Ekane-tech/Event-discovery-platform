@@ -32,7 +32,7 @@ export default function EventCard({ event }) {
   }
 
   return (
-    <article className="group relative flex h-full min-h-[360px] flex-col overflow-hidden rounded-xl bg-slate-900 shadow-sm ring-1 ring-slate-200 transition duration-300 hover:-translate-y-1 hover:shadow-2xl">
+    <Link to={`/events/${event.id}`} state={{ from: `${location.pathname}${location.search}` }} className="group relative flex h-full min-h-[360px] flex-col overflow-hidden rounded-xl bg-slate-900 shadow-sm ring-1 ring-slate-200 transition duration-300 hover:-translate-y-1 hover:shadow-2xl">
       <div className="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-105" style={{ backgroundImage: `url(${bg})` }} />
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/35 to-slate-950/5" />
       <button onClick={handleBookmark} className={`absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full backdrop-blur transition ${bookmarked ? 'bg-yellow-400 text-slate-950' : 'bg-white/25 text-white hover:bg-white/40'}`} aria-label="Bookmark event">
@@ -66,11 +66,9 @@ export default function EventCard({ event }) {
               </Link>
             </div>
           </div>
-          <Link to={`/events/${event.id}`} state={{ from: `${location.pathname}${location.search}` }}>
-            <Button className="w-auto rounded-full bg-teal-600 px-5 text-white hover:bg-teal-700">View Details</Button>
-          </Link>
+          <Button className="w-auto rounded-full bg-teal-600 px-5 text-white hover:bg-teal-700">View Details</Button>
         </div>
       </div>
-    </article>
+    </Link>
   )
 }
