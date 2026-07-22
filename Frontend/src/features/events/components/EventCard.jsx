@@ -1,4 +1,4 @@
-import { AlertTriangle, BadgeCheck, Bookmark, CalendarDays, Clock, MapPin } from 'lucide-react'
+import { BadgeCheck, Bookmark, CalendarDays, Clock, MapPin } from 'lucide-react'
 import { toast } from 'sonner'
 import { Link, useLocation } from 'react-router-dom'
 import Badge from '../../../shared/components/ui/Badge.jsx'
@@ -37,18 +37,20 @@ export default function EventCard({ event }) {
     <Link to={`/events/${event.id}`} state={{ from: `${location.pathname}${location.search}` }} className="group relative flex h-full min-h-[360px] flex-col overflow-hidden rounded-xl bg-slate-900 shadow-sm ring-1 ring-slate-200 transition duration-300 hover:-translate-y-1 hover:shadow-2xl">
       <div className="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-105" style={{ backgroundImage: `url(${bg})` }} />
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/35 to-slate-950/5" />
-      <button onClick={handleBookmark} className={`absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full backdrop-blur transition ${bookmarked ? 'bg-yellow-400 text-slate-950' : 'bg-white/25 text-white hover:bg-white/40'}`} aria-label="Bookmark event">
-        <Bookmark className="h-5 w-5" fill={bookmarked ? 'currentColor' : 'none'} />
-      </button>
+      <div className="absolute right-4 top-4 z-10 flex gap-2">
+        {!lifecycle.isPast && lifecycle.registrationDeadlineUrgent && (
+          <span className="mboa-deadline-pulse flex h-11 w-11 items-center justify-center rounded-full bg-red-600 text-white shadow-lg shadow-red-950/30 ring-1 ring-white/30 backdrop-blur">
+            <Clock className="h-5 w-5" />
+          </span>
+        )}
+        <button onClick={handleBookmark} className={`flex h-11 w-11 items-center justify-center rounded-full backdrop-blur transition ${bookmarked ? 'bg-yellow-400 text-slate-950' : 'bg-white/25 text-white hover:bg-white/40'}`} aria-label="Bookmark event">
+          <Bookmark className="h-5 w-5" fill={bookmarked ? 'currentColor' : 'none'} />
+        </button>
+      </div>
       <div className="absolute left-4 top-4 z-10 flex max-w-[calc(100%-5rem)] flex-wrap gap-2">
         {lifecycle.isPast && (
           <span className="inline-flex items-center gap-1 rounded-full bg-slate-950/85 px-3 py-1 text-xs font-black uppercase tracking-wide text-white ring-1 ring-white/20 backdrop-blur">
             <Clock className="h-3.5 w-3.5" /> Past event
-          </span>
-        )}
-        {!lifecycle.isPast && lifecycle.registrationDeadlineUrgent && (
-          <span className="mboa-deadline-pulse inline-flex items-center gap-1 rounded-full bg-red-600 px-3 py-1 text-xs font-black uppercase tracking-wide text-white shadow-lg shadow-red-950/30 ring-1 ring-white/30">
-            <AlertTriangle className="h-3.5 w-3.5" /> Closing soon
           </span>
         )}
       </div>

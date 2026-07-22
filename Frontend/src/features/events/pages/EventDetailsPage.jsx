@@ -34,6 +34,8 @@ export default function EventDetailsPage() {
   const [galleryIndex, setGalleryIndex] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [touchStart, setTouchStart] = useState(null)
+  const [touchEnd, setTouchEnd] = useState(null)
 
   useEffect(() => {
     async function fetchEvent() {
@@ -81,6 +83,29 @@ export default function EventDetailsPage() {
     setGalleryIndex((current) => (current + direction + galleryImages.length) % galleryImages.length)
   }
 
+  function handleTouchStart(e) {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  function handleTouchMove(e) {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  function handleTouchEnd() {
+    if (!touchStart || !touchEnd) return
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > 50
+    const isRightSwipe = distance < -50
+
+    if (isLeftSwipe) {
+      moveHero(1)
+    }
+    if (isRightSwipe) {
+      moveHero(-1)
+    }
+  }
+
   async function shareEvent() {
     const shareUrl = `${window.location.origin}/events/${event.id}`
     const shareData = {
@@ -111,7 +136,12 @@ export default function EventDetailsPage() {
 
   return (
     <div>
-      <section className="relative min-h-135 overflow-hidden bg-slate-950 text-white">
+      <section 
+        className="relative min-h-135 overflow-hidden bg-slate-950 text-white"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         <div key={activeHero?.id || activeHero?.url} className="absolute inset-0 animate-[fadeIn_.7s_ease-out]">
           <img src={activeHero?.url} alt={event.title} className="h-full w-full object-cover" />
         </div>
