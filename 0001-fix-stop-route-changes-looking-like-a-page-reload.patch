@@ -1,0 +1,51 @@
+From 9a8126a59fb106b711b7d18dbc4b8c18d03a5ac5 Mon Sep 17 00:00:00 2001
+From: ekane bryan <ekanebryan5@gmail.com>
+Date: Wed, 22 Jul 2026 16:59:18 +0000
+Subject: [PATCH] fix: stop route changes looking like a page reload
+
+PageOutlet faded every page in from a blank screen on navigation, so
+clicking Search/Home looked like a refresh. Navigation is now instant;
+per-element entrance animations (staggered grids, section reveals) remain.
+---
+ .../shared/components/motion/PageOutlet.jsx   | 26 +++++++------------
+ 1 file changed, 9 insertions(+), 17 deletions(-)
+
+diff --git a/Frontend/src/shared/components/motion/PageOutlet.jsx b/Frontend/src/shared/components/motion/PageOutlet.jsx
+index d2fe711..d4e282e 100644
+--- a/Frontend/src/shared/components/motion/PageOutlet.jsx
++++ b/Frontend/src/shared/components/motion/PageOutlet.jsx
+@@ -1,22 +1,14 @@
+-import { motion } from 'framer-motion'
+-import { Outlet, useLocation } from 'react-router-dom'
+-import { EASE } from './variants.js'
++import { Outlet } from 'react-router-dom'
+ 
+ /**
+- * Drop-in replacement for <Outlet /> that gives every routed page a subtle
+- * fade + slide-up entrance on navigation. Keyed by pathname so each route
+- * re-animates; query-param changes (filters) do NOT re-trigger.
++ * Drop-in replacement for <Outlet />.
++ *
++ * Note: an earlier version faded the whole page in from a blank screen on every
++ * navigation (keyed motion.div). That made route changes — e.g. clicking Search
++ * or Home — look like a full page reload (blank flash). Navigation is now instant
++ * and smooth. Per-element entrance animations (staggered grids, section reveals,
++ * hero) still run, so pages still feel alive without the "refresh" look.
+  */
+ export default function PageOutlet() {
+-  const { pathname } = useLocation()
+-  return (
+-    <motion.div
+-      key={pathname}
+-      initial={{ opacity: 0, y: 12 }}
+-      animate={{ opacity: 1, y: 0 }}
+-      transition={{ duration: 0.45, ease: EASE }}
+-    >
+-      <Outlet />
+-    </motion.div>
+-  )
++  return <Outlet />
+ }
+-- 
+2.47.3
+
