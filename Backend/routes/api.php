@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\AdminPayoutController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookmarkController;
 use App\Http\Controllers\Api\CategoryController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\RecommendationController;
 use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\RegistrationController;
 use App\Http\Middleware\EnsureEmailIsVerified;
 use Illuminate\Support\Facades\Route;
@@ -110,6 +112,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/organizer/events/{event}/attendees/export', [EventController::class, 'exportAttendees'])->middleware('role:organizer,admin')->middleware('throttle:authenticated-read');
     Route::post('/organizer/events/{event}/duplicate', [EventController::class, 'duplicate'])->middleware(['role:organizer,admin', 'throttle:event-write']);
     Route::patch('/organizer/registrations/{registration}/check-in', [RegistrationController::class, 'checkIn'])->middleware(['role:organizer,admin', 'throttle:check-in']);
+
+    // Organizer wallet & payouts
+    Route::get('/wallet', [WalletController::class, 'show'])->middleware('role:organizer')->middleware('throttle:authenticated-read');
+    Route::get('/wallet/transactions', [WalletController::class, 'transactions'])->middleware('role:organizer')->middleware('throttle:authenticated-read');
+    Route::put('/wallet/payout-method', [WalletController::class, 'updatePayoutMethod'])->middleware(['role:organizer', EnsureEmailIsVerified::class, 'throttle:event-write']);
+    Route::get('/wallet/payouts', [WalletController::class, 'payouts'])->middleware('role:organizer')->middleware('throttle:authenticated-read');
+    Route::post('/wallet/payouts', [WalletController::class, 'requestPayout'])->middleware(['role:organizer', EnsureEmailIsVerified::class, 'throttle:event-write']);
+    Route::post('/wallet/payouts/{payout}/cancel', [WalletController::class, 'cancelPayout'])->middleware(['role:organizer', 'throttle:event-write']);
     Route::post('/events', [EventController::class, 'store'])->middleware(['role:organizer,admin', EnsureEmailIsVerified::class, 'throttle:event-write']);
     Route::put('/events/{event}', [EventController::class, 'update'])->middleware(['role:organizer,admin', EnsureEmailIsVerified::class, 'throttle:event-write']);
     Route::delete('/events/{event}', [EventController::class, 'destroy'])->middleware(['role:organizer,admin', 'throttle:event-write']);
@@ -139,6 +149,16 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/admin/payments', [AdminController::class, 'payments'])->middleware('throttle:admin-actions');
         Route::get('/admin/payments/summary', [AdminController::class, 'paymentSummary'])->middleware('throttle:admin-actions');
+
+        // Admin payouts & platform settings
+        Route::get('/admin/payouts', [AdminPayoutController::class, 'index'])->middleware('throttle:admin-actions');
+        Route::get('/admin/payouts/{payout}', [AdminPayoutController::class, 'show'])->middleware('throttle:admin-actions');
+        Route::patch('/admin/payouts/{payout}/approve', [AdminPayoutController::class, 'approve'])->middleware('throttle:admin-actions');
+        Route::patch('/admin/payouts/{payout}/reject', [AdminPayoutController::class, 'reject'])->middleware('throttle:admin-actions');
+        Route::patch('/admin/payouts/{payout}/mark-paid', [AdminPayoutController::class, 'markPaid'])->middleware('throttle:admin-actions');
+        Route::get('/admin/wallets/{user}', [AdminPayoutController::class, 'wallet'])->middleware('throttle:admin-actions');
+        Route::get('/admin/platform-settings', [AdminPayoutController::class, 'platformSettings'])->middleware('throttle:admin-actions');
+        Route::put('/admin/platform-settings', [AdminPayoutController::class, 'updatePlatformSettings'])->middleware('throttle:admin-actions');
         Route::get('/admin/audit-logs', [AdminController::class, 'auditLogs'])->middleware('throttle:admin-actions');
         Route::get('/admin/email-logs', [AdminController::class, 'emailLogs'])->middleware('throttle:admin-actions');
         Route::post('/admin/test-email', [AdminController::class, 'sendTestEmail'])->middleware('throttle:admin-actions');

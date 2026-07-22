@@ -40,4 +40,38 @@ class Payment extends Model
     {
         return $this->belongsTo(Registration::class);
     }
+
+    public function walletTransaction()
+    {
+        return $this->hasOne(WalletTransaction::class);
+    }
+
+    /**
+     * Credit the organizer's wallet when a payment flips to 'paid', and reverse
+     * it on refund/cancellation. Centralised here so every payment path
+     * (controller + Campay service) is covered, idempotently.
+     */
+    protected static function booted(): void
+    {
+        static::updated(function (Payment $payment) {
+            if (! $payment->wasChanged('status')) {
+                return;
+            }
+
+            try {
+                $walletService = app(\App\Services\Wallet\WalletService::class);
+
+                if ($payment->status === 'paid') {
+                    $walletService->creditOnPayment($payment);
+                } elseif (in_array($payment->status, ['refunded', 'cancelled'], true)) {
+                    $walletService->reverseCredit($payment);
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Wallet hook failed for payment.', [
+                    'payment_id' => $payment->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        });
+    }
 }
