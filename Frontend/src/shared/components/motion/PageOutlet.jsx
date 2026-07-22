@@ -1,22 +1,14 @@
-import { motion } from 'framer-motion'
-import { Outlet, useLocation } from 'react-router-dom'
-import { EASE } from './variants.js'
+import { Outlet } from 'react-router-dom'
 
 /**
- * Drop-in replacement for <Outlet /> that gives every routed page a subtle
- * fade + slide-up entrance on navigation. Keyed by pathname so each route
- * re-animates; query-param changes (filters) do NOT re-trigger.
+ * Drop-in replacement for <Outlet />.
+ *
+ * Note: an earlier version faded the whole page in from a blank screen on every
+ * navigation (keyed motion.div). That made route changes — e.g. clicking Search
+ * or Home — look like a full page reload (blank flash). Navigation is now instant
+ * and smooth. Per-element entrance animations (staggered grids, section reveals,
+ * hero) still run, so pages still feel alive without the "refresh" look.
  */
 export default function PageOutlet() {
-  const { pathname } = useLocation()
-  return (
-    <motion.div
-      key={pathname}
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, ease: EASE }}
-    >
-      <Outlet />
-    </motion.div>
-  )
+  return <Outlet />
 }
