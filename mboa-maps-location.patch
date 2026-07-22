@@ -1,0 +1,329 @@
+diff --git a/Frontend/package-lock.json b/Frontend/package-lock.json
+index ad2f26d..7d75bb2 100644
+--- a/Frontend/package-lock.json
++++ b/Frontend/package-lock.json
+@@ -13,6 +13,7 @@
+         "axios": "^1.18.1",
+         "framer-motion": "^12.42.2",
+         "i18next": "^26.3.6",
++        "leaflet": "^1.9.4",
+         "lucide-react": "^1.23.0",
+         "next-themes": "^0.4.6",
+         "qrcode.react": "^4.2.0",
+@@ -2317,6 +2318,12 @@
+         "json-buffer": "3.0.1"
+       }
+     },
++    "node_modules/leaflet": {
++      "version": "1.9.4",
++      "resolved": "https://registry.npmjs.org/leaflet/-/leaflet-1.9.4.tgz",
++      "integrity": "sha512-nxS1ynzJOmOlHp+iL3FyWqK89GtNL8U8rvlMOsQdTTssxZwCXh8N2NB3GDQOL+YR3XnWyZAxwQixURb+FA74PA==",
++      "license": "BSD-2-Clause"
++    },
+     "node_modules/levn": {
+       "version": "0.4.1",
+       "resolved": "https://registry.npmjs.org/levn/-/levn-0.4.1.tgz",
+diff --git a/Frontend/package.json b/Frontend/package.json
+index 9e1d95a..2568b54 100644
+--- a/Frontend/package.json
++++ b/Frontend/package.json
+@@ -15,6 +15,7 @@
+     "axios": "^1.18.1",
+     "framer-motion": "^12.42.2",
+     "i18next": "^26.3.6",
++    "leaflet": "^1.9.4",
+     "lucide-react": "^1.23.0",
+     "next-themes": "^0.4.6",
+     "qrcode.react": "^4.2.0",
+diff --git a/Frontend/src/features/events/components/EventForm.jsx b/Frontend/src/features/events/components/EventForm.jsx
+index a605a75..94cb304 100644
+--- a/Frontend/src/features/events/components/EventForm.jsx
++++ b/Frontend/src/features/events/components/EventForm.jsx
+@@ -12,6 +12,7 @@ import { EVENT_VISIBILITIES, createEmptyEventForm } from '../utils/eventDefaults
+ import { categoryService } from '../../categories/services/categoryService.js'
+ import { locationService } from '../../locations/services/locationService.js'
+ import { extractCollection } from '../utils/normalizeEvent.js'
++import LocationPicker from '../../../shared/components/map/LocationPicker.jsx'
+ 
+ const MAX_GALLERY_IMAGES = 8
+ const MAX_SOURCE_IMAGE_MB = 10
+@@ -305,7 +306,14 @@ export default function EventForm({
+         <div className="grid gap-4 md:grid-cols-3">
+           <SearchableSelect label="Region" value={form.region_id} onChange={(value) => updateValue('region_id', value)} options={regionOptions} placeholder="Select region" />
+           <SearchableSelect label="City" value={form.city_id} onChange={(value) => updateValue('city_id', value)} options={cityOptions} placeholder="Select city" />
+-          <FormInput label="Venue" name="venue" value={form.venue} onChange={updateTextField} placeholder="Bonanjo Conference Hall" />
++            <FormInput label="Venue" name="venue" value={form.venue} onChange={updateTextField} placeholder="Bonanjo Conference Hall" />
++        </div>
++        <div className="mt-4">
++          <span className="mb-2 block text-sm font-medium text-slate-700">Pin on map</span>
++          <LocationPicker
++            value={{ venue: form.venue, latitude: form.latitude, longitude: form.longitude }}
++            onChange={({ latitude, longitude, venue }) => setForm((current) => ({ ...current, latitude, longitude, venue: venue ?? current.venue }))}
++          />
+         </div>
+       </Card>
+ 
+diff --git a/Frontend/src/features/events/pages/EventDetailsPage.jsx b/Frontend/src/features/events/pages/EventDetailsPage.jsx
+index 951c46c..a91ca08 100644
+--- a/Frontend/src/features/events/pages/EventDetailsPage.jsx
++++ b/Frontend/src/features/events/pages/EventDetailsPage.jsx
+@@ -5,6 +5,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+ import Button from '../../../shared/components/ui/Button.jsx'
+ import Badge from '../../../shared/components/ui/Badge.jsx'
+ import Card from '../../../shared/components/ui/Card.jsx'
++import LocationMap from '../../../shared/components/map/LocationMap.jsx'
+ import PageContainer from '../../../shared/components/layout/PageContainer.jsx'
+ import EmptyState from '../../../shared/components/feedback/EmptyState.jsx'
+ import ErrorState from '../../../shared/components/feedback/ErrorState.jsx'
+@@ -192,6 +193,12 @@ export default function EventDetailsPage() {
+                 <p className="flex gap-3 text-slate-700"><Users className="h-5 w-5 text-teal-700" /><span><strong>{t('events.details.capacityLabel')}:</strong><br />{event.maximumParticipants || t('events.details.notLimited')}</span></p>
+               </div>
+               <div className="mt-6 flex flex-wrap gap-2"><Button type="button" variant="secondary" onClick={shareEvent}><Share2 className="mr-2 h-4 w-4" />{t('events.details.shareEvent')}</Button></div>
++              {event.latitude && event.longitude && (
++                <div className="mt-6">
++                  <h3 className="mb-2 text-sm font-bold text-slate-950">{t('events.details.mapHeading', 'Location map')}</h3>
++                  <LocationMap latitude={event.latitude} longitude={event.longitude} height={300} />
++                </div>
++              )}
+             </Card>
+ 
+             {galleryImages.length > 0 && (
+diff --git a/Frontend/src/features/events/utils/eventDefaults.js b/Frontend/src/features/events/utils/eventDefaults.js
+index bbf4b67..3f90a95 100644
+--- a/Frontend/src/features/events/utils/eventDefaults.js
++++ b/Frontend/src/features/events/utils/eventDefaults.js
+@@ -18,6 +18,8 @@ export function createEmptyEventForm() {
+     region_id: '',
+     city_id: '',
+     venue: '',
++    latitude: '',
++    longitude: '',
+     startDate: '',
+     endDate: '',
+     price: '0',
+diff --git a/Frontend/src/shared/components/map/LocationMap.jsx b/Frontend/src/shared/components/map/LocationMap.jsx
+new file mode 100644
+index 0000000..f3de6fd
+--- /dev/null
++++ b/Frontend/src/shared/components/map/LocationMap.jsx
+@@ -0,0 +1,93 @@
++import { useEffect, useRef } from 'react'
++import L from 'leaflet'
++import 'leaflet/dist/leaflet.css'
++import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
++import markerIcon from 'leaflet/dist/images/marker-icon.png'
++import markerShadow from 'leaflet/dist/images/marker-shadow.png'
++
++// Leaflet's default marker icons reference image paths that bundlers (Vite) break.
++// Re-bind them to the imported asset URLs once, at module load.
++delete L.Icon.Default.prototype._getIconUrl
++L.Icon.Default.mergeOptions({ iconRetinaUrl: markerIcon2x, iconUrl: markerIcon, shadowUrl: markerShadow })
++
++// Default centre: Douala, Cameroon.
++const CAMEROON_CENTER = [4.0511, 9.7679]
++
++/**
++ * Reusable OpenStreetMap (Leaflet) map — no API key required.
++ *
++ * - Display mode (default): a fixed marker at latitude/longitude.
++ * - Picker mode (draggable): marker is draggable and clicking the map moves it;
++ *   calls onMove(lat, lng). Used by <LocationPicker/>.
++ */
++export default function LocationMap({
++  latitude,
++  longitude,
++  zoom = 13,
++  height = 260,
++  draggable = false,
++  onMove,
++  scrollWheelZoom = true,
++  className = '',
++}) {
++  const containerRef = useRef(null)
++  const mapRef = useRef(null)
++  const markerRef = useRef(null)
++  const hasCoords = latitude !== '' && latitude != null && longitude !== '' && longitude != null
++
++  // Initialise the map once.
++  useEffect(() => {
++    if (!containerRef.current || mapRef.current) return
++
++    const center = hasCoords ? [Number(latitude), Number(longitude)] : CAMEROON_CENTER
++    const map = L.map(containerRef.current, { scrollWheelZoom, zoomControl: true, attributionControl: true }).setView(center, hasCoords ? zoom : 6)
++
++    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
++      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
++      maxZoom: 19,
++    }).addTo(map)
++
++    const marker = L.marker(center, { draggable }).addTo(map)
++    const emit = () => {
++      const { lat, lng } = marker.getLatLng()
++      onMove?.(lat, lng)
++    }
++    if (draggable) {
++      marker.on('dragend', emit)
++      map.on('click', (event) => {
++        marker.setLatLng(event.latlng)
++        emit()
++      })
++    }
++
++    mapRef.current = map
++    markerRef.current = marker
++
++    // Leaflet can mis-size inside animated/hidden containers (e.g. page transitions).
++    const resizeTimer = setTimeout(() => map.invalidateSize(), 250)
++
++    return () => {
++      clearTimeout(resizeTimer)
++      map.remove()
++      mapRef.current = null
++      markerRef.current = null
++    }
++  }, [])
++
++  // Keep the marker/view in sync when coords change from the outside (e.g. a search).
++  useEffect(() => {
++    if (mapRef.current && markerRef.current && hasCoords) {
++      const latlng = [Number(latitude), Number(longitude)]
++      markerRef.current.setLatLng(latlng)
++      mapRef.current.setView(latlng, zoom, { animate: true })
++    }
++  }, [latitude, longitude])
++
++  return (
++    <div
++      ref={containerRef}
++      className={`overflow-hidden rounded-2xl border border-slate-200 ${className}`}
++      style={{ height, width: '100%' }}
++    />
++  )
++}
+diff --git a/Frontend/src/shared/components/map/LocationPicker.jsx b/Frontend/src/shared/components/map/LocationPicker.jsx
+new file mode 100644
+index 0000000..a189b4b
+--- /dev/null
++++ b/Frontend/src/shared/components/map/LocationPicker.jsx
+@@ -0,0 +1,93 @@
++import { useState } from 'react'
++import { MapPin, Search } from 'lucide-react'
++import LocationMap from './LocationMap.jsx'
++
++// Free geocoding via OpenStreetMap Nominatim (no API key).
++async function geocode(query) {
++  const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&addressdetails=1&q=${encodeURIComponent(query)}`
++  const response = await fetch(url, { headers: { Accept: 'application/json' } })
++  if (!response.ok) throw new Error('network')
++  const data = await response.json()
++  if (!data || data.length === 0) return null
++  const first = data[0]
++  return { lat: parseFloat(first.lat), lng: parseFloat(first.lon), name: first.display_name }
++}
++
++/**
++ * Form-friendly location picker: search an address (Nominatim) + a draggable map.
++ * Calls onChange({ latitude, longitude, venue? }). `venue` is only sent when a
++ * geocoded place name is found and the host hasn't typed one yet.
++ */
++export default function LocationPicker({ value, onChange, height = 280 }) {
++  const { venue, latitude, longitude } = value
++  const [query, setQuery] = useState('')
++  const [searching, setSearching] = useState(false)
++  const [error, setError] = useState('')
++
++  async function handleSearch(event) {
++    event.preventDefault()
++    if (!query.trim()) return
++    setSearching(true)
++    setError('')
++    try {
++      const result = await geocode(query)
++      if (!result) {
++        setError('Location not found. Try a more specific address or place name.')
++        return
++      }
++      onChange({ latitude: result.lat, longitude: result.lng, venue: venue ? undefined : result.name })
++    } catch {
++      setError('Unable to search right now. You can still drag the pin to set the location.')
++    } finally {
++      setSearching(false)
++    }
++  }
++
++  function handleMove(lat, lng) {
++    onChange({ latitude: lat, longitude: lng })
++  }
++
++  return (
++    <div className="grid gap-3">
++      <form onSubmit={handleSearch} className="flex flex-col gap-2 sm:flex-row">
++        <div className="relative flex-1">
++          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
++          <input
++            value={query}
++            onChange={(event) => setQuery(event.target.value)}
++            placeholder="Search an address or place (e.g. Bonanjo, Douala)…"
++            className="h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm outline-none transition focus:border-teal-500 focus:bg-white"
++          />
++        </div>
++        <button
++          type="submit"
++          disabled={searching}
++          className="inline-flex h-11 items-center justify-center rounded-2xl bg-teal-700 px-5 text-sm font-bold text-white transition hover:bg-teal-800 disabled:opacity-60"
++        >
++          {searching ? 'Searching…' : 'Search'}
++        </button>
++      </form>
++
++      {error && <p className="text-xs font-medium text-red-600">{error}</p>}
++
++      <LocationMap
++        latitude={latitude}
++        longitude={longitude}
++        draggable
++        onMove={handleMove}
++        height={height}
++      />
++
++      <div className="flex flex-wrap items-center justify-between gap-2">
++        <p className="flex items-center gap-1 text-xs text-slate-500">
++          <MapPin className="h-3.5 w-3.5" /> Drag the pin or click the map to set the exact location.
++        </p>
++        {latitude && longitude && (
++          <p className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
++            {Number(latitude).toFixed(5)}, {Number(longitude).toFixed(5)}
++          </p>
++        )}
++      </div>
++    </div>
++  )
++}
+diff --git a/Frontend/src/shared/i18n/locales/en/common.json b/Frontend/src/shared/i18n/locales/en/common.json
+index 118e38e..061dd61 100644
+--- a/Frontend/src/shared/i18n/locales/en/common.json
++++ b/Frontend/src/shared/i18n/locales/en/common.json
+@@ -236,7 +236,8 @@
+       "nextImage": "Next cover image",
+       "galleryImageLabel": "Show gallery image {{index}}",
+       "previousGalleryImages": "Previous gallery images",
+-      "nextGalleryImages": "Next gallery images"
++      "nextGalleryImages": "Next gallery images",
++      "mapHeading": "Location map"
+     },
+     "create": {
+       "title": "Create Event",
+diff --git a/Frontend/src/shared/i18n/locales/fr/common.json b/Frontend/src/shared/i18n/locales/fr/common.json
+index 13c0fb6..281e11a 100644
+--- a/Frontend/src/shared/i18n/locales/fr/common.json
++++ b/Frontend/src/shared/i18n/locales/fr/common.json
+@@ -236,7 +236,8 @@
+       "nextImage": "Image de couverture suivante",
+       "galleryImageLabel": "Afficher l'image de galerie {{index}}",
+       "previousGalleryImages": "Images de galerie précédentes",
+-      "nextGalleryImages": "Images de galerie suivantes"
++      "nextGalleryImages": "Images de galerie suivantes",
++      "mapHeading": "Carte du lieu"
+     },
+     "create": {
+       "title": "Créer un événement",
