@@ -121,10 +121,10 @@ export default function HomePage()  {
               <StaggerItem key={category.id}>
               <Link to={`/events?category_id=${category.id}`} className="group relative block min-h-47.5 overflow-hidden rounded-xl bg-slate-900 p-5 text-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-xl">
                 <div className="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-105" style={{ backgroundImage: `url(${category.image_url || '/hero-events.svg'})` }} />
-                <div className="absolute inset-0 bg-linear-to-t from-slate-950/30 via-slate-950/10 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-slate-950/85 via-slate-950/45 to-slate-950/5" />
                 <div className="relative flex min-h-37.5 flex-col justify-end overflow-hidden">
                 <h3 className="text-xl max-md:text-base font-black drop-shadow-sm truncate w-full" title={category.name}>{category.name}</h3>
-                  <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-50 drop-shadow-sm">{category.description}</p>
+                  <p className="mt-1 line-clamp-2 text-sm leading-6 text-white drop-shadow-sm">{category.description}</p>
                 </div>
               </Link>
               </StaggerItem>

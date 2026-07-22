@@ -88,6 +88,30 @@ body {
 .dark .text-slate-300 { color: #cbd5e1; }
 .dark .text-slate-200 { color: #cdd8e6; }
 .dark .text-slate-100 { color: #d7deea; }
+.dark .text-slate-50  { color: #f8fafc; }
+
+/* Light-tint accent TEXT must stay light in dark mode (it sits on dark/image
+   backgrounds). The token remap above darkens bg-* usages of these tints; these
+   rules keep the text-* versions light so labels stay legible. (Teal tints are
+   already handled by the .dark .text-teal-* block below.) */
+.dark .text-red-50    { color: #fecaca; }
+.dark .text-red-100   { color: #fecaca; }
+.dark .text-green-50  { color: #bbf7d0; }
+.dark .text-green-100 { color: #bbf7d0; }
+.dark .text-blue-50   { color: #bfdbfe; }
+.dark .text-blue-100  { color: #bfdbfe; }
+.dark .text-amber-50  { color: #fde68a; }
+.dark .text-amber-100 { color: #fde68a; }
+.dark .text-yellow-50 { color: #fef08a; }
+.dark .text-yellow-100{ color: #fef08a; }
+.dark .text-purple-50 { color: #e9d5ff; }
+.dark .text-purple-100{ color: #e9d5ff; }
+.dark .text-pink-50   { color: #fbcfe8; }
+.dark .text-pink-100  { color: #fbcfe8; }
+.dark .text-indigo-50 { color: #c7d2fe; }
+.dark .text-rose-50   { color: #ffcdd2; }
+.dark .text-emerald-50{ color: #a7f3d0; }
+.dark .text-orange-50 { color: #fed7aa; }
 .dark .\!text-slate-950 { color: #f6f8fb !important; }
 
 /* keep labels on coloured buttons / badges / hero text white */
