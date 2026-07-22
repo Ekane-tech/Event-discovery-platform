@@ -1,4 +1,4 @@
-﻿import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { MapPin, Mail, Phone } from 'lucide-react'
 import { FaFacebookF, FaInstagram, FaLinkedinIn, FaXTwitter } from 'react-icons/fa6'
 import { APP_NAME, APP_TAGLINE } from '../../constants/app.js'
@@ -10,11 +10,10 @@ export default function Footer() {
   const socials = [FaFacebookF, FaInstagram, FaLinkedinIn, FaXTwitter]
 
   const sections = [
-    { title: t('footer.platformTitle'), links: [[t('footer.browseEvents'), '/events'], [t('about.badge', 'About'), '/about'], [t('publicNotifications.badge', 'Public Updates'), '/public-notifications']] },
-    { title: t('footer.platformTitle', 'Account'), links: [[t('footer.createAccount'), '/register'], [t('auth.signIn'), '/login'], [t('footer.feedback', 'Feedback'), '/feedback']] },
-    { title: t('footer.platformTitle', 'Support'), links: [[t('footer.terms'), '/terms-of-service'], [t('footer.privacy'), '/privacy-policy']] },
+    { title: t('footer.platformTitle', 'Platform'), links: [[t('browseEvents', 'Browse Events'), '/events'], [t('footer.about', 'About'), '/about'], [t('footer.publicUpdates', 'Public Updates'), '/public-notifications']] },
+    { title: t('footer.accountTitle', 'Account'), links: [[t('footer.createAccount', 'Create Account'), '/register'], [t('auth.signIn', 'Login'), '/login'], [t('footer.feedback', 'Feedback'), '/feedback']] },
+    { title: t('footer.supportTitle', 'Support'), links: [[t('footer.terms', 'Terms of Service'), '/terms-of-service'], [t('footer.privacy', 'Privacy Policy'), '/privacy-policy']] },
   ]
-
 
   return (
     <footer className="border-t border-slate-200 bg-slate-950 text-white">
@@ -26,7 +25,7 @@ export default function Footer() {
               <span>{APP_NAME}</span>
             </Link>
             <p className="mt-3 text-sm font-semibold text-teal-200">{APP_TAGLINE}</p>
-            <p className="mt-4 max-w-sm text-sm leading-6 text-slate-300">Discover Mboa experiences, receive smart notifications, register with digital tickets, and manage event activity across Cameroon.</p>
+            <p className="mt-4 max-w-sm text-sm leading-6 text-slate-300">{t('footer.description', 'Discover Mboa experiences, receive smart notifications, register with digital tickets, and manage event activity across Cameroon.')}</p>
             <div className="mt-5 flex gap-2">
               {socials.map((Icon, index) => <span key={index} className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-teal-600"><Icon className="h-4 w-4" /></span>)}
             </div>
@@ -34,7 +33,6 @@ export default function Footer() {
 
           <div className="grid gap-8 sm:grid-cols-3">
             {sections.map((section, index) => (
-              // L'index garantit l'unicité de la clé même si deux titres sont identiques
               <div key={`${section.title}-${index}`}>
                 <h3 className="font-bold text-white">{section.title}</h3>
                 <div className="mt-4 grid gap-3">
@@ -46,11 +44,10 @@ export default function Footer() {
             ))}
           </div>
 
-
           <div>
-            <h3 className="font-bold text-white">Contact us</h3>
+            <h3 className="font-bold text-white">{t('footer.contactTitle', 'Contact us')}</h3>
             <div className="mt-4 grid gap-3 text-sm text-slate-300">
-              <p className="flex gap-2"><MapPin className="h-4 w-4 text-teal-300" /> Cameroon</p>
+              <p className="flex gap-2"><MapPin className="h-4 w-4 text-teal-300" /> {t('footer.country', 'Cameroon')}</p>
               <p className="flex gap-2"><Mail className="h-4 w-4 text-teal-300" /> support@mboaevents237.cm</p>
               <p className="flex gap-2"><Phone className="h-4 w-4 text-teal-300" /> +237 6XX XXX XXX</p>
             </div>
@@ -58,9 +55,9 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-slate-400 md:flex-row md:items-center md:justify-between">
-          <p>© {new Date().getFullYear()} {APP_NAME}. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {APP_NAME}. {t('footer.rightsReserved', 'All rights reserved.')}</p>
           <div className="flex items-center gap-4">
-            <div className="flex gap-4"><Link to="/terms-of-service" className="hover:text-teal-300">Terms</Link><Link to="/privacy-policy" className="hover:text-teal-300">Privacy</Link><span>Cookies</span></div>
+            <div className="flex gap-4"><Link to="/terms-of-service" className="hover:text-teal-300">{t('footer.termsShort', 'Terms')}</Link><Link to="/privacy-policy" className="hover:text-teal-300">{t('footer.privacyShort', 'Privacy')}</Link><span>{t('footer.cookies', 'Cookies')}</span></div>
             <LanguageSwitcher />
           </div>
         </div>

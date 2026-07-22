@@ -12,10 +12,12 @@ import NavigationBadge from '../navigation/NavigationBadge.jsx'
 import RoleSidebar from '../navigation/RoleSidebar.jsx'
 import LanguageSwitcher from '../language/LanguageSwitcher.jsx'
 import PageOutlet from '../motion/PageOutlet.jsx'
+import { useTranslation } from '../../i18n/useTranslation.js'
 
 const SIDEBAR_STORAGE_KEY = 'sidebar_collapsed_v2'
 
 export default function AppShell({ section = 'user' }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
@@ -34,7 +36,7 @@ export default function AppShell({ section = 'user' }) {
   }
 
   if (loggingOut) {
-    return <div className="flex min-h-screen items-center justify-center bg-slate-50 text-sm font-medium text-slate-600">Signing you out...</div>
+    return <div className="flex min-h-screen items-center justify-center bg-slate-50 text-sm font-medium text-slate-600">{t('appshell.signingOut', 'Signing you out...')}</div>
   }
 
   return (
@@ -44,21 +46,21 @@ export default function AppShell({ section = 'user' }) {
         <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
           <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
             <div className="flex min-w-0 items-center gap-3">
-              <button type="button" onClick={() => setMobileMenuOpen((current) => !current)} className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 xl:hidden" aria-label="Toggle navigation menu"><Menu className="h-5 w-5" /></button>
+              <button type="button" onClick={() => setMobileMenuOpen((current) => !current)} className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 xl:hidden" aria-label={t('appshell.toggleNav', 'Toggle navigation menu')}><Menu className="h-5 w-5" /></button>
               <Link to="/" className="flex min-w-0 items-center gap-2 font-black text-slate-950 xl:hidden">
                 <img src="/applogo.png" alt={APP_NAME} className="h-10 w-10 shrink-0 rounded-2xl object-cover shadow-md shadow-teal-100" />
                 <span className="hidden max-w-[150px] truncate sm:inline">{APP_NAME}</span>
               </Link>
-              <button type="button" onClick={() => setSidebarCollapsed((current) => !current)} className="hidden h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 transition hover:bg-teal-50 hover:text-teal-700 xl:inline-flex" aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>{sidebarCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}</button>
-              <div className="hidden min-w-0 xl:block"><p className="truncate text-sm font-semibold capitalize text-slate-500">{section} area</p><h1 className="truncate text-lg font-bold text-slate-950">Welcome back, {user?.name}</h1></div>
+              <button type="button" onClick={() => setSidebarCollapsed((current) => !current)} className="hidden h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 transition hover:bg-teal-50 hover:text-teal-700 xl:inline-flex" aria-label={sidebarCollapsed ? t('appshell.expandSidebar', 'Expand sidebar') : t('appshell.collapseSidebar', 'Collapse sidebar')}>{sidebarCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}</button>
+              <div className="hidden min-w-0 xl:block"><p className="truncate text-sm font-semibold capitalize text-slate-500">{t('appshell.area', { section, defaultValue: '{{section}} area' })}</p><h1 className="truncate text-lg font-bold text-slate-950">{t('appshell.welcomeBack', { name: user?.name, defaultValue: 'Welcome back, {{name}}' })}</h1></div>
             </div>
 
             <div className="flex items-center gap-3">
-              <Link to="/" className="inline-flex h-11 items-center gap-2 rounded-2xl bg-slate-100 px-3 text-sm font-semibold text-slate-700 transition hover:bg-teal-50 hover:text-teal-700 sm:px-4"><Home className="h-4 w-4" /><span className="hidden sm:inline">Home</span></Link>
-              <Link to={getNotificationPathByRole(role)} className="relative hidden xl:inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700"><span className="sr-only">Notifications</span><Bell className="h-5 w-5" /><span className="absolute -right-1 -top-1"><NavigationBadge count={unreadCount} /></span></Link>
-              <Link to="/profile" className="rounded-full focus:outline-none focus:ring-4 focus:ring-teal-100" title="Open profile"><Avatar name={user?.name} src={user?.avatar} /></Link>
+              <Link to="/" className="inline-flex h-11 items-center gap-2 rounded-2xl bg-slate-100 px-3 text-sm font-semibold text-slate-700 transition hover:bg-teal-50 hover:text-teal-700 sm:px-4"><Home className="h-4 w-4" /><span className="hidden sm:inline">{t('home', 'Home')}</span></Link>
+              <Link to={getNotificationPathByRole(role)} className="relative hidden xl:inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700"><span className="sr-only">{t('nav.notifications', 'Notifications')}</span><Bell className="h-5 w-5" /><span className="absolute -right-1 -top-1"><NavigationBadge count={unreadCount} /></span></Link>
+              <Link to="/profile" className="rounded-full focus:outline-none focus:ring-4 focus:ring-teal-100" title={t('appshell.openProfile', 'Open profile')}><Avatar name={user?.name} src={user?.avatar} /></Link>
               <Link to="/profile" className="hidden text-right md:block"><p className="text-sm font-bold text-slate-950 hover:text-teal-700">{user?.name}</p><p className="text-xs capitalize text-slate-500">{role}</p></Link>
-              <button type="button" onClick={handleLogout} className="hidden xl:inline-flex"><Button variant="secondary">Logout</Button></button>
+              <button type="button" onClick={handleLogout} className="hidden xl:inline-flex"><Button variant="secondary">{t('logout', 'Logout')}</Button></button>
             </div>
           </div>
         </header>

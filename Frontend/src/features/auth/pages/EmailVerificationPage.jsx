@@ -1,4 +1,4 @@
-﻿import { MailCheck, RefreshCw, ShieldCheck } from 'lucide-react'
+import { MailCheck, RefreshCw, ShieldCheck } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import Alert from '../../../shared/components/feedback/Alert.jsx'
@@ -72,7 +72,7 @@ export default function EmailVerificationPage() {
           <h2 className="mt-6 text-3xl font-black leading-tight">{t('auth.verifyEmailTitle')}</h2>
           <p className="mt-3 text-sm leading-7 text-slate-200">{t('auth.verifyEmailDescription')}</p>
           <div className="mt-6 rounded-3xl bg-white/10 p-5 backdrop-blur">
-            <p className="text-xs font-bold uppercase tracking-wide text-teal-100">Verification email sent to</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-teal-100">{t('auth.verificationEmailSentTo', 'Verification email sent to')}</p>
             <p className="mt-2 text-lg font-black">{maskedEmail}</p>
           </div>
         </section>

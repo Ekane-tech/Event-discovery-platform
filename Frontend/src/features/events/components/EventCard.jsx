@@ -11,9 +11,11 @@ import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
 import { formatDate } from '../../../shared/utils/formatDate.js'
 import { formatPrice } from '../../../shared/utils/currency.js'
 import { getEventLifecycle } from '../utils/eventLifecycle.js'
+import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
 export default function EventCard({ event }) {
   const location = useLocation()
+  const { t } = useTranslation()
   const { isAuthenticated, role } = useAuth()
   const { isBookmarked, toggleBookmark } = useBookmarks()
   const bg = event.coverImage?.url || event.categoryImageUrl || '/hero-events.svg'
@@ -24,12 +26,12 @@ export default function EventCard({ event }) {
   async function handleBookmark(clickEvent) {
     clickEvent.preventDefault()
     clickEvent.stopPropagation()
-    if (!canBookmark) return toast.info('Sign in as an attendee to bookmark events.')
+    if (!canBookmark) return toast.info(t('events.card.signInToBookmark', 'Sign in as an attendee to bookmark events.'))
     try {
       const added = await toggleBookmark(event.id)
-      toast.success(added ? 'Event bookmarked.' : 'Bookmark removed.')
+      toast.success(added ? t('eventAction.bookmarkAdded', 'Event bookmarked successfully.') : t('eventAction.bookmarkRemoved', 'Bookmark removed successfully.'))
     } catch (error) {
-      toast.error(getApiErrorMessage(error, 'Unable to update bookmark.'))
+      toast.error(getApiErrorMessage(error, t('eventAction.bookmarkUpdateFailed', 'Unable to update bookmark.')))
     }
   }
 
@@ -44,26 +46,26 @@ export default function EventCard({ event }) {
             <Clock className="h-5 w-5" />
           </span>
         )}
-        <button onClick={handleBookmark} className={`flex h-8 w-8 items-center justify-center rounded-full backdrop-blur transition ${bookmarked ? 'bg-yellow-400 text-slate-950' : 'bg-white/25 text-white hover:bg-white/40'}`} aria-label="Bookmark event">
+        <button onClick={handleBookmark} className={`flex h-8 w-8 items-center justify-center rounded-full backdrop-blur transition ${bookmarked ? 'bg-yellow-400 text-slate-950' : 'bg-white/25 text-white hover:bg-white/40'}`} aria-label={t('events.card.bookmarkAria', 'Bookmark event')}>
           <Bookmark className="h-5 w-5" fill={bookmarked ? 'currentColor' : 'none'} />
         </button>
       </div>
       <div className="absolute left-4 top-4 z-10 flex max-w-[calc(100%-5rem)] flex-wrap gap-2">
         {lifecycle.isPast && (
           <span className="inline-flex items-center gap-1 rounded-full bg-slate-950/85 px-3 py-1 text-xs font-black uppercase tracking-wide text-white ring-1 ring-white/20 backdrop-blur">
-            <Clock className="h-3.5 w-3.5" /> Past event
+            <Clock className="h-3.5 w-3.5" /> {t('events.card.pastEvent', 'Past event')}
           </span>
         )}
       </div>
       <div className="relative flex flex-1 flex-col justify-end p-5 text-white">
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          <Badge className="bg-white/20 text-white backdrop-blur">{event.category || 'Event'}</Badge>
+          <Badge className="bg-white/20 text-white backdrop-blur">{event.category || t('events.card.eventFallback', 'Event')}</Badge>
           <span className="rounded-full bg-teal-500 px-3 py-1 text-sm font-bold text-white">{formatPrice(event.price)}</span>
         </div>
         <h3 className="text-xl font-black leading-tight drop-shadow-sm">{event.title}</h3>
         <p className="mt-2 line-clamp-2 text-sm leading-6 text-white drop-shadow-sm">{event.description}</p>
         <div className="mt-4 grid gap-2 text-sm text-slate-100">
-          <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-teal-200" /> {event.city || 'Unknown city'}, {event.region || 'Unknown region'}</p>
+          <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-teal-200" /> {event.city || t('events.card.unknownCity', 'Unknown city')}, {event.region || t('events.card.unknownRegion', 'Unknown region')}</p>
           <p className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-teal-200" /> {formatDate(event.startDate)}</p>
         </div>
         <div className="mt-auto flex flex-col gap-3 pt-4">
@@ -77,13 +79,13 @@ export default function EventCard({ event }) {
               )}
             </Link>
             <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-200">Organized by</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-200">{t('events.card.organizedBy', 'Organized by')}</p>
               <Link to={event.organizerId ? `/organizers/${event.organizerId}` : '#'} onClick={(clickEvent) => clickEvent.stopPropagation()} className="truncate text-sm font-black text-white">
-                {event.organizerName || event.organizer || 'Organizer'}
+                {event.organizerName || event.organizer || t('events.card.organizerFallback', 'Organizer')}
               </Link>
             </div>
           </div>
-          <Button className="w-auto rounded-full bg-teal-600 px-5 text-white hover:bg-teal-700">View Details</Button>
+          <Button className="w-auto rounded-full bg-teal-600 px-5 text-white hover:bg-teal-700">{t('viewDetails', 'View Details')}</Button>
         </div>
       </div>
     </Link>

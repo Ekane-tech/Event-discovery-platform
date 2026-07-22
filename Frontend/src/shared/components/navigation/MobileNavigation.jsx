@@ -51,11 +51,11 @@ export default function MobileNavigation({ open, groups = [], unreadCount = 0, i
         </div>
         <div className="mt-5 flex gap-2">
           {isAuthenticated ? (
-            <Button variant="secondary" className="w-full" onClick={onLogout}>Logout</Button>
+            <Button variant="secondary" className="w-full" onClick={onLogout}>{t('logout', 'Logout')}</Button>
           ) : (
             <>
-              <Link to="/login" onClick={onClose} className="flex-1"><Button variant="secondary" className="w-full">Login</Button></Link>
-              <Link to="/register" onClick={onClose} className="flex-1"><Button className="w-full">Register</Button></Link>
+              <Link to="/login" onClick={onClose} className="flex-1"><Button variant="secondary" className="w-full">{t('login', 'Login')}</Button></Link>
+              <Link to="/register" onClick={onClose} className="flex-1"><Button className="w-full">{t('register', 'Register')}</Button></Link>
             </>
           )}
         </div>
@@ -65,7 +65,7 @@ export default function MobileNavigation({ open, groups = [], unreadCount = 0, i
 
   return (
     <div className="fixed inset-0 z-[9999] xl:hidden">
-      <button type="button" aria-label="Close navigation" className="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px]" onClick={onClose} />
+      <button type="button" aria-label={t('appshell.closeNav', 'Close navigation')} className="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px]" onClick={onClose} />
       <aside className="relative flex h-full w-[62vw] min-w-[260px] max-w-[340px] animate-[slideInLeft_.22s_ease-out] flex-col overflow-hidden border-r border-slate-200 bg-white shadow-2xl">
         <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-5">
           <img src="/applogo.png" alt={APP_NAME} className="h-12 w-12 shrink-0 rounded-2xl object-cover shadow-lg shadow-teal-200" />
@@ -82,8 +82,8 @@ export default function MobileNavigation({ open, groups = [], unreadCount = 0, i
             </div>
           ) : (
             <div className="rounded-2xl bg-slate-50 p-4">
-              <p className="font-bold text-slate-950">Welcome</p>
-              <p className="text-sm text-slate-600">Discover events across Cameroon.</p>
+              <p className="font-bold text-slate-950">{t('mobileNav.welcome', 'Welcome')}</p>
+              <p className="text-sm text-slate-600">{t('mobileNav.guest', 'Discover events across Cameroon.')}</p>
             </div>
           )}
         </div>
@@ -118,11 +118,11 @@ export default function MobileNavigation({ open, groups = [], unreadCount = 0, i
 
         <div className="border-t border-slate-100 p-4">
           {isAuthenticated ? (
-            <Button variant="secondary" className="w-full" onClick={onLogout}>Logout</Button>
+            <Button variant="secondary" className="w-full" onClick={onLogout}>{t('logout', 'Logout')}</Button>
           ) : (
             <div className="grid gap-2">
-              <Link to="/login" onClick={onClose}><Button variant="secondary" className="w-full">Login</Button></Link>
-              <Link to="/register" onClick={onClose}><Button className="w-full">Register</Button></Link>
+              <Link to="/login" onClick={onClose}><Button variant="secondary" className="w-full">{t('login', 'Login')}</Button></Link>
+              <Link to="/register" onClick={onClose}><Button className="w-full">{t('register', 'Register')}</Button></Link>
             </div>
           )}
         </div>

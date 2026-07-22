@@ -1,4 +1,4 @@
-﻿import { ArrowRight, CalendarCheck, CheckCircle2, Ticket, Users } from 'lucide-react'
+import { ArrowRight, CalendarCheck, CheckCircle2, Ticket, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Alert from '../../../shared/components/feedback/Alert.jsx'
@@ -88,7 +88,7 @@ export default function RegisterPage() {
             <div className="mt-6 grid gap-3 text-sm text-slate-100">
               <p className="flex gap-2"><CheckCircle2 className="h-5 w-5 text-teal-300" /> Discover events across Cameroon.</p>
               <p className="flex gap-2"><CheckCircle2 className="h-5 w-5 text-teal-300" /> Manage registrations, tickets and check-ins.</p>
-              <p className="flex gap-2"><CheckCircle2 className="h-5 w-5 text-teal-300" /> Receive important updates by email.</p>
+              <p className="flex gap-2"><CheckCircle2 className="h-5 w-5 text-teal-300" /> {t('auth.registerBenefit2', 'Receive important updates by email.')}</p>
             </div>
           </div>
         </div>

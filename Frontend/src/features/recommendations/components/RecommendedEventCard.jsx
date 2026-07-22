@@ -9,9 +9,11 @@ import { formatPrice } from '../../../shared/utils/currency.js'
 import RecommendationReasons from './RecommendationReasons.jsx'
 import RecommendationScoreBadge from './RecommendationScoreBadge.jsx'
 import { getEventLifecycle } from '../../events/utils/eventLifecycle.js'
+import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
 export default function RecommendedEventCard({ event }) {
   const location = useLocation()
+  const { t } = useTranslation()
   const { isBookmarked, toggleBookmark } = useBookmarks()
   const bookmarked = isBookmarked(event.id)
   const bg = event.coverImage?.url || '/hero-events.svg'
@@ -22,9 +24,9 @@ export default function RecommendedEventCard({ event }) {
     clickEvent.stopPropagation()
     try {
       const added = await toggleBookmark(event.id)
-      toast.success(added ? 'Event bookmarked.' : 'Bookmark removed.')
+      toast.success(added ? t('eventAction.bookmarkAdded', 'Event bookmarked successfully.') : t('eventAction.bookmarkRemoved', 'Bookmark removed successfully.'))
     } catch {
-      toast.error('Unable to update bookmark.')
+      toast.error(t('eventAction.bookmarkUpdateFailed', 'Unable to update bookmark.'))
     }
   }
 
@@ -47,18 +49,18 @@ export default function RecommendedEventCard({ event }) {
         <div className="absolute left-4 top-4 z-10 flex max-w-[calc(100%-5rem)] flex-wrap gap-2">
           {lifecycle.isPast && (
             <span className="inline-flex items-center gap-1 rounded-full bg-slate-950/85 px-3 py-1 text-xs font-black uppercase tracking-wide text-white ring-1 ring-white/20 backdrop-blur">
-              <Clock className="h-3.5 w-3.5" /> Past event
+              <Clock className="h-3.5 w-3.5" /> {t('events.card.pastEvent', 'Past event')}
             </span>
           )}
         </div>
         <div className="absolute bottom-4 left-4 flex flex-wrap gap-2">
-          <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur">{event.category || 'Event'}</span>
+          <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur">{event.category || t('events.card.eventFallback', 'Event')}</span>
           <RecommendationScoreBadge score={event.recommendationScore} />
         </div>
       </div>
 
       <div className="flex flex-1 flex-col p-5">
-        <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-teal-700">Recommended for you</div>
+        <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-teal-700">{t('recommendations.recommendedForYou', 'Recommended for you')}</div>
         <h3 className="text-xl font-black leading-tight text-slate-950">{event.title}</h3>
         <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{event.description}</p>
         <RecommendationReasons reasons={event.recommendationReasons} />
@@ -77,15 +79,15 @@ export default function RecommendedEventCard({ event }) {
               )}
             </Link>
             <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Organized by</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{t('events.card.organizedBy', 'Organized by')}</p>
               <Link to={event.organizerId ? `/organizers/${event.organizerId}` : '#'} onClick={(clickEvent) => clickEvent.stopPropagation()} className="truncate text-sm font-black text-slate-950">
-                {event.organizerName || event.organizer || 'Organizer'}
+                {event.organizerName || event.organizer || t('events.card.organizerFallback', 'Organizer')}
               </Link>
             </div>
           </div>
           <div className="flex items-center justify-between gap-2">
             <span className="font-semibold text-slate-900">{formatPrice(event.price)}</span>
-            <Button className="rounded-full bg-teal-600 px-5 text-white hover:bg-teal-700">View Details</Button>
+            <Button className="rounded-full bg-teal-600 px-5 text-white hover:bg-teal-700">{t('viewDetails', 'View Details')}</Button>
           </div>
         </div>
       </div>
