@@ -122,7 +122,8 @@
     "passwordLetter": "Password must contain at least one letter.",
     "passwordNumber": "Password must contain at least one number.",
     "passwordsNotMatch": "Passwords do not match.",
-    "creatingAccount": "Creating account..."
+    "creatingAccount": "Creating account...",
+    "organizerName": "Organizer name"
   },
   "eventAction": {
     "title": "Event actions",
@@ -452,6 +453,21 @@
     "notificationTitle": "Notification settings",
     "notificationDescription": "Choose what you want to receive and how you want to receive it.",
     "securityTitle": "Security settings",
-    "securityDescription": "Update your password and keep your account protected."
+    "securityDescription": "Update your password and keep your account protected.",
+    "accountTitle": "Account settings",
+    "accountDescription": "Manage profile, phone, city, region, photo and bio.",
+    "appearanceTitle": "Appearance",
+    "appearanceDescription": "Choose how Mboa Events looks. Dark mode is easier on the eyes at night.",
+    "appearanceCardDescription": "Switch between light and dark mode.",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
+    "appearanceHint": "Your choice is saved on this device.",
+    "appearanceActive": "Currently active"
+  },
+  "theme": {
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode"
   }
 }

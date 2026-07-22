@@ -38,7 +38,8 @@
     "adminReports": "Signalements",
     "announcements": "Annonces",
     "adminFeedback": "Avis",
-    "admin": "Admin"
+    "admin": "Admin",
+    "settings": "Paramètres"
   },
   "home": {
     "badge": "Decouvrez les événements du Mboa",
@@ -120,7 +121,9 @@
     "passwordLetter": "Le mot de passe doit contenir au moins une lettre.",
     "passwordNumber": "Le mot de passe doit contenir au moins un chiffre.",
     "passwordsNotMatch": "Les mots de passe ne correspondent pas.",
-    "creatingAccount": "Création du compte..."
+    "creatingAccount": "Création du compte...",
+    "organizerName": "Nom de l'organisateur",
+    "accountProtected": "Votre compte est protégé"
   },
   "eventAction": {
     "title": "Actions d'événement",
@@ -150,7 +153,8 @@
     "cancelSuccess": "Inscription annulée avec succès.",
     "cancelFailed": "Impossible d'annuler l'inscription.",
     "reportSubmitted": "Signalement soumis avec succès.",
-    "reportSubmittedReview": "Signalement soumis avec succès. Notre équipe de modération l'examinera."
+    "reportSubmittedReview": "Signalement soumis avec succès. Notre équipe de modération l'examinera.",
+    "reportEvent": "Signaler l'événement"
   },
   "event": {
     "defaultCategory": "Événement",
@@ -449,6 +453,21 @@
     "notificationTitle": "Paramètres de notification",
     "notificationDescription": "Choisissez les notifications et les canaux que vous voulez utiliser.",
     "securityTitle": "Sécurité",
-    "securityDescription": "Mettez à jour votre mot de passe et protégez votre compte."
+    "securityDescription": "Mettez à jour votre mot de passe et protégez votre compte.",
+    "accountTitle": "Paramètres du compte",
+    "accountDescription": "Gérez votre profil, le téléphone, la ville, la région, la photo et la bio.",
+    "appearanceTitle": "Apparence",
+    "appearanceDescription": "Choisissez l'apparence de Mboa Events. Le mode sombre est plus reposant pour les yeux la nuit.",
+    "appearanceCardDescription": "Basculez entre le mode clair et le mode sombre.",
+    "theme": "Thème",
+    "themeLight": "Clair",
+    "themeDark": "Sombre",
+    "themeSystem": "Système",
+    "appearanceHint": "Votre choix est enregistré sur cet appareil.",
+    "appearanceActive": "Actuellement actif"
+  },
+  "theme": {
+    "switchToLight": "Passer en mode clair",
+    "switchToDark": "Passer en mode sombre"
   }
 }

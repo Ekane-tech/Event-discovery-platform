@@ -56,6 +56,7 @@ import SecuritySettingsPage from '../../features/settings/pages/SecuritySettings
 import NotificationSettingsPage from '../../features/settings/pages/NotificationSettingsPage.jsx'
 import LanguageSettingsPage from '../../features/settings/pages/LanguageSettingsPage.jsx'
 import AccountSettingsPage from '../../features/settings/pages/AccountSettingsPage.jsx'
+import AppearanceSettingsPage from '../../features/settings/pages/AppearanceSettingsPage.jsx'
 import SearchResultsPage from '../../features/search/pages/SearchResultsPage.jsx'
 import RecommendedEventsPage from '../../features/recommendations/pages/RecommendedEventsPage.jsx'
 import StatisticsPage from '../../features/statistics/pages/StatisticsPage.jsx'
@@ -130,6 +131,7 @@ export default function AppRouter() {
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/settings/account" element={<AccountSettingsPage />} />
               <Route path="/settings/language" element={<LanguageSettingsPage />} />
+              <Route path="/settings/appearance" element={<AppearanceSettingsPage />} />
               <Route path="/settings/notifications" element={<NotificationSettingsPage />} />
               <Route path="/settings/security" element={<SecuritySettingsPage />} />
             </Route>

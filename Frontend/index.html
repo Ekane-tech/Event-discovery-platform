@@ -7,6 +7,18 @@
     <link rel="apple-touch-icon" href="/applogo.png" />
     <meta name="description" content="Mboa Events 237 — Your gateway to Cameroon’s events." />
     <title>Mboa Events 237</title>
+    <script>
+      // Apply the saved theme before paint to avoid a flash of the wrong theme.
+      (function () {
+        try {
+          var saved = localStorage.getItem('theme')
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+          var theme = saved === 'light' || saved === 'dark' ? saved : (prefersDark ? 'dark' : 'light')
+          document.documentElement.classList.add(theme)
+          document.documentElement.style.colorScheme = theme
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,4 +1,10 @@
-@import "tailwindcss";
+/*
+ * Global custom styles for Mboa Events (radar-bloom, datepicker sizing,
+ * shared keyframes/animations). This file is a partial imported by
+ * src/index.css — it must NOT re-import Tailwind, which index.css already
+ * pulls in once (a duplicate @import "tailwindcss" would double-emit the
+ * framework).
+ */
 
 /* ── mboa-radar-bloom : urgent-deadline radar pulse ─────────────────────── */
 

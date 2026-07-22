@@ -10,6 +10,7 @@ import Avatar from '../ui/Avatar.jsx'
 import MobileNavigation from '../navigation/MobileNavigation.jsx'
 import NavigationBadge from '../navigation/NavigationBadge.jsx'
 import LanguageSwitcher from '../language/LanguageSwitcher.jsx'
+import ThemeToggle from '../theme/ThemeToggle.jsx'
 import { useTranslation } from '../../i18n/useTranslation.js'
 
 const navLinkClass = ({ isActive }) =>
@@ -55,6 +56,7 @@ export default function Navbar() {
           
           <div className="hidden items-center gap-2 lg:flex">
             {/* <LanguageSwitcher compact /> */}
+            <ThemeToggle />
             {isAuthenticated ? (
               <>
                 <Link to="notifications" className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700">
@@ -66,23 +68,26 @@ export default function Navbar() {
                 <Link to="/profile" className="max-w-48 truncate text-sm text-slate-600 hover:text-teal-700">
                   {user?.name} <span className="text-slate-400">({role})</span>
                 </Link>
-                <button type="button" onClick={handleLogout}><Button variant="secondary">Logout</Button></button>
+                <button type="button" onClick={handleLogout}><Button variant="secondary">{t('logout', 'Logout')}</Button></button>
               </>
             ) : (
               <>
                 <Link to="/public-notifications" className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700">
                   <Bell className="h-5 w-5" />
                 </Link>
-                <Link to="/feedback"><Button variant="secondary">Feedback</Button></Link>
-                <Link to="/login"><Button variant="secondary">Login</Button></Link>
-                <Link to="/register"><Button>Register</Button></Link>
+                <Link to="/feedback"><Button variant="secondary">{t('feedback', 'Feedback')}</Button></Link>
+                <Link to="/login"><Button variant="secondary">{t('login', 'Login')}</Button></Link>
+                <Link to="/register"><Button>{t('register', 'Register')}</Button></Link>
               </>
             )}
           </div>
-          <button type="button" onClick={() => setMobileMenuOpen((current) => !current)} className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold text-slate-700 lg:hidden" aria-label="Toggle navigation menu">
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            {isAuthenticated && <NavigationBadge count={unreadCount} />}
-          </button>
+          <div className="flex items-center gap-2 lg:hidden">
+            <ThemeToggle />
+            <button type="button" onClick={() => setMobileMenuOpen((current) => !current)} className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold text-slate-700 lg:hidden" aria-label="Toggle navigation menu">
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {isAuthenticated && <NavigationBadge count={unreadCount} />}
+            </button>
+          </div>
         </div>
 
         {/* Menu pour les visiteurs (Non connectés) : affichage en Dropdown */}
