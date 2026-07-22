@@ -32,3 +32,16 @@ SQLSTATE[HY000] [2002] No connection could be made because the target machine ac
 
 
 ok the two next improvements of the app will be the location management with google map and the recommendation system for a for events with ai, those are the two major features to come but before that we need to make the event card better visually because we need to see the company(organizer name) and logo(if exist) on it and also a badge for verified organizers, also a page where u can search for an organizer and his particular events. 
+
+Which money-flow model do you want for organizers?
+
+Organizer wallet + on-demand payouts
+Platform holds funds, tracks each organizer's balance; organizer requests a withdrawal, admin approves & sends. Best fit for your current single Campay account. RECOMMENDED.
+
+Direct split at payment time
+Campay sends the organizer's share straight to them per transaction (needs Campay split-payout support + verified payout details).
+
+Scheduled auto-payouts
+Like wallet, but payouts run automatically (weekly / X days after event) via Campay disbursement API.
+Revise options or write your own...
+Submit

@@ -1,0 +1,70 @@
+From fdc344f604a1a68560f53719919b32de6b2517d8 Mon Sep 17 00:00:00 2001
+From: ekane bryan <ekanebryan5@gmail.com>
+Date: Wed, 22 Jul 2026 17:58:27 +0000
+Subject: [PATCH] feat(map): 'Get directions' button on the event details page
+
+Adds a button under the location map that opens Google Maps
+directions to the event's coordinates in a new tab (free deep link,
+no API key). EN/FR key events.details.getDirections.
+---
+ .../src/features/events/pages/EventDetailsPage.jsx     | 10 +++++++++-
+ Frontend/src/shared/i18n/locales/en/common.json        |  3 ++-
+ Frontend/src/shared/i18n/locales/fr/common.json        |  3 ++-
+ 3 files changed, 13 insertions(+), 3 deletions(-)
+
+diff --git a/Frontend/src/features/events/pages/EventDetailsPage.jsx b/Frontend/src/features/events/pages/EventDetailsPage.jsx
+index a91ca08..76f7d72 100644
+--- a/Frontend/src/features/events/pages/EventDetailsPage.jsx
++++ b/Frontend/src/features/events/pages/EventDetailsPage.jsx
+@@ -1,4 +1,4 @@
+-import { CalendarDays, ChevronLeft, ChevronRight, Images, MapPin, Share2, Users } from 'lucide-react'
++import { CalendarDays, ChevronLeft, ChevronRight, Images, MapPin, Navigation, Share2, Users } from 'lucide-react'
+ import { toast } from 'sonner'
+ import { useEffect, useMemo, useState } from 'react'
+ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+@@ -197,6 +197,14 @@ export default function EventDetailsPage() {
+                 <div className="mt-6">
+                   <h3 className="mb-2 text-sm font-bold text-slate-950">{t('events.details.mapHeading', 'Location map')}</h3>
+                   <LocationMap latitude={event.latitude} longitude={event.longitude} height={300} />
++                  <a
++                    href={`https://www.google.com/maps/dir/?api=1&destination=${event.latitude},${event.longitude}`}
++                    target="_blank"
++                    rel="noreferrer"
++                    className="mt-3 inline-flex"
++                  >
++                    <Button type="button" variant="secondary"><Navigation className="mr-2 h-4 w-4" />{t('events.details.getDirections', 'Get directions')}</Button>
++                  </a>
+                 </div>
+               )}
+             </Card>
+diff --git a/Frontend/src/shared/i18n/locales/en/common.json b/Frontend/src/shared/i18n/locales/en/common.json
+index 7e7bc09..8b85431 100644
+--- a/Frontend/src/shared/i18n/locales/en/common.json
++++ b/Frontend/src/shared/i18n/locales/en/common.json
+@@ -238,7 +238,8 @@
+       "galleryImageLabel": "Show gallery image {{index}}",
+       "previousGalleryImages": "Previous gallery images",
+       "nextGalleryImages": "Next gallery images",
+-      "mapHeading": "Location map"
++      "mapHeading": "Location map",
++      "getDirections": "Get directions"
+     },
+     "create": {
+       "title": "Create Event",
+diff --git a/Frontend/src/shared/i18n/locales/fr/common.json b/Frontend/src/shared/i18n/locales/fr/common.json
+index c44276e..1f5c62e 100644
+--- a/Frontend/src/shared/i18n/locales/fr/common.json
++++ b/Frontend/src/shared/i18n/locales/fr/common.json
+@@ -238,7 +238,8 @@
+       "galleryImageLabel": "Afficher l'image de galerie {{index}}",
+       "previousGalleryImages": "Images de galerie précédentes",
+       "nextGalleryImages": "Images de galerie suivantes",
+-      "mapHeading": "Carte du lieu"
++      "mapHeading": "Carte du lieu",
++      "getDirections": "Obtenir l'itinéraire"
+     },
+     "create": {
+       "title": "Créer un événement",
+-- 
+2.47.3
+
