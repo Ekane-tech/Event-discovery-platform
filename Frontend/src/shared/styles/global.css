@@ -12,7 +12,6 @@
 
 body {
   margin: 0;
-  min-width: 320px;
   min-height: 100vh;
 }
 
@@ -206,119 +205,29 @@ select {
 
 @media (max-width: 380px) {
   .mboa-datepicker-popper .react-datepicker {
-    width: min(100%, 20.5rem) !important;
-  }
-
-  .mboa-datepicker-popper .react-datepicker__day-name,
-  .mboa-datepicker-popper .react-datepicker__day {
-    width: 1.58rem !important;
-    height: 1.58rem !important;
-    line-height: 1.58rem !important;
-    font-size: 0.64rem !important;
+    transform: scale(0.90);
+    transform-origin: top center;
   }
 }
 
 @media (max-width: 340px) {
   .mboa-datepicker-popper .react-datepicker {
-    width: min(100%, 18rem) !important;
-    font-size: 0.72rem !important;
+    transform: scale(0.82);
+    transform-origin: top center;
   }
+}
 
-  .mboa-datepicker-popper .react-datepicker__header {
-    padding: 0.35rem 0.25rem 0.25rem !important;
-  }
-
-  .mboa-datepicker-popper .react-datepicker__current-month {
-    margin-bottom: 0.25rem !important;
-    font-size: 0.78rem !important;
-  }
-
-  .mboa-datepicker-popper .react-datepicker__navigation {
-    top: 0.45rem !important;
-    width: 0.6rem !important;
-    height: 0.6rem !important;
-  }
-
-  .mboa-datepicker-popper .react-datepicker__month {
-    margin: 0.15rem !important;
-  }
-
-  .mboa-datepicker-popper .react-datepicker__day-name,
-  .mboa-datepicker-popper .react-datepicker__day {
-    width: 1.35rem !important;
-    height: 1.35rem !important;
-    margin: 0.05rem !important;
-    line-height: 1.35rem !important;
-    font-size: 0.58rem !important;
-  }
-
-  .mboa-datepicker-popper .react-datepicker-time__header {
-    padding: 0.3rem 0 0.15rem !important;
-    font-size: 0.7rem !important;
-  }
-
-  .mboa-datepicker-popper .react-datepicker__time-list {
-    max-height: 2.75rem !important;
-    padding: 0.25rem !important;
-    gap: 0.25rem !important;
-  }
-
-  .mboa-datepicker-popper .react-datepicker__time-list-item {
-    min-width: 4rem !important;
-    padding: 0.3rem 0.5rem !important;
-    font-size: 0.65rem !important;
+@media (max-width: 300px) {
+  .mboa-datepicker-popper .react-datepicker {
+    transform: scale(0.74);
+    transform-origin: top center;
   }
 }
 
 @media (max-width: 280px) {
   .mboa-datepicker-popper .react-datepicker {
-    width: min(100%, 15.5rem) !important;
-    font-size: 0.65rem !important;
-  }
-
-  .mboa-datepicker-popper .react-datepicker__header {
-    padding: 0.25rem 0.15rem 0.15rem !important;
-  }
-
-  .mboa-datepicker-popper .react-datepicker__current-month {
-    margin-bottom: 0.15rem !important;
-    font-size: 0.7rem !important;
-  }
-
-  .mboa-datepicker-popper .react-datepicker__navigation {
-    top: 0.35rem !important;
-    width: 0.5rem !important;
-    height: 0.5rem !important;
-  }
-
-  .mboa-datepicker-popper .react-datepicker__month {
-    margin: 0.1rem !important;
-  }
-
-  .mboa-datepicker-popper .react-datepicker__day-name,
-  .mboa-datepicker-popper .react-datepicker__day {
-    width: 1.15rem !important;
-    height: 1.15rem !important;
-    margin: 0.03rem !important;
-    line-height: 1.15rem !important;
-    font-size: 0.52rem !important;
-  }
-
-  .mboa-datepicker-popper .react-datepicker-time__header {
-    padding: 0.25rem 0 0.1rem !important;
-    font-size: 0.62rem !important;
-  }
-
-  .mboa-datepicker-popper .react-datepicker__time-list {
-    max-height: 2.25rem !important;
-    padding: 0.2rem !important;
-    gap: 0.2rem !important;
-  }
-
-  .mboa-datepicker-popper .react-datepicker__time-list-item {
-    min-width: 3.5rem !important;
-    padding: 0.25rem 0.4rem !important;
-    font-size: 0.58rem !important;
+    transform: scale(0.68);
+    transform-origin: top center;
   }
 }
 
