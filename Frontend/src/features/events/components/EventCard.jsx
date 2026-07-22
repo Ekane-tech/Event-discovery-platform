@@ -61,7 +61,7 @@ export default function EventCard({ event }) {
           <span className="rounded-full bg-teal-500 px-3 py-1 text-sm font-bold text-white">{formatPrice(event.price)}</span>
         </div>
         <h3 className="text-xl font-black leading-tight drop-shadow-sm">{event.title}</h3>
-        <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-100 drop-shadow-sm">{event.description}</p>
+        <p className="mt-2 line-clamp-2 text-sm leading-6 text-white drop-shadow-sm">{event.description}</p>
         <div className="mt-4 grid gap-2 text-sm text-slate-100">
           <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-teal-200" /> {event.city || 'Unknown city'}, {event.region || 'Unknown region'}</p>
           <p className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-teal-200" /> {formatDate(event.startDate)}</p>

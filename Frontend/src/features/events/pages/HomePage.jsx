@@ -92,7 +92,7 @@ export default function HomePage()  {
     <div>
       <section className="relative min-h-112.5 overflow-visible bg-cover bg-center text-white" style={{ backgroundImage: 'url(/Hero-Image.jpg)' }}>
         <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-8">
-          <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100 backdrop-blur animate-fade-in-up"> {t('home.badge')}</p>
+          <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-white backdrop-blur animate-fade-in-up"> {t('home.badge')}</p>
           <h1 className="mt-4 max-w-4xl text-3xl font-black leading-tight md:text-4xl animate-fade-in-up" style={{ animationDelay: '0.1s' }}>{t('home.title')}</h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-100 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>{t('home.subtitle')}</p>
 
