@@ -16,7 +16,9 @@ async function geocode(query) {
 /**
  * Form-friendly location picker: search an address (Nominatim) + a draggable map.
  * Calls onChange({ latitude, longitude, venue? }). `venue` is only sent when a
- * geocoded place name is found and the host hasn't typed one yet.
+ * place is found AND the host hasn't typed one yet — and only the short place
+ * name (first segment of the address), e.g. "Akwa Palace", not the full address
+ * (city/region are stored separately).
  */
 export default function LocationPicker({ value, onChange, height = 280 }) {
   const { venue, latitude, longitude } = value
@@ -35,7 +37,7 @@ export default function LocationPicker({ value, onChange, height = 280 }) {
         setError('Location not found. Try a more specific address or place name.')
         return
       }
-      onChange({ latitude: result.lat, longitude: result.lng, venue: venue ? undefined : result.name })
+      onChange({ latitude: result.lat, longitude: result.lng, venue: venue ? undefined : result.name.split(',')[0].trim() })
     } catch {
       setError('Unable to search right now. You can still drag the pin to set the location.')
     } finally {
