@@ -27,6 +27,7 @@ export const ORGANIZER_NAV_LINKS = [
   { label: 'Organizer Dashboard', labelKey: 'nav.organizerDashboard', to: '/organizer/dashboard', icon: 'layoutDashboard' },
   { label: 'My Events', labelKey: 'nav.myEvents', to: '/organizer/events', icon: 'calendarDays' },
   { label: 'Statistics', labelKey: 'nav.statistics', to: '/organizer/statistics', icon: 'barChart3' },
+  { label: 'Wallet', labelKey: 'nav.wallet', to: '/organizer/wallet', icon: 'wallet' },
   { label: 'Notifications', labelKey: 'nav.notifications', to: '/notifications', badge: 'notifications', icon: 'bell' },
   { label: 'Settings', labelKey: 'nav.settings', to: '/settings', icon: 'settings' },
 ]
@@ -36,6 +37,7 @@ export const ADMIN_NAV_LINKS = [
   { label: 'Users', labelKey: 'nav.users', to: '/admin/users', icon: 'users' },
   { label: 'Events', labelKey: 'nav.events', to: '/admin/events', icon: 'calendarCheck' },
   { label: 'Payments', labelKey: 'nav.payments', to: '/admin/payments', icon: 'creditCard' },
+  { label: 'Payouts', labelKey: 'nav.payouts', to: '/admin/payouts', icon: 'wallet' },
   { label: 'Categories', labelKey: 'nav.categories', to: '/admin/categories', icon: 'boxes' },
   { label: 'Locations', labelKey: 'nav.locations', to: '/admin/locations', icon: 'mapPin' },
   { label: 'Reports', labelKey: 'nav.adminReports', to: '/admin/reports', icon: 'barChart3' },

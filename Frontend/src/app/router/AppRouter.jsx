@@ -26,6 +26,7 @@ import UserDashboardPage from '../../features/dashboard/user/pages/UserDashboard
 import OrganizerDashboardPage from '../../features/dashboard/organizer/pages/OrganizerDashboardPage.jsx'
 import OrganizerAttendeesPage from '../../features/dashboard/organizer/pages/OrganizerAttendeesPage.jsx'
 import OrganizerStatisticsPage from '../../features/dashboard/organizer/pages/OrganizerStatisticsPage.jsx'
+import OrganizerWalletPage from '../../features/wallet/pages/OrganizerWalletPage.jsx'
 import AdminDashboardPage from '../../features/dashboard/admin/pages/AdminDashboardPage.jsx'
 import AdminUsersPage from '../../features/dashboard/admin/pages/AdminUsersPage.jsx'
 import AdminEventsPage from '../../features/dashboard/admin/pages/AdminEventsPage.jsx'
@@ -35,6 +36,7 @@ import AdminReportsPage from '../../features/dashboard/admin/pages/AdminReportsP
 import AdminNotificationsPage from '../../features/dashboard/admin/pages/AdminNotificationsPage.jsx'
 import AdminFeedbackPage from '../../features/dashboard/admin/pages/AdminFeedbackPage.jsx'
 import AdminPaymentsPage from '../../features/dashboard/admin/pages/AdminPaymentsPage.jsx'
+import AdminPayoutsPage from '../../features/dashboard/admin/pages/AdminPayoutsPage.jsx'
 import AdminAuditLogsPage from '../../features/dashboard/admin/pages/AdminAuditLogsPage.jsx'
 import AdminEmailPage from '../../features/dashboard/admin/pages/AdminEmailPage.jsx'
 
@@ -147,6 +149,7 @@ export default function AppRouter() {
               <Route path="/organizer/events/:id/attendees" element={<OrganizerAttendeesPage />} />
               <Route path="/organizer/events/:id/scanner" element={<TicketScannerPage />} />
               <Route path="/organizer/statistics" element={<OrganizerStatisticsPage />} />
+              <Route path="/organizer/wallet" element={<OrganizerWalletPage />} />
             </Route>
           </Route>
 
@@ -156,6 +159,7 @@ export default function AppRouter() {
               <Route path="/admin/users" element={<AdminUsersPage />} />
               <Route path="/admin/events" element={<AdminEventsPage />} />
               <Route path="/admin/payments" element={<AdminPaymentsPage />} />
+              <Route path="/admin/payouts" element={<AdminPayoutsPage />} />
               <Route path="/admin/events/:id/details" element={<OrganizerEventDetailsPage />} />
               <Route path="/admin/events/:id/attendees" element={<OrganizerAttendeesPage />} />
               <Route path="/admin/events/:id/scanner" element={<TicketScannerPage />} />
