@@ -127,6 +127,18 @@ body {
 .dark .text-indigo-600 { color: #818cf8; }
 .dark .text-indigo-500 { color: #6366f1; }
 
+/* theme toggle button dark mode fixes */
+.dark .bg-slate-100 { background-color: #1e293b !important; }
+.dark .hover\:bg-teal-50:hover { background-color: #0f766e !important; }
+
+/* notification icon dark mode fixes */
+.dark .bg-slate-100 { background-color: #1e293b !important; }
+.dark .hover\:bg-teal-50:hover { background-color: #0f766e !important; }
+
+/* menu button dark mode fixes */
+.dark .border-slate-200 { border-color: #26324a !important; }
+.dark .text-slate-700 { color: #d3dbe8 !important; }
+
 /* ── Border / ring hairlines ───────────────────────────────────────────── */
 .dark .border-slate-200,
 .dark .border-slate-100 { border-color: #26324a; }

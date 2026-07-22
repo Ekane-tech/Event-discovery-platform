@@ -83,6 +83,11 @@ export default function Navbar() {
           </div>
           <div className="flex items-center gap-2 lg:hidden">
             <ThemeToggle />
+            {isAuthenticated && (
+              <Link to="/profile" className="rounded-full focus:outline-none focus:ring-4 focus:ring-teal-100" title="Open profile">
+                <Avatar name={user?.name} src={user?.avatar} className="h-9 w-9" />
+              </Link>
+            )}
             <button type="button" onClick={() => setMobileMenuOpen((current) => !current)} className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold text-slate-700 lg:hidden" aria-label="Toggle navigation menu">
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               {isAuthenticated && <NavigationBadge count={unreadCount} />}
