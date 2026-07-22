@@ -39,18 +39,14 @@ export default function EventCard({ event }) {
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/35 to-slate-950/5" />
       <div className="absolute right-4 top-4 z-10 flex gap-2">
         {!lifecycle.isPast && lifecycle.registrationDeadlineUrgent && (
-          <span className="mboa-radar-bloom flex h-11 w-11 items-center justify-center rounded-full bg-red-600 text-white shadow-lg shadow-red-950/30 ring-1 ring-white/30 backdrop-blur">
+          <span
+            className="mboa-radar-bloom flex h-8 w-8 items-center justify-center
+                      rounded-full bg-red-600 text-white shadow-lg shadow-red-950/30
+                      ring-1 ring-white/30 backdrop-blur"
+          >
+            {/* Ring 3 — ::before and ::after provide rings 1 & 2 via CSS */}
+            <span className="radar-ring-3" />
             <Clock className="h-5 w-5" />
-          </span>
-        )}
-        <button onClick={handleBookmark} className={`flex h-11 w-11 items-center justify-center rounded-full backdrop-blur transition ${bookmarked ? 'bg-yellow-400 text-slate-950' : 'bg-white/25 text-white hover:bg-white/40'}`} aria-label="Bookmark event">
-          <Bookmark className="h-5 w-5" fill={bookmarked ? 'currentColor' : 'none'} />
-        </button>
-      </div>
-      <div className="absolute left-4 top-4 z-10 flex max-w-[calc(100%-5rem)] flex-wrap gap-2">
-        {lifecycle.isPast && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-slate-950/85 px-3 py-1 text-xs font-black uppercase tracking-wide text-white ring-1 ring-white/20 backdrop-blur">
-            <Clock className="h-3.5 w-3.5" /> Past event
           </span>
         )}
       </div>
