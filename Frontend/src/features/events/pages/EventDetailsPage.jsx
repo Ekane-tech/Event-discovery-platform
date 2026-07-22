@@ -1,4 +1,4 @@
-import { CalendarDays, ChevronLeft, ChevronRight, Images, MapPin, Share2, Users } from 'lucide-react'
+import { CalendarDays, ChevronLeft, ChevronRight, Images, MapPin, Navigation, Share2, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
@@ -197,6 +197,14 @@ export default function EventDetailsPage() {
                 <div className="mt-6">
                   <h3 className="mb-2 text-sm font-bold text-slate-950">{t('events.details.mapHeading', 'Location map')}</h3>
                   <LocationMap latitude={event.latitude} longitude={event.longitude} height={300} />
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${event.latitude},${event.longitude}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-3 inline-flex"
+                  >
+                    <Button type="button" variant="secondary"><Navigation className="mr-2 h-4 w-4" />{t('events.details.getDirections', 'Get directions')}</Button>
+                  </a>
                 </div>
               )}
             </Card>

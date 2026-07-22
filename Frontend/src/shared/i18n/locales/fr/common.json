@@ -238,7 +238,8 @@
       "galleryImageLabel": "Afficher l'image de galerie {{index}}",
       "previousGalleryImages": "Images de galerie précédentes",
       "nextGalleryImages": "Images de galerie suivantes",
-      "mapHeading": "Carte du lieu"
+      "mapHeading": "Carte du lieu",
+      "getDirections": "Obtenir l'itinéraire"
     },
     "create": {
       "title": "Créer un événement",

@@ -238,7 +238,8 @@
       "galleryImageLabel": "Show gallery image {{index}}",
       "previousGalleryImages": "Previous gallery images",
       "nextGalleryImages": "Next gallery images",
-      "mapHeading": "Location map"
+      "mapHeading": "Location map",
+      "getDirections": "Get directions"
     },
     "create": {
       "title": "Create Event",
