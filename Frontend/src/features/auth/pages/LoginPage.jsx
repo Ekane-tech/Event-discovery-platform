@@ -1,5 +1,5 @@
 ﻿import { ArrowRight, CalendarCheck, ShieldCheck, Ticket } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Alert from '../../../shared/components/feedback/Alert.jsx'
 import Button from '../../../shared/components/ui/Button.jsx'
@@ -13,10 +13,16 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const location = useLocation()
-  const { login } = useAuth()
+  const { login, isAuthenticated, role, loading } = useAuth()
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      navigate(getDashboardPathByRole(role), { replace: true })
+    }
+  }, [isAuthenticated, role, loading, navigate])
 
   const quickAccess = [
     { title: t('auth.attendee'), description: t('auth.attendeeDescription'), icon: Ticket, email: 'user@example.com' },

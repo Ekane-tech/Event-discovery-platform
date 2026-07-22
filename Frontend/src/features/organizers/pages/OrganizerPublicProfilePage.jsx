@@ -43,11 +43,12 @@ export default function OrganizerPublicProfilePage() {
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-slate-950 text-white">
-        <div className="absolute inset-0 bg-cover bg-center opacity-45" style={{ backgroundImage: 'url(/hero-events.svg)' }} />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-teal-900/70" />
-        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+      <div className="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+        <section className="relative overflow-hidden rounded-3xl bg-slate-950 text-white shadow-xl">
+          <div className="absolute inset-0 bg-cover bg-center opacity-45" style={{ backgroundImage: 'url(/hero-events.svg)' }} />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-teal-900/70" />
+          <div className="relative px-5 py-12 sm:px-8 lg:px-10 lg:py-16">
+            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
               <Avatar name={organizer.displayName} src={organizer.avatar} className="h-24 w-24 text-3xl" />
               <div>
@@ -57,10 +58,11 @@ export default function OrganizerPublicProfilePage() {
               </div>
             </div>
             <Link to="/organizers"><Button variant="light">All organizers</Button></Link>
+            </div>
+            <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-200">{organizer.bio || 'Organizer on Mboa Events 237.'}</p>
           </div>
-          <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-200">{organizer.bio || 'Organizer on Mboa Events 237.'}</p>
-        </div>
-      </section>
+        </section>
+      </div>
 
       <PageContainer>
         <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">

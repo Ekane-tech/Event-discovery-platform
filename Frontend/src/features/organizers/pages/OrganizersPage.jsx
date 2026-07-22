@@ -42,15 +42,17 @@ export default function OrganizersPage() {
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-slate-950 text-white">
-        <div className="absolute inset-0 bg-cover bg-center opacity-50" style={{ backgroundImage: 'url(/hero-events.svg)' }} />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-teal-900/70" />
-        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+        <section className="relative overflow-hidden rounded-3xl bg-slate-950 text-white shadow-xl">
+          <div className="absolute inset-0 bg-cover bg-center opacity-50" style={{ backgroundImage: 'url(/hero-events.svg)' }} />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-teal-900/70" />
+          <div className="relative px-5 py-12 sm:px-8 lg:px-10 lg:py-16">
           <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100"><Users className="h-4 w-4" />Organizers</span>
           <h1 className="mt-5 max-w-4xl text-4xl font-black md:text-6xl">Find trusted event organizers.</h1>
           <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-200">Search organizer profiles, discover verified organizers and browse their public events on Mboa Events 237.</p>
-        </div>
-      </section>
+          </div>
+        </section>
+      </div>
 
       <PageContainer>
         <div className="mb-6 grid grid-cols-2 gap-4">

@@ -1,5 +1,5 @@
 ﻿import { ArrowRight, CalendarCheck, CheckCircle2, Ticket, Users } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Alert from '../../../shared/components/feedback/Alert.jsx'
 import Button from '../../../shared/components/ui/Button.jsx'
@@ -21,7 +21,7 @@ const ACCOUNT_TYPES = [
 export default function RegisterPage() {
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { register } = useAuth()
+  const { register, isAuthenticated, role, loading } = useAuth()
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [form, setForm] = useState({
@@ -35,6 +35,12 @@ export default function RegisterPage() {
     passwordConfirmation: '',
     termsAccepted: false,
   })
+
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      navigate(getDashboardPathByRole(role), { replace: true })
+    }
+  }, [isAuthenticated, role, loading, navigate])
 
   function updateField(event) {
     const { name, value, type, checked } = event.target
