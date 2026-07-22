@@ -145,8 +145,8 @@ export default function EventDetailsPage() {
         <div key={activeHero?.id || activeHero?.url} className="absolute inset-0 animate-[fadeIn_.7s_ease-out]">
           <img src={activeHero?.url} alt={event.title} className="h-full w-full object-cover" />
         </div>
-        <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/65 to-slate-950/10" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(20,184,166,.25),transparent_34%)]" />
+        <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/40 to-slate-950/5" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(20,184,166,.15),transparent_34%)]" />
 
         {heroImages.length > 1 && (
           <div className="absolute inset-x-4 top-1/2 z-10 hidden -translate-y-1/2 justify-between md:flex">
