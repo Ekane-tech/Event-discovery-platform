@@ -1,4 +1,4 @@
-import { BadgeCheck, Bookmark, CalendarDays, MapPin } from 'lucide-react'
+import { AlertTriangle, BadgeCheck, Bookmark, CalendarDays, Clock, MapPin } from 'lucide-react'
 import { toast } from 'sonner'
 import { Link, useLocation } from 'react-router-dom'
 import Button from '../../../shared/components/ui/Button.jsx'
@@ -8,12 +8,14 @@ import { formatDate } from '../../../shared/utils/formatDate.js'
 import { formatPrice } from '../../../shared/utils/currency.js'
 import RecommendationReasons from './RecommendationReasons.jsx'
 import RecommendationScoreBadge from './RecommendationScoreBadge.jsx'
+import { getEventLifecycle } from '../../events/utils/eventLifecycle.js'
 
 export default function RecommendedEventCard({ event }) {
   const location = useLocation()
   const { isBookmarked, toggleBookmark } = useBookmarks()
   const bookmarked = isBookmarked(event.id)
   const bg = event.coverImage?.url || '/hero-events.svg'
+  const lifecycle = getEventLifecycle(event)
 
   async function handleBookmark(clickEvent) {
     clickEvent.preventDefault()
@@ -34,6 +36,18 @@ export default function RecommendedEventCard({ event }) {
         <button onClick={handleBookmark} className={`absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full backdrop-blur transition ${bookmarked ? 'bg-yellow-400 text-slate-950' : 'bg-white/20 text-white hover:bg-white/30'}`}>
           <Bookmark className="h-5 w-5" fill={bookmarked ? 'currentColor' : 'none'} />
         </button>
+        <div className="absolute left-4 top-4 z-10 flex max-w-[calc(100%-5rem)] flex-wrap gap-2">
+          {lifecycle.isPast && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-slate-950/85 px-3 py-1 text-xs font-black uppercase tracking-wide text-white ring-1 ring-white/20 backdrop-blur">
+              <Clock className="h-3.5 w-3.5" /> Past event
+            </span>
+          )}
+          {!lifecycle.isPast && lifecycle.registrationDeadlineUrgent && (
+            <span className="mboa-deadline-pulse inline-flex items-center gap-1 rounded-full bg-red-600 px-3 py-1 text-xs font-black uppercase tracking-wide text-white shadow-lg shadow-red-950/30 ring-1 ring-white/30">
+              <AlertTriangle className="h-3.5 w-3.5" /> Closing soon
+            </span>
+          )}
+        </div>
         <div className="absolute bottom-4 left-4 flex flex-wrap gap-2">
           <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur">{event.category || 'Event'}</span>
           <RecommendationScoreBadge score={event.recommendationScore} />

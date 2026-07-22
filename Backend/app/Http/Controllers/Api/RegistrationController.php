@@ -151,14 +151,18 @@ class RegistrationController extends Controller
         $eventIsAvailable = $event
             && $event->status === 'published'
             && $event->visibility === 'public';
+        $eventHasEnded = $event && $this->eventHasEnded($event);
 
-        $registrationIsValid = $registration->status === 'confirmed' && $eventIsAvailable;
+        $registrationIsValid = $registration->status === 'confirmed' && $eventIsAvailable && ! $eventHasEnded;
+        $message = match (true) {
+            $registrationIsValid => 'Ticket is valid.',
+            $eventHasEnded => 'Ticket is no longer valid because the event end time has passed.',
+            default => 'Ticket is not currently valid.',
+        };
 
         return response()->json([
             'valid' => $registrationIsValid,
-            'message' => $registrationIsValid
-                ? 'Ticket is valid.'
-                : 'Ticket is not currently valid.',
+            'message' => $message,
             'ticket' => [
                 'registration_id' => $registration->id,
                 'ticket_number' => $registration->ticket_number,
@@ -182,6 +186,7 @@ class RegistrationController extends Controller
                     'status' => $event->status,
                     'visibility' => $event->visibility,
                     'start_date' => $event->start_date,
+                    'end_date' => $event->end_date,
                     'venue' => $event->venue,
                     'city' => $event->city?->name,
                     'region' => $event->region?->name,
@@ -206,6 +211,13 @@ class RegistrationController extends Controller
         if ($registration->status !== 'confirmed') {
             return response()->json([
                 'message' => 'Only confirmed registrations can be checked in.',
+                'registration' => new RegistrationResource($registration),
+            ], 422);
+        }
+
+        if ($this->eventHasEnded($event)) {
+            return response()->json([
+                'message' => 'This ticket can no longer be checked in because the event end time has passed.',
                 'registration' => new RegistrationResource($registration),
             ], 422);
         }
@@ -268,6 +280,18 @@ class RegistrationController extends Controller
             'message' => 'Event registration cancelled successfully.',
             'status' => $registration->status,
         ]);
+    }
+
+
+    private function eventHasEnded(?Event $event): bool
+    {
+        if (! $event) {
+            return true;
+        }
+
+        $effectiveEndDate = $event->end_date ?: $event->start_date;
+
+        return $effectiveEndDate ? now()->greaterThan($effectiveEndDate) : false;
     }
 
 
