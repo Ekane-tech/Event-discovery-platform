@@ -236,7 +236,8 @@
       "nextImage": "Image de couverture suivante",
       "galleryImageLabel": "Afficher l'image de galerie {{index}}",
       "previousGalleryImages": "Images de galerie précédentes",
-      "nextGalleryImages": "Images de galerie suivantes"
+      "nextGalleryImages": "Images de galerie suivantes",
+      "mapHeading": "Carte du lieu"
     },
     "create": {
       "title": "Créer un événement",

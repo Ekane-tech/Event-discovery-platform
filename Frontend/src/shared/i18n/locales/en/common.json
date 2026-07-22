@@ -236,7 +236,8 @@
       "nextImage": "Next cover image",
       "galleryImageLabel": "Show gallery image {{index}}",
       "previousGalleryImages": "Previous gallery images",
-      "nextGalleryImages": "Next gallery images"
+      "nextGalleryImages": "Next gallery images",
+      "mapHeading": "Location map"
     },
     "create": {
       "title": "Create Event",

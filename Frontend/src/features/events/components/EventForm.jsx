@@ -12,6 +12,7 @@ import { EVENT_VISIBILITIES, createEmptyEventForm } from '../utils/eventDefaults
 import { categoryService } from '../../categories/services/categoryService.js'
 import { locationService } from '../../locations/services/locationService.js'
 import { extractCollection } from '../utils/normalizeEvent.js'
+import LocationPicker from '../../../shared/components/map/LocationPicker.jsx'
 
 const MAX_GALLERY_IMAGES = 8
 const MAX_SOURCE_IMAGE_MB = 10
@@ -305,7 +306,14 @@ export default function EventForm({
         <div className="grid gap-4 md:grid-cols-3">
           <SearchableSelect label="Region" value={form.region_id} onChange={(value) => updateValue('region_id', value)} options={regionOptions} placeholder="Select region" />
           <SearchableSelect label="City" value={form.city_id} onChange={(value) => updateValue('city_id', value)} options={cityOptions} placeholder="Select city" />
-          <FormInput label="Venue" name="venue" value={form.venue} onChange={updateTextField} placeholder="Bonanjo Conference Hall" />
+            <FormInput label="Venue" name="venue" value={form.venue} onChange={updateTextField} placeholder="Bonanjo Conference Hall" />
+        </div>
+        <div className="mt-4">
+          <span className="mb-2 block text-sm font-medium text-slate-700">Pin on map</span>
+          <LocationPicker
+            value={{ venue: form.venue, latitude: form.latitude, longitude: form.longitude }}
+            onChange={({ latitude, longitude, venue }) => setForm((current) => ({ ...current, latitude, longitude, venue: venue ?? current.venue }))}
+          />
         </div>
       </Card>
 

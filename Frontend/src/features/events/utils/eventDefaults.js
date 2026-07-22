@@ -18,6 +18,8 @@ export function createEmptyEventForm() {
     region_id: '',
     city_id: '',
     venue: '',
+    latitude: '',
+    longitude: '',
     startDate: '',
     endDate: '',
     price: '0',

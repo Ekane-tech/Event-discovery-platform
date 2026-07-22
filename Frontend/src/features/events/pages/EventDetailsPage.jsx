@@ -5,6 +5,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import Button from '../../../shared/components/ui/Button.jsx'
 import Badge from '../../../shared/components/ui/Badge.jsx'
 import Card from '../../../shared/components/ui/Card.jsx'
+import LocationMap from '../../../shared/components/map/LocationMap.jsx'
 import PageContainer from '../../../shared/components/layout/PageContainer.jsx'
 import EmptyState from '../../../shared/components/feedback/EmptyState.jsx'
 import ErrorState from '../../../shared/components/feedback/ErrorState.jsx'
@@ -192,6 +193,12 @@ export default function EventDetailsPage() {
                 <p className="flex gap-3 text-slate-700"><Users className="h-5 w-5 text-teal-700" /><span><strong>{t('events.details.capacityLabel')}:</strong><br />{event.maximumParticipants || t('events.details.notLimited')}</span></p>
               </div>
               <div className="mt-6 flex flex-wrap gap-2"><Button type="button" variant="secondary" onClick={shareEvent}><Share2 className="mr-2 h-4 w-4" />{t('events.details.shareEvent')}</Button></div>
+              {event.latitude && event.longitude && (
+                <div className="mt-6">
+                  <h3 className="mb-2 text-sm font-bold text-slate-950">{t('events.details.mapHeading', 'Location map')}</h3>
+                  <LocationMap latitude={event.latitude} longitude={event.longitude} height={300} />
+                </div>
+              )}
             </Card>
 
             {galleryImages.length > 0 && (
