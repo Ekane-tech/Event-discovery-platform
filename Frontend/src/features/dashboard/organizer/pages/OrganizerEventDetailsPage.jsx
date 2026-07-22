@@ -11,6 +11,7 @@ import { formatDate } from '../../../../shared/utils/formatDate.js'
 import { formatPrice } from '../../../../shared/utils/currency.js'
 import { eventService } from '../../../events/services/eventService.js'
 import { normalizeEvent } from '../../../events/utils/normalizeEvent.js'
+import { hasEventEnded } from '../../../events/utils/eventLifecycle.js'
 import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
 
 export default function OrganizerEventDetailsPage() {
@@ -39,6 +40,8 @@ export default function OrganizerEventDetailsPage() {
   if (error) return <PageContainer><ErrorState title="Unable to load event" message={error} /></PageContainer>
   if (!event) return <PageContainer><EmptyState title="Event not found" message="This organizer event could not be found." /></PageContainer>
 
+  const isPast = hasEventEnded(event)
+
   const stats = [
     ['Views', event.views || 0],
     ['Registrations', event.registrations || 0],
@@ -64,7 +67,7 @@ export default function OrganizerEventDetailsPage() {
           <p><strong>Price:</strong> {formatPrice(event.price)}</p><p><strong>Registration deadline:</strong> {formatDate(event.registrationDeadline)}</p>
         </div>
         <p className="mt-4 text-sm leading-6 text-slate-600">{event.description}</p>
-        <div className="mt-6 flex flex-wrap gap-2">{!isAdminView && <Link to={`/organizer/events/${event.id}/edit`}><Button>Edit Event</Button></Link>}<Link to={isAdminView ? `/admin/events/${event.id}/attendees` : `/organizer/events/${event.id}/attendees`}><Button variant="secondary">View Attendees</Button></Link></div>
+        <div className="mt-6 flex flex-wrap gap-2">{!isAdminView && !isPast && <Link to={`/organizer/events/${event.id}/edit`}><Button>Edit Event</Button></Link>}{isPast && <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700">Past event locked</span>}<Link to={isAdminView ? `/admin/events/${event.id}/attendees` : `/organizer/events/${event.id}/attendees`}><Button variant="secondary">View Attendees</Button></Link></div>
       </Card>
     </PageContainer>
   )

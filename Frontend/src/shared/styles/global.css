@@ -252,3 +252,40 @@ select {
 .mboa-water-ripple {
   animation: mboaWaterRipple 2s ease-out infinite;
 }
+
+@keyframes mboaRadarBloom {
+  0% {
+    box-shadow: 
+      0 0 0 0 rgba(220, 38, 38, 0.8),
+      0 0 0 0 rgba(220, 38, 38, 0.6),
+      0 0 0 0 rgba(220, 38, 38, 0.4);
+  }
+  25% {
+    box-shadow: 
+      0 0 0 0.4rem rgba(220, 38, 38, 0),
+      0 0 0 0.8rem rgba(220, 38, 38, 0.5),
+      0 0 0 1.2rem rgba(220, 38, 38, 0.3);
+  }
+  50% {
+    box-shadow: 
+      0 0 0 0.8rem rgba(220, 38, 38, 0),
+      0 0 0 1.6rem rgba(220, 38, 38, 0),
+      0 0 0 2.4rem rgba(220, 38, 38, 0.2);
+  }
+  75% {
+    box-shadow: 
+      0 0 0 1.2rem rgba(220, 38, 38, 0),
+      0 0 0 2.4rem rgba(220, 38, 38, 0),
+      0 0 0 3.6rem rgba(220, 38, 38, 0.1);
+  }
+  100% {
+    box-shadow: 
+      0 0 0 1.6rem rgba(220, 38, 38, 0),
+      0 0 0 3.2rem rgba(220, 38, 38, 0),
+      0 0 0 4.8rem rgba(220, 38, 38, 0);
+  }
+}
+
+.mboa-radar-bloom {
+  animation: mboaRadarBloom 2.5s ease-out infinite;
+}

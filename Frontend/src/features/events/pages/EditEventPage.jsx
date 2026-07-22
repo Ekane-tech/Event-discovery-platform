@@ -9,6 +9,7 @@ import PageContainer from '../../../shared/components/layout/PageContainer.jsx'
 import EventForm from '../components/EventForm.jsx'
 import { eventService } from '../services/eventService.js'
 import { buildEventImagesFormData, eventToFormValues, extractEventFiles, formValuesToApiPayload, hasEventFiles, normalizeEvent } from '../utils/normalizeEvent.js'
+import { hasEventEnded } from '../utils/eventLifecycle.js'
 import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
 import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
@@ -77,6 +78,21 @@ export default function EditEventPage() {
       <PageContainer>
         <EmptyState title={t('events.edit.notFoundTitle')} message={t('events.edit.notFoundMessage')} />
         <div className="mt-6"><Link to="/organizer/events"><Button>{t('events.edit.backToMyEvents')}</Button></Link></div>
+      </PageContainer>
+    )
+  }
+
+  if (hasEventEnded(event)) {
+    return (
+      <PageContainer>
+        <ErrorState
+          title="Past event cannot be edited"
+          message="This event has already ended, so its details and photos are locked. Duplicate it from My Events to create a new edition with new dates."
+        />
+        <div className="mt-6 flex flex-wrap gap-2">
+          <Link to={`/organizer/events/${event.id}/details`}><Button variant="secondary">View details</Button></Link>
+          <Link to="/organizer/events"><Button>Back to My Events</Button></Link>
+        </div>
       </PageContainer>
     )
   }

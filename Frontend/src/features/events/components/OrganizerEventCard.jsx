@@ -1,12 +1,14 @@
-import { CalendarDays, Copy, Eye, MapPin, Ticket, Trash2 } from 'lucide-react'
+import { CalendarDays, Clock, Copy, Eye, MapPin, Ticket, Trash2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Button from '../../../shared/components/ui/Button.jsx'
 import { formatDate } from '../../../shared/utils/formatDate.js'
 import { formatPrice } from '../../../shared/utils/currency.js'
 import OrganizerEventStatusBadge from './OrganizerEventStatusBadge.jsx'
+import { hasEventEnded } from '../utils/eventLifecycle.js'
 
 export default function OrganizerEventCard({ event, onDelete, onDuplicate }) {
   const cover = event.coverImage?.url || event.categoryImageUrl || '/hero-events.svg'
+  const isPast = hasEventEnded(event)
 
   return (
     <article className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
@@ -23,6 +25,7 @@ export default function OrganizerEventCard({ event, onDelete, onDuplicate }) {
                 <OrganizerEventStatusBadge status={event.status} />
                 <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">{event.category || 'Event'}</span>
                 <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 capitalize">{event.visibility}</span>
+                {isPast && <span className="inline-flex items-center gap-1 rounded-full bg-slate-900 px-3 py-1 text-xs font-black uppercase tracking-wide text-white"><Clock className="h-3 w-3" /> Past</span>}
               </div>
 
               <h2 className="max-w-3xl break-words text-xl font-black leading-tight text-slate-950 sm:text-2xl md:text-3xl">{event.title}</h2>
@@ -51,8 +54,8 @@ export default function OrganizerEventCard({ event, onDelete, onDuplicate }) {
               <Link to={`/organizer/events/${event.id}/details`}><Button variant="secondary" className="w-full sm:w-auto">Details</Button></Link>
               <Link to={`/organizer/events/${event.id}/attendees`}><Button variant="secondary" className="w-full sm:w-auto">Attendees</Button></Link>
               <Link to={`/organizer/events/${event.id}/scanner`}><Button variant="secondary" className="w-full sm:w-auto">Scanner</Button></Link>
-              <Link to={`/organizer/events/${event.id}/edit`}><Button className="w-full sm:w-auto">Edit</Button></Link>
-              <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => onDuplicate(event.id)}><Copy className="mr-2 h-4 w-4" />Duplicate</Button>
+              {!isPast && <Link to={`/organizer/events/${event.id}/edit`}><Button className="w-full sm:w-auto">Edit</Button></Link>}
+              <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => onDuplicate(event.id)}><Copy className="mr-2 h-4 w-4" />{isPast ? 'Duplicate for new date' : 'Duplicate'}</Button>
               <Button type="button" variant="danger" className="w-full sm:w-auto" onClick={() => onDelete(event.id)}><Trash2 className="mr-2 h-4 w-4" />Delete</Button>
             </div>
           </div>

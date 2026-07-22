@@ -103,6 +103,8 @@ class EventController extends Controller
 
     public function update(UpdateEventRequest $request, Event $event): JsonResponse
     {
+        $this->ensureEventCanBeEdited($event);
+
         $wasAvailable = $event->status === 'published' && $event->visibility === 'public';
         $validated = $request->validated();
         $eventData = Arr::except($validated, ['category_ids', 'images', 'ticket_types']);
@@ -156,6 +158,8 @@ class EventController extends Controller
             abort(403, 'You do not have permission to upload images for this event.');
         }
 
+        $this->ensureEventCanBeEdited($event, 'Past events can no longer have photos changed. Duplicate the event to create a new edition.');
+
         $request->validate([
             'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'gallery' => ['nullable', 'array', 'max:8'],
@@ -208,6 +212,8 @@ class EventController extends Controller
             abort(403, 'You do not have permission to delete images for this event.');
         }
 
+        $this->ensureEventCanBeEdited($event, 'Past events can no longer have photos changed. Duplicate the event to create a new edition.');
+
         $wasCover = (bool) $image->is_cover;
 
         Storage::disk('public')->delete($image->path);
@@ -243,6 +249,8 @@ class EventController extends Controller
             abort(403, 'You do not have permission to manage images for this event.');
         }
 
+        $this->ensureEventCanBeEdited($event, 'Past events can no longer have photos changed. Duplicate the event to create a new edition.');
+
         $event->images()->update(['is_cover' => false, 'type' => 'gallery']);
         $image->update(['is_cover' => true, 'type' => 'cover']);
 
@@ -262,15 +270,39 @@ class EventController extends Controller
             abort(403, 'You do not have permission to duplicate this event.');
         }
 
-        $event->loadMissing(['images', 'categories']);
+        $event->loadMissing(['images', 'categories', 'ticketTypes']);
+        $sourceHasEnded = $this->eventHasEnded($event);
 
         $copy = $event->replicate(['slug', 'views']);
         $copy->title = $event->title.' (Copy)';
         $copy->slug = Event::generateUniqueSlug($copy->title);
         $copy->status = 'draft';
         $copy->views = 0;
+
+        if ($sourceHasEnded) {
+            $newStartDate = now()->addWeek()->startOfHour();
+            $durationInMinutes = ($event->end_date && $event->start_date && $event->end_date->greaterThan($event->start_date))
+                ? $event->start_date->diffInMinutes($event->end_date)
+                : 120;
+
+            $copy->start_date = $newStartDate;
+            $copy->end_date = $newStartDate->copy()->addMinutes($durationInMinutes);
+            $copy->registration_deadline = $newStartDate->copy()->subDay();
+        }
+
         $copy->push();
         $copy->categories()->sync($event->categories()->pluck('categories.id')->all());
+
+        foreach ($event->ticketTypes as $ticketType) {
+            $copy->ticketTypes()->create($ticketType->only([
+                'name',
+                'description',
+                'price',
+                'quantity',
+                'is_active',
+                'sort_order',
+            ]));
+        }
 
         foreach ($event->images as $image) {
             $newPath = 'events/'.$copy->id.'/'.basename($image->path);
@@ -289,7 +321,9 @@ class EventController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Event duplicated as draft.',
+            'message' => $sourceHasEnded
+                ? 'Past event duplicated as draft. Update the new dates before publishing.'
+                : 'Event duplicated as draft.',
             'event' => new EventResource($copy->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])),
         ], 201);
     }
@@ -470,6 +504,24 @@ class EventController extends Controller
                 $registration->update(['status' => 'cancelled_by_event']);
             }
             $registration->user?->notify(new EventUnavailableNotification($event, $reason));
+        }
+    }
+
+    private function eventHasEnded(?Event $event): bool
+    {
+        if (! $event) {
+            return true;
+        }
+
+        $effectiveEndDate = $event->end_date ?: $event->start_date;
+
+        return $effectiveEndDate ? now()->greaterThan($effectiveEndDate) : false;
+    }
+
+    private function ensureEventCanBeEdited(Event $event, string $message = 'Past events can no longer be edited. Duplicate the event to create a new edition.'): void
+    {
+        if ($this->eventHasEnded($event)) {
+            abort(422, $message);
         }
     }
 
