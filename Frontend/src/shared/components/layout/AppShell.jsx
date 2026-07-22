@@ -1,6 +1,6 @@
 import { Bell, Home, Menu, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Link, Outlet, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { APP_NAME } from '../../constants/app.js'
 import { getMobileNavigationGroups, getNotificationPathByRole } from '../../constants/navigation.js'
 import { useAuth } from '../../../features/auth/hooks/useAuth.js'
@@ -11,6 +11,7 @@ import MobileNavigation from '../navigation/MobileNavigation.jsx'
 import NavigationBadge from '../navigation/NavigationBadge.jsx'
 import RoleSidebar from '../navigation/RoleSidebar.jsx'
 import LanguageSwitcher from '../language/LanguageSwitcher.jsx'
+import PageOutlet from '../motion/PageOutlet.jsx'
 
 const SIDEBAR_STORAGE_KEY = 'sidebar_collapsed_v2'
 
@@ -62,7 +63,7 @@ export default function AppShell({ section = 'user' }) {
           </div>
         </header>
         <MobileNavigation open={mobileMenuOpen} groups={mobileGroups} unreadCount={unreadCount} isAuthenticated={isAuthenticated} user={user} onLogout={handleLogout} onClose={() => setMobileMenuOpen(false)} />
-        <Outlet />
+        <PageOutlet />
       </div>
     </div>
   )

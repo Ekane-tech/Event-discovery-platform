@@ -14,6 +14,7 @@ import { categoryService} from '../../categories/services/categoryService.js'
 import { locationService } from '../../locations/services/locationService.js'
 import SearchSuggestInput from '../../search/components/SearchSuggestInput.jsx'
 import { useTranslation } from '../../../shared/i18n/useTranslation.js'
+import { Stagger, StaggerItem } from '../../../shared/components/motion/Stagger.jsx'
 
 export default function HomePage()  {
   const navigate = useNavigate()
@@ -115,9 +116,10 @@ export default function HomePage()  {
         <section>
           <SectionHeader title={t('home.featuredCategories')} description={t('home.featuredCategoriesDescription')} />
           {loading ? <EventGridSkeleton count={6} /> :
-          <div className="grid gap-5 max-sm:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <Stagger className="grid gap-5 max-sm:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {categories.slice(0, 20).map((category) => (
-              <Link key={category.id} to={`/events?category_id=${category.id}`} className="group relative min-h-47.5 overflow-hidden rounded-xl bg-slate-900 p-5 text-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-xl">
+              <StaggerItem key={category.id}>
+              <Link to={`/events?category_id=${category.id}`} className="group relative block min-h-47.5 overflow-hidden rounded-xl bg-slate-900 p-5 text-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-xl">
                 <div className="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-105" style={{ backgroundImage: `url(${category.image_url || '/hero-events.svg'})` }} />
                 <div className="absolute inset-0 bg-linear-to-t from-slate-950/30 via-slate-950/10 to-transparent" />
                 <div className="relative flex min-h-37.5 flex-col justify-end overflow-hidden">
@@ -125,8 +127,9 @@ export default function HomePage()  {
                   <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-50 drop-shadow-sm">{category.description}</p>
                 </div>
               </Link>
+              </StaggerItem>
             ))}
-          </div> }
+          </Stagger> }
         </section>
 
         <section className="mt-8">

@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion'
 import { staggerContainer, fadeUp } from '../../../shared/components/motion/variants.js'
-import EventCard from './EventCard.jsx'
+import RecommendedEventCard from './RecommendedEventCard.jsx'
 
-export default function EventGrid({ events = [] }) {
+export default function RecommendedEventsGrid({ events = [] }) {
   return (
     <motion.div
       className="grid gap-5 max-sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
@@ -13,7 +13,7 @@ export default function EventGrid({ events = [] }) {
     >
       {events.map((event) => (
         <motion.div key={event.id} variants={fadeUp}>
-          <EventCard event={event} />
+          <RecommendedEventCard event={event} />
         </motion.div>
       ))}
     </motion.div>

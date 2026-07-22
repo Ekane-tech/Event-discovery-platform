@@ -1,7 +1,8 @@
-import { Outlet, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import Navbar from '../../shared/components/layout/Navbar.jsx'
 import Footer from '../../shared/components/layout/Footer.jsx'
 import AppShell from '../../shared/components/layout/AppShell.jsx'
+import PageOutlet from '../../shared/components/motion/PageOutlet.jsx'
 import { ROLES } from '../../shared/constants/roles.js'
 import { useAuth } from '../../features/auth/hooks/useAuth.js'
 
@@ -27,7 +28,7 @@ export default function GuestLayout() {
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />
-      <Outlet />
+      <PageOutlet />
       <Footer />
     </div>
   )
