@@ -119,8 +119,7 @@ select {
   .mboa-datepicker-popper .react-datepicker {
     width: min(100%, 23rem) !important;
     margin: 0 auto !important;
-    display: flex !important;
-    flex-direction: column !important;
+    display: block !important;
     overflow: hidden !important;
     border-radius: 1rem !important;
     font-size: 0.78rem !important;
@@ -200,34 +199,6 @@ select {
     font-size: 0.72rem !important;
     font-weight: 700 !important;
     white-space: nowrap !important;
-  }
-}
-
-@media (max-width: 380px) {
-  .mboa-datepicker-popper .react-datepicker {
-    transform: scale(0.90);
-    transform-origin: top center;
-  }
-}
-
-@media (max-width: 340px) {
-  .mboa-datepicker-popper .react-datepicker {
-    transform: scale(0.82);
-    transform-origin: top center;
-  }
-}
-
-@media (max-width: 300px) {
-  .mboa-datepicker-popper .react-datepicker {
-    transform: scale(0.74);
-    transform-origin: top center;
-  }
-}
-
-@media (max-width: 280px) {
-  .mboa-datepicker-popper .react-datepicker {
-    transform: scale(0.68);
-    transform-origin: top center;
   }
 }
 
