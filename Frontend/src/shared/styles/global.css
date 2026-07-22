@@ -178,6 +178,7 @@ select {
     float: left !important;
     width: auto !important;
     max-width: 100% !important;
+    height: 100% !important;
   }
 
   .mboa-datepicker-popper .react-datepicker__header {
@@ -215,6 +216,7 @@ select {
   .mboa-datepicker-popper .react-datepicker__time-container {
     float: right !important;
     width: auto !important;
+    height: 100% !important;
     border-left: 1px solid #e2e8f0 !important;
     border-top: none !important;
   }
