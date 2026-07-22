@@ -49,24 +49,26 @@ export default function LocationPicker({ value, onChange, height = 280 }) {
 
   return (
     <div className="grid gap-3">
-      <form onSubmit={handleSearch} className="flex flex-col gap-2 sm:flex-row">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleSearch(event) } }}
             placeholder="Search an address or place (e.g. Bonanjo, Douala)…"
             className="h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm outline-none transition focus:border-teal-500 focus:bg-white"
           />
         </div>
         <button
-          type="submit"
+          type="button"
+          onClick={handleSearch}
           disabled={searching}
           className="inline-flex h-11 items-center justify-center rounded-2xl bg-teal-700 px-5 text-sm font-bold text-white transition hover:bg-teal-800 disabled:opacity-60"
         >
           {searching ? 'Searching…' : 'Search'}
         </button>
-      </form>
+      </div>
 
       {error && <p className="text-xs font-medium text-red-600">{error}</p>}
 

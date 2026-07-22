@@ -39,7 +39,8 @@
     "adminReports": "Reports",
     "announcements": "Announcements",
     "adminFeedback": "Feedback",
-    "admin": "Admin"
+    "admin": "Admin",
+    "home": "Home"
   },
   "home": {
     "badge": "Discover Mboa Events",
