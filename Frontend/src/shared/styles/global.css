@@ -166,7 +166,8 @@ select {
   .mboa-datepicker-popper .react-datepicker {
     width: min(100%, 23rem) !important;
     margin: 0 auto !important;
-    display: block !important;
+    display: flex !important;
+    flex-direction: row !important;
     overflow: hidden !important;
     border-radius: 1rem !important;
     font-size: 0.78rem !important;
@@ -174,8 +175,8 @@ select {
   }
 
   .mboa-datepicker-popper .react-datepicker__month-container {
-    float: none !important;
-    width: 100% !important;
+    float: left !important;
+    width: auto !important;
     max-width: 100% !important;
   }
 
@@ -212,10 +213,10 @@ select {
   }
 
   .mboa-datepicker-popper .react-datepicker__time-container {
-    float: none !important;
-    width: 100% !important;
-    border-left: none !important;
-    border-top: 1px solid #e2e8f0 !important;
+    float: right !important;
+    width: auto !important;
+    border-left: 1px solid #e2e8f0 !important;
+    border-top: none !important;
   }
 
   .mboa-datepicker-popper .react-datepicker-time__header {
