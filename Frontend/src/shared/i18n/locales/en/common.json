@@ -165,7 +165,8 @@
     "cancelSuccess": "Registration cancelled successfully.",
     "cancelFailed": "Unable to cancel registration.",
     "reportSubmitted": "Report submitted successfully.",
-    "reportSubmittedReview": "Report submitted successfully. Our moderation team will review it."
+    "reportSubmittedReview": "Report submitted successfully. Our moderation team will review it.",
+    "soldOut": "Sold out"
   },
   "event": {
     "defaultCategory": "Event",
@@ -243,7 +244,8 @@
       "nextGalleryImages": "Next gallery images",
       "mapHeading": "Location map",
       "getDirections": "Get directions",
-      "deadlineLabel": "Registration deadline"
+      "deadlineLabel": "Registration deadline",
+      "shareWhatsApp": "WhatsApp"
     },
     "create": {
       "title": "Create Event",

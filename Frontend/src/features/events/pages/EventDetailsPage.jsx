@@ -1,4 +1,5 @@
 import { CalendarDays, ChevronLeft, ChevronRight, Images, MapPin, Navigation, Share2, Users } from 'lucide-react'
+import { FaWhatsapp } from 'react-icons/fa6'
 import { toast } from 'sonner'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
@@ -194,7 +195,7 @@ export default function EventDetailsPage() {
                 <p className="flex gap-3 text-slate-700"><Users className="h-5 w-5 text-teal-700" /><span><strong>{t('events.details.capacityLabel')}:</strong><br />{event.maximumParticipants || t('events.details.notLimited')}</span></p>
                 <p className="flex gap-3 text-slate-700"><CalendarDays className="h-5 w-5 text-teal-700" /><span><strong>{t('events.details.deadlineLabel', 'Registration deadline')}:</strong><br />{event.registrationDeadline ? formatDate(event.registrationDeadline) : t('events.details.notSpecified')}</span></p>
               </div>
-              <div className="mt-6 flex flex-wrap gap-2"><Button type="button" variant="secondary" onClick={shareEvent}><Share2 className="mr-2 h-4 w-4" />{t('events.details.shareEvent')}</Button></div>
+              <div className="mt-6 flex flex-wrap gap-2"><Button type="button" variant="secondary" onClick={shareEvent}><Share2 className="mr-2 h-4 w-4" />{t('events.details.shareEvent')}</Button><a href={`https://wa.me/?text=${encodeURIComponent(`${event.title} — ${window.location.origin}/events/${event.id}`)}`} target="_blank" rel="noreferrer" className="inline-flex"><Button type="button" variant="secondary"><FaWhatsapp className="mr-2 h-4 w-4 text-green-600" />{t('events.details.shareWhatsApp', 'WhatsApp')}</Button></a></div>
               {event.latitude && event.longitude && (
                 <div className="mt-6">
                   <h3 className="mb-2 text-sm font-bold text-slate-950">{t('events.details.mapHeading', 'Location map')}</h3>

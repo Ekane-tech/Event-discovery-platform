@@ -165,7 +165,8 @@
     "cancelFailed": "Impossible d'annuler l'inscription.",
     "reportSubmitted": "Signalement soumis avec succès.",
     "reportSubmittedReview": "Signalement soumis avec succès. Notre équipe de modération l'examinera.",
-    "reportEvent": "Signaler l'événement"
+    "reportEvent": "Signaler l'événement",
+    "soldOut": "Complet"
   },
   "event": {
     "defaultCategory": "Événement",
@@ -243,7 +244,8 @@
       "nextGalleryImages": "Images de galerie suivantes",
       "mapHeading": "Carte du lieu",
       "getDirections": "Obtenir l'itinéraire",
-      "deadlineLabel": "Fin des inscriptions"
+      "deadlineLabel": "Fin des inscriptions",
+      "shareWhatsApp": "WhatsApp"
     },
     "create": {
       "title": "Créer un événement",

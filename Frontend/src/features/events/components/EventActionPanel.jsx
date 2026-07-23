@@ -43,9 +43,15 @@ export default function EventActionPanel({ event }) {
   const registered = isRegistered(event.id)
   const cancellationAllowed = canCancelRegistration(event, registration)
   const selectedTicket = ticketOptions.find((ticket) => String(ticket.id || '') === String(selectedTicketTypeId)) || ticketOptions[0]
-  const showPurchaseForm = !registered || buyingMore
+  const showPurchaseForm = (!registered || buyingMore) && !isSoldOut
   const selectedQuantity = Math.max(1, Number(quantity || 1))
   const totalAmount = Number(selectedTicket?.price || 0) * selectedQuantity
+
+  const maxCapacity = Number(event?.maximumParticipants) || 0
+  const confirmedRegistrations = Number(event?.registrations) || 0
+  const remaining = maxCapacity > 0 ? Math.max(0, maxCapacity - confirmedRegistrations) : null
+  const isSoldOut = remaining !== null && remaining <= 0
+  const isLowCapacity = remaining !== null && remaining > 0 && remaining <= 5
 
   async function handleBookmark() {
     setBusy(true)
@@ -154,6 +160,10 @@ export default function EventActionPanel({ event }) {
         <div className="mt-4"><Alert type="info">{t('eventAction.registrationCancelled')}</Alert></div>
       )}
 
+      {!registered && isLowCapacity && !isSoldOut && (
+        <div className="mt-4"><Alert type="warning">{t('eventAction.lowCapacity', { count: remaining, defaultValue: 'Only {{count}} spots left — register soon!' })}</Alert></div>
+      )}
+
       {showPurchaseForm && (
         <div className="mt-5">
           <div className="mb-2 flex items-center justify-between gap-3">
@@ -188,6 +198,8 @@ export default function EventActionPanel({ event }) {
             <Button type="button" variant="secondary" disabled={busy} onClick={() => setBuyingMore(true)}>Buy more tickets</Button>
             {cancellationAllowed && <Button type="button" variant="danger" disabled={busy} onClick={handleCancelRegistration}>{t('eventAction.cancelRegistration')}</Button>}
           </>
+        ) : isSoldOut ? (
+          <Button type="button" disabled>{t('eventAction.soldOut', 'Sold out')}</Button>
         ) : (
           <Button type="button" disabled={busy} onClick={handleRegister}>{busy ? t('eventAction.processing') : `${selectedQuantity > 1 ? 'Buy tickets' : 'Register'} - ${formatPrice(totalAmount)}`}</Button>
         )}
