@@ -18,6 +18,7 @@ import { eventService } from '../services/eventService.js'
 import { normalizeEvent } from '../utils/normalizeEvent.js'
 import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
 import { useTranslation } from '../../../shared/i18n/useTranslation.js'
+import { variantSrcSet } from '../../../shared/utils/imageVariants.js'
 
 function getVisibleImages(images, start, count) {
   if (!images.length) return []
@@ -228,7 +229,7 @@ export default function EventDetailsPage() {
                 <div className="grid gap-4 sm:grid-cols-2 lg:hidden">
                   {visibleGalleryMobile.map((image, index) => (
                     <a key={`${image.id}-mobile-${index}`} href={image.url} target="_blank" rel="noreferrer" className="group block overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-lg">
-                      <img src={image.url} alt={event.title} loading="lazy" decoding="async" className="h-56 w-full object-cover transition duration-500 group-hover:scale-102" />
+                      <img src={image.url} alt={event.title} loading="lazy" decoding="async" srcSet={variantSrcSet(image.path)} sizes="(max-width: 768px) 50vw, 33vw" className="h-56 w-full object-cover transition duration-500 group-hover:scale-102" />
                     </a>
                   ))}
                 </div>
@@ -236,7 +237,7 @@ export default function EventDetailsPage() {
                 <div className="hidden gap-5 lg:grid lg:grid-cols-3">
                   {visibleGalleryDesktop.map((image, index) => (
                     <a key={`${image.id}-desktop-${index}`} href={image.url} target="_blank" rel="noreferrer" className="group block overflow-hidden rounded-4xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-lg">
-                      <img src={image.url} alt={event.title} loading="lazy" decoding="async" className="h-72 w-full object-cover transition duration-500 group-hover:scale-102" />
+                      <img src={image.url} alt={event.title} loading="lazy" decoding="async" srcSet={variantSrcSet(image.path)} sizes="(max-width: 768px) 50vw, 33vw" className="h-72 w-full object-cover transition duration-500 group-hover:scale-102" />
                     </a>
                   ))}
                 </div>

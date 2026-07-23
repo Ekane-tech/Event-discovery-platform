@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom'
 import Badge from '../../../shared/components/ui/Badge.jsx'
 import Avatar from '../../../shared/components/ui/Avatar.jsx'
 import Button from '../../../shared/components/ui/Button.jsx'
+import PrefetchLink from '../../../shared/components/navigation/PrefetchLink.jsx'
 import { ROLES } from '../../../shared/constants/roles.js'
 import { useAuth } from '../../auth/hooks/useAuth.js'
 import { useBookmarks } from '../../bookmarks/hooks/useBookmarks.js'
@@ -12,6 +13,7 @@ import { formatDate } from '../../../shared/utils/formatDate.js'
 import { formatPrice } from '../../../shared/utils/currency.js'
 import { getEventLifecycle } from '../utils/eventLifecycle.js'
 import { useTranslation } from '../../../shared/i18n/useTranslation.js'
+import { variantSrcSet } from '../../../shared/utils/imageVariants.js'
 
 export default function EventCard({ event }) {
   const location = useLocation()
@@ -36,8 +38,8 @@ export default function EventCard({ event }) {
   }
 
   return (
-    <Link to={`/events/${event.id}`} state={{ from: `${location.pathname}${location.search}` }} className="group relative flex h-full min-h-[360px] flex-col overflow-hidden rounded-xl bg-slate-900 shadow-sm ring-1 ring-slate-200 transition duration-300 hover:-translate-y-1 hover:shadow-2xl">
-      <img src={bg} alt={event.title} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+    <PrefetchLink to={`/events/${event.id}`} state={{ from: `${location.pathname}${location.search}` }} importer={() => import('../pages/EventDetailsPage.jsx')} className="group relative flex h-full min-h-[360px] flex-col overflow-hidden rounded-xl bg-slate-900 shadow-sm ring-1 ring-slate-200 transition duration-300 hover:-translate-y-1 hover:shadow-2xl">
+      <img src={bg} alt={event.title} loading="lazy" decoding="async" srcSet={variantSrcSet(event.coverImage?.path)} sizes="(max-width: 768px) 50vw, 33vw" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/35 to-slate-950/5" />
       <div className="absolute right-4 top-4 z-10 flex gap-2">
         {!lifecycle.isPast && lifecycle.registrationDeadlineUrgent && (
@@ -88,6 +90,6 @@ export default function EventCard({ event }) {
           <Button className="w-auto rounded-full bg-teal-600 px-5 text-white hover:bg-teal-700">{t('viewDetails', 'View Details')}</Button>
         </div>
       </div>
-    </Link>
+    </PrefetchLink>
   )
 }

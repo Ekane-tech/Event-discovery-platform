@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\FeedbackController;
+use App\Http\Controllers\Api\ImageVariantController;
 use App\Http\Controllers\Api\InterestController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\NotificationController;
@@ -24,6 +25,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/public/notifications', [NotificationController::class, 'publicAnnouncements'])->middleware('throttle:public-read');
 Route::post('/feedback', [FeedbackController::class, 'store'])->middleware('throttle:feedback-submit');
 Route::post('/payments/callback/campay', [PaymentController::class, 'campayCallback'])->middleware('throttle:payments');
+
+Route::get('/img', [ImageVariantController::class, 'show'])->middleware('throttle:public-read');
 
 Route::get('/health', function () {
     return response()->json([
