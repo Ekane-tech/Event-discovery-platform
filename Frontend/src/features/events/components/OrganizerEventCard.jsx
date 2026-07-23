@@ -14,7 +14,7 @@ export default function OrganizerEventCard({ event, onDelete, onDuplicate }) {
     <article className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
       <div className="grid lg:grid-cols-[300px_1fr] xl:grid-cols-[340px_1fr]">
         <div className="relative h-52 bg-slate-100 sm:h-60 lg:h-auto lg:min-h-full">
-          <img src={cover} alt={event.title} className="absolute inset-0 h-full w-full object-cover" />
+          <img src={cover} alt={event.title} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/35 via-transparent to-transparent lg:hidden" />
         </div>
 

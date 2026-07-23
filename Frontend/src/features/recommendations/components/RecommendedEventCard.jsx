@@ -33,7 +33,7 @@ export default function RecommendedEventCard({ event }) {
   return (
     <Link to={`/events/${event.id}`} state={{ from: `${location.pathname}${location.search}` }} className="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-2xl">
       <div className="relative h-52 overflow-hidden bg-slate-900 shrink-0">
-        <div className="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-105" style={{ backgroundImage: `url(${bg})` }} />
+        <img src={bg} alt={event.title} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent" />
         <div className="absolute right-4 top-4 z-10 flex gap-2">
           {!lifecycle.isPast && lifecycle.registrationDeadlineUrgent && (
