@@ -37,12 +37,12 @@ export default function RecommendedEventCard({ event }) {
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent" />
         <div className="absolute right-4 top-4 z-10 flex gap-2">
           {!lifecycle.isPast && lifecycle.registrationDeadlineUrgent && (
-            <span className="mboa-radar-bloom flex h-8 w-8 items-center justify-center rounded-full bg-red-600 text-white shadow-lg shadow-red-950/30 ring-1 ring-white/30 backdrop-blur">
+            <span className="mboa-radar-bloom flex h-9 w-9 items-center justify-center rounded-full bg-red-600 text-white shadow-lg shadow-red-950/30 ring-1 ring-white/30 backdrop-blur">
               <span className="radar-ring-3" />
               <Clock className="h-5 w-5" />
             </span>
           )}
-          <button onClick={handleBookmark} className={`flex h-11 w-11 items-center justify-center rounded-full backdrop-blur transition ${bookmarked ? 'bg-yellow-400 text-slate-950' : 'bg-white/20 text-white hover:bg-white/30'}`}>
+          <button onClick={handleBookmark} className={`flex h-9 w-9 items-center justify-center rounded-full backdrop-blur transition ${bookmarked ? 'bg-yellow-400 text-slate-950' : 'bg-white/20 text-white hover:bg-white/30'}`}>
             <Bookmark className="h-5 w-5" fill={bookmarked ? 'currentColor' : 'none'} />
           </button>
         </div>
