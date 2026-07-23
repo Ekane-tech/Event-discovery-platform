@@ -1,22 +1,37 @@
 import { ArrowUp } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from '../../i18n/useTranslation.js'
 
 export default function ScrollToTop() {
   const { t } = useTranslation()
   const [visible, setVisible] = useState(false)
+  const scrollTimeoutRef = useRef(null)
 
   useEffect(() => {
-    const toggleVisibility = () => {
+    const handleScroll = () => {
       if (window.scrollY > 300) {
         setVisible(true)
       } else {
         setVisible(false)
       }
+
+      // Clear existing timeout and set new one to hide after scrolling stops
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current)
+      }
+
+      scrollTimeoutRef.current = setTimeout(() => {
+        setVisible(false)
+      }, 2000) // Hide after 2 seconds of no scrolling
     }
 
-    window.addEventListener('scroll', toggleVisibility)
-    return () => window.removeEventListener('scroll', toggleVisibility)
+    window.addEventListener('scroll', handleScroll)
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current)
+      }
+    }
   }, [])
 
   const scrollToTop = () => {
