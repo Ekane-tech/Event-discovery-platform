@@ -77,8 +77,12 @@ select {
 .react-datepicker {
   border: 1px solid #e2e8f0 !important;
   border-radius: 1rem !important;
-  overflow: hidden;
+  overflow: hidden !important;
   font-family: inherit !important;
+}
+
+.react-datepicker__time-container {
+  overflow: hidden !important;
 }
 
 .react-datepicker__header {
