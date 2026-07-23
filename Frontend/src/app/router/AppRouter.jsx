@@ -1,5 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import GuestLayout from '../layouts/GuestLayout.jsx'
 import AuthLayout from '../layouts/AuthLayout.jsx'
 import UserLayout from '../layouts/UserLayout.jsx'
@@ -9,67 +9,67 @@ import ProtectedRoute from './ProtectedRoute.jsx'
 import RoleRoute from './RoleRoute.jsx'
 import { ROLES } from '../../shared/constants/roles.js'
 
-import HomePage from '../../features/events/pages/HomePage.jsx'
-import BrowseEventsPage from '../../features/events/pages/BrowseEventsPage.jsx'
-import EventDetailsPage from '../../features/events/pages/EventDetailsPage.jsx'
-import CreateEventPage from '../../features/events/pages/CreateEventPage.jsx'
-import EditEventPage from '../../features/events/pages/EditEventPage.jsx'
-import MyEventsPage from '../../features/events/pages/MyEventsPage.jsx'
+const HomePage = lazy(() => import('../../features/events/pages/HomePage.jsx'))
+const BrowseEventsPage = lazy(() => import('../../features/events/pages/BrowseEventsPage.jsx'))
+const EventDetailsPage = lazy(() => import('../../features/events/pages/EventDetailsPage.jsx'))
+const CreateEventPage = lazy(() => import('../../features/events/pages/CreateEventPage.jsx'))
+const EditEventPage = lazy(() => import('../../features/events/pages/EditEventPage.jsx'))
+const MyEventsPage = lazy(() => import('../../features/events/pages/MyEventsPage.jsx'))
 
-import LoginPage from '../../features/auth/pages/LoginPage.jsx'
-import RegisterPage from '../../features/auth/pages/RegisterPage.jsx'
-import ForgotPasswordPage from '../../features/auth/pages/ForgotPasswordPage.jsx'
-import ResetPasswordPage from '../../features/auth/pages/ResetPasswordPage.jsx'
-import EmailVerificationPage from '../../features/auth/pages/EmailVerificationPage.jsx'
+const LoginPage = lazy(() => import('../../features/auth/pages/LoginPage.jsx'))
+const RegisterPage = lazy(() => import('../../features/auth/pages/RegisterPage.jsx'))
+const ForgotPasswordPage = lazy(() => import('../../features/auth/pages/ForgotPasswordPage.jsx'))
+const ResetPasswordPage = lazy(() => import('../../features/auth/pages/ResetPasswordPage.jsx'))
+const EmailVerificationPage = lazy(() => import('../../features/auth/pages/EmailVerificationPage.jsx'))
 
-import UserDashboardPage from '../../features/dashboard/user/pages/UserDashboardPage.jsx'
-import OrganizerDashboardPage from '../../features/dashboard/organizer/pages/OrganizerDashboardPage.jsx'
-import OrganizerAttendeesPage from '../../features/dashboard/organizer/pages/OrganizerAttendeesPage.jsx'
-import OrganizerStatisticsPage from '../../features/dashboard/organizer/pages/OrganizerStatisticsPage.jsx'
-import OrganizerWalletPage from '../../features/wallet/pages/OrganizerWalletPage.jsx'
-import AdminDashboardPage from '../../features/dashboard/admin/pages/AdminDashboardPage.jsx'
-import AdminUsersPage from '../../features/dashboard/admin/pages/AdminUsersPage.jsx'
-import AdminEventsPage from '../../features/dashboard/admin/pages/AdminEventsPage.jsx'
-import AdminCategoriesPage from '../../features/dashboard/admin/pages/AdminCategoriesPage.jsx'
-import AdminLocationsPage from '../../features/dashboard/admin/pages/AdminLocationsPage.jsx'
-import AdminReportsPage from '../../features/dashboard/admin/pages/AdminReportsPage.jsx'
-import AdminNotificationsPage from '../../features/dashboard/admin/pages/AdminNotificationsPage.jsx'
-import AdminFeedbackPage from '../../features/dashboard/admin/pages/AdminFeedbackPage.jsx'
-import AdminPaymentsPage from '../../features/dashboard/admin/pages/AdminPaymentsPage.jsx'
-import AdminPayoutsPage from '../../features/dashboard/admin/pages/AdminPayoutsPage.jsx'
-import AdminAuditLogsPage from '../../features/dashboard/admin/pages/AdminAuditLogsPage.jsx'
-import AdminEmailPage from '../../features/dashboard/admin/pages/AdminEmailPage.jsx'
+const UserDashboardPage = lazy(() => import('../../features/dashboard/user/pages/UserDashboardPage.jsx'))
+const OrganizerDashboardPage = lazy(() => import('../../features/dashboard/organizer/pages/OrganizerDashboardPage.jsx'))
+const OrganizerAttendeesPage = lazy(() => import('../../features/dashboard/organizer/pages/OrganizerAttendeesPage.jsx'))
+const OrganizerStatisticsPage = lazy(() => import('../../features/dashboard/organizer/pages/OrganizerStatisticsPage.jsx'))
+const OrganizerWalletPage = lazy(() => import('../../features/wallet/pages/OrganizerWalletPage.jsx'))
+const AdminDashboardPage = lazy(() => import('../../features/dashboard/admin/pages/AdminDashboardPage.jsx'))
+const AdminUsersPage = lazy(() => import('../../features/dashboard/admin/pages/AdminUsersPage.jsx'))
+const AdminEventsPage = lazy(() => import('../../features/dashboard/admin/pages/AdminEventsPage.jsx'))
+const AdminCategoriesPage = lazy(() => import('../../features/dashboard/admin/pages/AdminCategoriesPage.jsx'))
+const AdminLocationsPage = lazy(() => import('../../features/dashboard/admin/pages/AdminLocationsPage.jsx'))
+const AdminReportsPage = lazy(() => import('../../features/dashboard/admin/pages/AdminReportsPage.jsx'))
+const AdminNotificationsPage = lazy(() => import('../../features/dashboard/admin/pages/AdminNotificationsPage.jsx'))
+const AdminFeedbackPage = lazy(() => import('../../features/dashboard/admin/pages/AdminFeedbackPage.jsx'))
+const AdminPaymentsPage = lazy(() => import('../../features/dashboard/admin/pages/AdminPaymentsPage.jsx'))
+const AdminPayoutsPage = lazy(() => import('../../features/dashboard/admin/pages/AdminPayoutsPage.jsx'))
+const AdminAuditLogsPage = lazy(() => import('../../features/dashboard/admin/pages/AdminAuditLogsPage.jsx'))
+const AdminEmailPage = lazy(() => import('../../features/dashboard/admin/pages/AdminEmailPage.jsx'))
 
-import ProfilePage from '../../features/profile/pages/ProfilePage.jsx'
-import EditProfilePage from '../../features/profile/pages/EditProfilePage.jsx'
-import ChooseInterestsPage from '../../features/interests/pages/ChooseInterestsPage.jsx'
-import MyInterestsPage from '../../features/interests/pages/MyInterestsPage.jsx'
-import BookmarksPage from '../../features/bookmarks/pages/BookmarksPage.jsx'
-import MyRegistrationsPage from '../../features/registrations/pages/MyRegistrationsPage.jsx'
-import RegistrationDetailsPage from '../../features/registrations/pages/RegistrationDetailsPage.jsx'
-import TicketPage from '../../features/registrations/pages/TicketPage.jsx'
-import TicketVerificationPage from '../../features/tickets/pages/TicketVerificationPage.jsx'
-import TicketScannerPage from '../../features/tickets/pages/TicketScannerPage.jsx'
-import PaymentPage from '../../features/payments/pages/PaymentPage.jsx'
-import MyReportsPage from '../../features/reports/pages/MyReportsPage.jsx'
-import NotificationsPage from '../../features/notifications/pages/NotificationsPage.jsx'
-import SettingsPage from '../../features/settings/pages/SettingsPage.jsx'
-import SecuritySettingsPage from '../../features/settings/pages/SecuritySettingsPage.jsx'
-import NotificationSettingsPage from '../../features/settings/pages/NotificationSettingsPage.jsx'
-import LanguageSettingsPage from '../../features/settings/pages/LanguageSettingsPage.jsx'
-import AccountSettingsPage from '../../features/settings/pages/AccountSettingsPage.jsx'
-import AppearanceSettingsPage from '../../features/settings/pages/AppearanceSettingsPage.jsx'
-import SearchResultsPage from '../../features/search/pages/SearchResultsPage.jsx'
-import RecommendedEventsPage from '../../features/recommendations/pages/RecommendedEventsPage.jsx'
-import StatisticsPage from '../../features/statistics/pages/StatisticsPage.jsx'
-import OrganizerEventDetailsPage from '../../features/dashboard/organizer/pages/OrganizerEventDetailsPage.jsx'
-import PublicNotificationsPage from '../../features/public/pages/PublicNotificationsPage.jsx'
-import AboutPage from '../../features/about/pages/AboutPage.jsx'
-import FeedbackPage from '../../features/feedback/pages/FeedbackPage.jsx'
-import OrganizersPage from '../../features/organizers/pages/OrganizersPage.jsx'
-import OrganizerPublicProfilePage from '../../features/organizers/pages/OrganizerPublicProfilePage.jsx'
-import TermsOfServicePage from '../../features/legal/pages/TermsOfServicePage.jsx'
-import PrivacyPolicyPage from '../../features/legal/pages/PrivacyPolicyPage.jsx'
+const ProfilePage = lazy(() => import('../../features/profile/pages/ProfilePage.jsx'))
+const EditProfilePage = lazy(() => import('../../features/profile/pages/EditProfilePage.jsx'))
+const ChooseInterestsPage = lazy(() => import('../../features/interests/pages/ChooseInterestsPage.jsx'))
+const MyInterestsPage = lazy(() => import('../../features/interests/pages/MyInterestsPage.jsx'))
+const BookmarksPage = lazy(() => import('../../features/bookmarks/pages/BookmarksPage.jsx'))
+const MyRegistrationsPage = lazy(() => import('../../features/registrations/pages/MyRegistrationsPage.jsx'))
+const RegistrationDetailsPage = lazy(() => import('../../features/registrations/pages/RegistrationDetailsPage.jsx'))
+const TicketPage = lazy(() => import('../../features/registrations/pages/TicketPage.jsx'))
+const TicketVerificationPage = lazy(() => import('../../features/tickets/pages/TicketVerificationPage.jsx'))
+const TicketScannerPage = lazy(() => import('../../features/tickets/pages/TicketScannerPage.jsx'))
+const PaymentPage = lazy(() => import('../../features/payments/pages/PaymentPage.jsx'))
+const MyReportsPage = lazy(() => import('../../features/reports/pages/MyReportsPage.jsx'))
+const NotificationsPage = lazy(() => import('../../features/notifications/pages/NotificationsPage.jsx'))
+const SettingsPage = lazy(() => import('../../features/settings/pages/SettingsPage.jsx'))
+const SecuritySettingsPage = lazy(() => import('../../features/settings/pages/SecuritySettingsPage.jsx'))
+const NotificationSettingsPage = lazy(() => import('../../features/settings/pages/NotificationSettingsPage.jsx'))
+const LanguageSettingsPage = lazy(() => import('../../features/settings/pages/LanguageSettingsPage.jsx'))
+const AccountSettingsPage = lazy(() => import('../../features/settings/pages/AccountSettingsPage.jsx'))
+const AppearanceSettingsPage = lazy(() => import('../../features/settings/pages/AppearanceSettingsPage.jsx'))
+const SearchResultsPage = lazy(() => import('../../features/search/pages/SearchResultsPage.jsx'))
+const RecommendedEventsPage = lazy(() => import('../../features/recommendations/pages/RecommendedEventsPage.jsx'))
+const StatisticsPage = lazy(() => import('../../features/statistics/pages/StatisticsPage.jsx'))
+const OrganizerEventDetailsPage = lazy(() => import('../../features/dashboard/organizer/pages/OrganizerEventDetailsPage.jsx'))
+const PublicNotificationsPage = lazy(() => import('../../features/public/pages/PublicNotificationsPage.jsx'))
+const AboutPage = lazy(() => import('../../features/about/pages/AboutPage.jsx'))
+const FeedbackPage = lazy(() => import('../../features/feedback/pages/FeedbackPage.jsx'))
+const OrganizersPage = lazy(() => import('../../features/organizers/pages/OrganizersPage.jsx'))
+const OrganizerPublicProfilePage = lazy(() => import('../../features/organizers/pages/OrganizerPublicProfilePage.jsx'))
+const TermsOfServicePage = lazy(() => import('../../features/legal/pages/TermsOfServicePage.jsx'))
+const PrivacyPolicyPage = lazy(() => import('../../features/legal/pages/PrivacyPolicyPage.jsx'))
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -85,7 +85,8 @@ export default function AppRouter() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <Routes>
+      <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-slate-50"><div className="h-10 w-10 animate-spin rounded-full border-4 border-teal-600 border-t-transparent" /></div>}>
+        <Routes>
         <Route element={<GuestLayout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/events" element={<BrowseEventsPage />} />
@@ -176,7 +177,8 @@ export default function AppRouter() {
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   )
 }
