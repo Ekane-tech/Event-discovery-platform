@@ -61,7 +61,7 @@ export default function DateTimeField({ label, helper, value, onChange, name, re
           placeholderText="Select date and time"
           wrapperClassName="w-full"
           popperClassName="z-50 mboa-datepicker-popper"
-          popperPlacement="bottom"
+          popperPlacement="auto"
           showPopperArrow={false}
           shouldCloseOnSelect={false}
           calendarClassName="rounded-2xl border border-slate-200 shadow-xl"

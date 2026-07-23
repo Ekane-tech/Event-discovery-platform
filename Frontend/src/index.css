@@ -212,6 +212,7 @@ body {
 }
 .dark .react-datepicker__time-container {
   background-color: #0f172a !important;
+  border-left-color: #26324a !important;
 }
 .dark .react-datepicker__time-container
   .react-datepicker__time

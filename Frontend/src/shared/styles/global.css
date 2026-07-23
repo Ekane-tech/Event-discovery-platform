@@ -188,6 +188,7 @@ select {
     border-left: 1px solid #e2e8f0 !important;
     border-top: none !important;
     overflow: hidden !important;
+    background-color: #ffffff !important;
   }
 
   .mboa-datepicker-popper .react-datepicker__month-container {
