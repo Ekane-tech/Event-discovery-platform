@@ -173,7 +173,6 @@ select {
     border-radius: 1rem !important;
     font-size: 0.78rem !important;
     box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24) !important;
-    min-height: 20rem !important;
   }
 
   .mboa-datepicker-popper .react-datepicker__month-container {
