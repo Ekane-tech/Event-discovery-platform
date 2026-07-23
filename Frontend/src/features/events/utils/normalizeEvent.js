@@ -88,6 +88,8 @@ export function normalizeEvent(apiEvent) {
     registrations: apiEvent.registrations_count || 0,
     bookmarks: apiEvent.bookmarks_count || 0,
     reports: apiEvent.reports_count || 0,
+    reviewsCount: apiEvent.reviews_count || 0,
+    averageRating: apiEvent.average_rating != null ? Number(apiEvent.average_rating) : null,
     recommendationScore: apiEvent.recommendation_score || 0,
     recommendationReasons: apiEvent.recommendation_reasons || [],
     popularity: apiEvent.views ? Math.min(100, Math.round(Number(apiEvent.views) / 10)) : 0,

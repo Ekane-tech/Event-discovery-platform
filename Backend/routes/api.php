@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\BookmarkController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EventController;
+use App\Http\Controllers\Api\EventReviewController;
 use App\Http\Controllers\Api\FeedbackController;
 use App\Http\Controllers\Api\ImageVariantController;
 use App\Http\Controllers\Api\InterestController;
@@ -108,6 +109,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/registrations/{registration}', [RegistrationController::class, 'show'])->middleware('role:user')->middleware('throttle:authenticated-read');
     Route::post('/events/{event}/register', [RegistrationController::class, 'store'])->middleware(['role:user', EnsureEmailIsVerified::class, 'throttle:event-write']);
     Route::delete('/events/{event}/registration', [RegistrationController::class, 'destroy'])->middleware(['role:user', EnsureEmailIsVerified::class, 'throttle:event-write']);
+
+    // Post-event reviews & ratings
+    Route::post('/events/{event}/reviews', [EventReviewController::class, 'store'])->middleware(['role:user', EnsureEmailIsVerified::class, 'throttle:event-write']);
+    Route::put('/events/{event}/reviews/{review}', [EventReviewController::class, 'update'])->middleware(['role:user', EnsureEmailIsVerified::class, 'throttle:event-write']);
+    Route::delete('/events/{event}/reviews/{review}', [EventReviewController::class, 'destroy'])->middleware('throttle:event-write');
 
     Route::get('/organizer/events', [EventController::class, 'myEvents'])->middleware('role:organizer')->middleware('throttle:authenticated-read');
     Route::get('/organizer/events/{event}', [EventController::class, 'organizerShow'])->middleware('role:organizer,admin')->middleware('throttle:authenticated-read');

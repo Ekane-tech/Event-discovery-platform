@@ -1,4 +1,4 @@
-import { BadgeCheck, Bookmark, CalendarDays, Clock, MapPin } from 'lucide-react'
+import { BadgeCheck, Bookmark, CalendarDays, Clock, MapPin, Star } from 'lucide-react'
 import { toast } from 'sonner'
 import { Link, useLocation } from 'react-router-dom'
 import Badge from '../../../shared/components/ui/Badge.jsx'

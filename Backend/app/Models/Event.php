@@ -138,6 +138,11 @@ class Event extends Model
         return $this->hasMany(EventView::class);
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(EventReview::class);
+    }
+
     public function scopePublishedPublic($query)
     {
         return $query->where('status', 'published')->where('visibility', 'public');

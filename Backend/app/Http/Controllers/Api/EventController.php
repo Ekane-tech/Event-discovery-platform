@@ -49,7 +49,8 @@ class EventController extends Controller
 
         $query = Event::query()
             ->with(['organizer.role', 'organizer.profile', 'category', 'region', 'division', 'city', 'images', 'ticketTypes'])
-            ->withCount(['registrations', 'bookmarks', 'reports']);
+            ->withCount(['registrations', 'bookmarks', 'reports', 'reviews'])
+            ->withAvg('reviews', 'rating');
 
         if (! $request->user()?->hasRole('admin')) {
             $query->publishedPublic();
@@ -87,7 +88,7 @@ class EventController extends Controller
         $this->recordUniqueView($event, request());
 
         return response()->json([
-            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])->loadCount(['registrations', 'bookmarks', 'reports'])),
+            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])->loadCount(['registrations', 'bookmarks', 'reports', 'reviews'])->loadAvg('reviews', 'rating')),
         ]);
     }
 

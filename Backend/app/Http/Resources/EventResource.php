@@ -33,6 +33,8 @@ class EventResource extends JsonResource
             'registrations_count' => $this->whenCounted('registrations'),
             'bookmarks_count' => $this->whenCounted('bookmarks'),
             'reports_count' => $this->whenCounted('reports'),
+            'reviews_count' => $this->whenCounted('reviews'),
+            'average_rating' => $this->whenAggregated('reviews', 'rating', 'avg', fn ($value) => $value !== null ? round((float) $value, 2) : null),
             'organizer' => new UserResource($this->whenLoaded('organizer')),
             'category' => new CategoryResource($this->whenLoaded('category')),
             'categories' => CategoryResource::collection($this->whenLoaded('categories')),
