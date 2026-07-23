@@ -41,6 +41,22 @@ export default function PrivacyPolicyPage() {
               <h2 className="text-xl font-black text-slate-950">{t('legal.privacy.choicesTitle', 'Your choices')}</h2>
               <p className="mt-3 leading-7 text-slate-600">{t('legal.privacy.choicesText', 'You may update your profile, notification preferences and account settings from your dashboard. For privacy questions, contact our support team.')}</p>
             </Card>
+            <Card>
+              <h2 className="text-xl font-black text-slate-950">{t('legal.privacy.s6Title', 'Data retention')}</h2>
+              <p className="mt-3 leading-7 text-slate-600">{t('legal.privacy.s6Text', 'We retain your account information for as long as your account is active. Event data (registrations, tickets, payment references) is retained for a minimum of 5 years for accounting and dispute-resolution purposes. You may request deletion of your account and personal data at any time, subject to legal retention obligations.')}</p>
+            </Card>
+            <Card>
+              <h2 className="text-xl font-black text-slate-950">{t('legal.privacy.s7Title', 'Your rights')}</h2>
+              <p className="mt-3 leading-7 text-slate-600">{t('legal.privacy.s7Text', 'Under applicable data protection laws, you have the right to: access the personal data we hold about you, correct inaccurate data, request deletion of your data, export your data in a portable format, and withdraw consent for processing at any time. To exercise these rights, contact our support team.')}</p>
+            </Card>
+            <Card>
+              <h2 className="text-xl font-black text-slate-950">{t('legal.privacy.s8Title', 'Cookies and tracking')}</h2>
+              <p className="mt-3 leading-7 text-slate-600">{t('legal.privacy.s8Text', 'We use essential cookies for authentication and session management. We do not use third-party advertising or tracking cookies. Analytics, if implemented, will be anonymized and used solely to improve the platform. You can manage cookie preferences through your browser settings.')}</p>
+            </Card>
+            <Card>
+              <h2 className="text-xl font-black text-slate-950">{t('legal.privacy.s9Title', "Children's privacy")}</h2>
+              <p className="mt-3 leading-7 text-slate-600">{t('legal.privacy.s9Text', 'The platform is intended for users aged 18 and above. We do not knowingly collect personal information from minors. If you believe a minor has registered, please contact us and we will promptly remove the account.')}</p>
+            </Card>
           </div>
 
           <div className="lg:sticky lg:top-24 lg:self-start">

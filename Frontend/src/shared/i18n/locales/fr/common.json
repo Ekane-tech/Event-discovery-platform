@@ -203,7 +203,8 @@
       "feature": "Demande de fonctionnalité",
       "design": "Conception/UI",
       "performance": "Performance"
-    }
+    },
+    "ratingLabel": "Votre note"
   },
   "events": {
     "browse": {
@@ -647,7 +648,15 @@
       "s5Text": "Nous appliquons l'authentification, l'autorisation, la limitation de débit, les journaux d'audit et des contrôles opérationnels pour réduire les accès non autorisés et le mauvais usage des données.",
       "s5Title": "Protection des données",
       "sendFeedback": "Envoyer un retour",
-      "title": "Politique de confidentialité"
+      "title": "Politique de confidentialité",
+      "s6Title": "Conservation des données",
+      "s6Text": "Nous conservons les informations de votre compte tant qu'il est actif. Les données d'événement (inscriptions, billets, références de paiement) sont conservées pendant au moins 5 ans à des fins comptables et de résolution des litiges. Vous pouvez demander la suppression de votre compte et de vos données personnelles à tout moment, sous réserve des obligations légales de conservation.",
+      "s7Title": "Vos droits",
+      "s7Text": "Conformément aux lois applicables sur la protection des données, vous avez le droit d'accéder aux données personnelles que nous détenons à votre sujet, de corriger les données inexactes, de demander la suppression de vos données, d'exporter vos données dans un format portable et de retirer votre consentement au traitement à tout moment. Pour exercer ces droits, contactez notre équipe de support.",
+      "s8Title": "Cookies et suivi",
+      "s8Text": "Nous utilisons des cookies essentiels pour l'authentification et la gestion des sessions. Nous n'utilisons pas de cookies publicitaires ni de suivi tiers. Les analyses, si elles sont mises en œuvre, seront anonymisées et utilisées uniquement pour améliorer la plateforme. Vous pouvez gérer les préférences de cookies via les paramètres de votre navigateur.",
+      "s9Title": "Confidentialité des mineurs",
+      "s9Text": "La plateforme est destinée aux utilisateurs âgés de 18 ans et plus. Nous ne collectons pas sciemment d'informations personnelles auprès de mineurs. Si vous pensez qu'un mineur s'est inscrit, veuillez nous contacter et nous supprimerons rapidement le compte."
     },
     "privacyBadge": "Confidentialité",
     "terms": {
@@ -668,7 +677,13 @@
       "s4Title": "Paiements",
       "s5Text": "La plateforme peut modérer les événements, suspendre des comptes, supprimer du contenu ou restreindre l'accès en cas de fraude, d'abus, de violation des règles ou de risque de sécurité.",
       "s5Title": "Modération et suspension",
-      "title": "Conditions d'utilisation"
+      "title": "Conditions d'utilisation",
+      "s6Title": "Propriété intellectuelle",
+      "s6Text": "Tout le contenu de la plateforme, la marque, les logos et les logiciels sont la propriété de Mboa Events 237 ou de ses concédants. Les organisateurs conservent la propriété de leur contenu d'événement, de leurs images et de leurs descriptions. Vous nous accordez une licence limitée pour afficher votre contenu dans le but de faire fonctionner la plateforme. Vous ne pouvez pas copier, redistribuer ni extraire les données de la plateforme sans autorisation écrite.",
+      "s7Title": "Limitation de responsabilité",
+      "s7Text": "Mboa Events 237 est fourni « tel quel » sans garantie d'aucune sorte. Nous ne sommes pas responsables des dommages indirects, accessoires ou consécutifs découlant de votre utilisation de la plateforme. Notre responsabilité totale pour toute réclamation est limitée au montant que vous nous avez versé via la plateforme au cours des 12 derniers mois. Nous ne sommes pas responsables du comportement des organisateurs ou des participants, ni des événements annulés, reprogrammés ou ne répondant pas aux attentes.",
+      "s8Title": "Droit applicable",
+      "s8Text": "Ces conditions sont régies par les lois de la République du Cameroun. Tout litige découlant de votre utilisation de la plateforme sera tranché par les tribunaux camerounais. Nous ferons des efforts raisonnables pour résoudre les litiges à l'amiable avant toute action en justice."
     }
   },
   "mobileNav": {

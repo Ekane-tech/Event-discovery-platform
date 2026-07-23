@@ -41,6 +41,18 @@ export default function TermsOfServicePage() {
               <h2 className="text-xl font-black text-slate-950">{t('legal.terms.changesTitle', 'Changes to these terms')}</h2>
               <p className="mt-3 leading-7 text-slate-600">{t('legal.terms.changesText', 'We may update these terms as the platform evolves. Important updates may be communicated through email, in-app notifications or public announcements.')}</p>
             </Card>
+            <Card>
+              <h2 className="text-xl font-black text-slate-950">{t('legal.terms.s6Title', 'Intellectual property')}</h2>
+              <p className="mt-3 leading-7 text-slate-600">{t('legal.terms.s6Text', 'All platform content, branding, logos, and software are the property of Mboa Events 237 or its licensors. Organizers retain ownership of their event content, images, and descriptions. You grant us a limited license to display your content for the purpose of operating the platform. You may not copy, redistribute, or scrape platform data without written permission.')}</p>
+            </Card>
+            <Card>
+              <h2 className="text-xl font-black text-slate-950">{t('legal.terms.s7Title', 'Limitation of liability')}</h2>
+              <p className="mt-3 leading-7 text-slate-600">{t('legal.terms.s7Text', 'Mboa Events 237 is provided "as is" without warranties of any kind. We are not liable for indirect, incidental, or consequential damages arising from your use of the platform. Our total liability for any claim is limited to the amount you have paid us through the platform in the preceding 12 months. We are not responsible for the conduct of organizers or attendees, or for events that are cancelled, rescheduled, or do not meet expectations.')}</p>
+            </Card>
+            <Card>
+              <h2 className="text-xl font-black text-slate-950">{t('legal.terms.s8Title', 'Governing law')}</h2>
+              <p className="mt-3 leading-7 text-slate-600">{t('legal.terms.s8Text', 'These terms are governed by the laws of the Republic of Cameroon. Any disputes arising from your use of the platform shall be resolved in the courts of Cameroon. We will make reasonable efforts to resolve disputes informally before legal action.')}</p>
+            </Card>
           </div>
 
           <div className="lg:sticky lg:top-24 lg:self-start">

@@ -203,7 +203,8 @@
       "feature": "Feature request",
       "design": "Design/UI",
       "performance": "Performance"
-    }
+    },
+    "ratingLabel": "Your rating"
   },
   "events": {
     "browse": {
@@ -647,7 +648,15 @@
       "s5Text": "We apply authentication, authorization, rate limiting, audit logs and operational controls to reduce unauthorized access and misuse of data.",
       "s5Title": "Data protection",
       "sendFeedback": "Send Feedback",
-      "title": "Privacy Policy"
+      "title": "Privacy Policy",
+      "s6Title": "Data retention",
+      "s6Text": "We retain your account information for as long as your account is active. Event data (registrations, tickets, payment references) is retained for a minimum of 5 years for accounting and dispute-resolution purposes. You may request deletion of your account and personal data at any time, subject to legal retention obligations.",
+      "s7Title": "Your rights",
+      "s7Text": "Under applicable data protection laws, you have the right to: access the personal data we hold about you, correct inaccurate data, request deletion of your data, export your data in a portable format, and withdraw consent for processing at any time. To exercise these rights, contact our support team.",
+      "s8Title": "Cookies and tracking",
+      "s8Text": "We use essential cookies for authentication and session management. We do not use third-party advertising or tracking cookies. Analytics, if implemented, will be anonymized and used solely to improve the platform. You can manage cookie preferences through your browser settings.",
+      "s9Title": "Children's privacy",
+      "s9Text": "The platform is intended for users aged 18 and above. We do not knowingly collect personal information from minors. If you believe a minor has registered, please contact us and we will promptly remove the account."
     },
     "privacyBadge": "Privacy",
     "terms": {
@@ -668,7 +677,13 @@
       "s4Title": "Payments",
       "s5Text": "The platform may moderate events, suspend accounts, remove content or restrict access when there is fraud, abuse, policy violation or security risk.",
       "s5Title": "Moderation and suspension",
-      "title": "Terms of Service"
+      "title": "Terms of Service",
+      "s6Title": "Intellectual property",
+      "s6Text": "All platform content, branding, logos, and software are the property of Mboa Events 237 or its licensors. Organizers retain ownership of their event content, images, and descriptions. You grant us a limited license to display your content for the purpose of operating the platform. You may not copy, redistribute, or scrape platform data without written permission.",
+      "s7Title": "Limitation of liability",
+      "s7Text": "Mboa Events 237 is provided \"as is\" without warranties of any kind. We are not liable for indirect, incidental, or consequential damages arising from your use of the platform. Our total liability for any claim is limited to the amount you have paid us through the platform in the preceding 12 months. We are not responsible for the conduct of organizers or attendees, or for events that are cancelled, rescheduled, or do not meet expectations.",
+      "s8Title": "Governing law",
+      "s8Text": "These terms are governed by the laws of the Republic of Cameroon. Any disputes arising from your use of the platform shall be resolved in the courts of Cameroon. We will make reasonable efforts to resolve disputes informally before legal action."
     }
   },
   "mobileNav": {
