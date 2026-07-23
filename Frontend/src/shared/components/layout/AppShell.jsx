@@ -49,7 +49,7 @@ export default function AppShell({ section = 'user' }) {
               <button type="button" onClick={() => setMobileMenuOpen((current) => !current)} className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 xl:hidden" aria-label={t('appshell.toggleNav', 'Toggle navigation menu')}><Menu className="h-5 w-5" /></button>
               <Link to="/" className="flex min-w-0 items-center gap-2 font-black text-slate-950 xl:hidden">
                 <img src="/applogo.png" alt={APP_NAME} className="h-10 w-10 shrink-0 rounded-2xl object-cover shadow-md shadow-teal-100" />
-                <span className="hidden max-w-[150px] truncate sm:inline">{APP_NAME}</span>
+                <span className="hidden shrink-0 sm:inline">{APP_NAME}</span>
               </Link>
               <button type="button" onClick={() => setSidebarCollapsed((current) => !current)} className="hidden h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 transition hover:bg-teal-50 hover:text-teal-700 xl:inline-flex" aria-label={sidebarCollapsed ? t('appshell.expandSidebar', 'Expand sidebar') : t('appshell.collapseSidebar', 'Collapse sidebar')}>{sidebarCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}</button>
               <div className="hidden min-w-0 xl:block"><p className="truncate text-sm font-semibold capitalize text-slate-500">{t('appshell.area', { section, defaultValue: '{{section}} area' })}</p><h1 className="truncate text-lg font-bold text-slate-950">{t('appshell.welcomeBack', { name: user?.name, defaultValue: 'Welcome back, {{name}}' })}</h1></div>
