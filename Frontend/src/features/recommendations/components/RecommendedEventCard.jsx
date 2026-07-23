@@ -1,7 +1,6 @@
 import { BadgeCheck, Bookmark, CalendarDays, Clock, MapPin } from 'lucide-react'
 import { toast } from 'sonner'
 import { Link, useLocation } from 'react-router-dom'
-import PrefetchLink from '../../../shared/components/navigation/PrefetchLink.jsx'
 import Button from '../../../shared/components/ui/Button.jsx'
 import Avatar from '../../../shared/components/ui/Avatar.jsx'
 import { useBookmarks } from '../../bookmarks/hooks/useBookmarks.js'
@@ -33,7 +32,7 @@ export default function RecommendedEventCard({ event }) {
   }
 
   return (
-    <PrefetchLink to={`/events/${event.id}`} state={{ from: `${location.pathname}${location.search}` }} importer={() => import('../../events/pages/EventDetailsPage.jsx')} className="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-2xl">
+    <Link to={`/events/${event.id}`} state={{ from: `${location.pathname}${location.search}` }} className="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-2xl">
       <div className="relative h-52 overflow-hidden bg-slate-900 shrink-0">
         <img src={bg} alt={event.title} loading="lazy" decoding="async" srcSet={variantSrcSet(event.coverImage?.path)} sizes="(max-width: 768px) 100vw, 33vw" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent" />
@@ -93,6 +92,6 @@ export default function RecommendedEventCard({ event }) {
           </div>
         </div>
       </div>
-    </PrefetchLink>
+    </Link>
   )
 }
