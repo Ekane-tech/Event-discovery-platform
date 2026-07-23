@@ -11,3 +11,4 @@ Artisan::command('inspire', function () {
 // Release held organizer credits to withdrawable once the event ended
 // past the grace period (and the payment is still paid).
 Schedule::command('payouts:release-held')->daily();
+Schedule::command('events:send-reminders')->hourly();

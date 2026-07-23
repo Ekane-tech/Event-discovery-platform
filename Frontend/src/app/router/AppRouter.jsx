@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { lazy, Suspense, useEffect } from 'react'
+import ErrorBoundary from '../../shared/components/feedback/ErrorBoundary.jsx'
 import GuestLayout from '../layouts/GuestLayout.jsx'
 import AuthLayout from '../layouts/AuthLayout.jsx'
 import UserLayout from '../layouts/UserLayout.jsx'
@@ -85,7 +86,8 @@ export default function AppRouter() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-slate-50"><div className="h-10 w-10 animate-spin rounded-full border-4 border-teal-600 border-t-transparent" /></div>}>
+      <ErrorBoundary>
+        <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-slate-50"><div className="h-10 w-10 animate-spin rounded-full border-4 border-teal-600 border-t-transparent" /></div>}>
         <Routes>
         <Route element={<GuestLayout />}>
           <Route path="/" element={<HomePage />} />
@@ -178,7 +180,8 @@ export default function AppRouter() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </Suspense>
+        </Suspense>
+      </ErrorBoundary>
     </BrowserRouter>
   )
 }

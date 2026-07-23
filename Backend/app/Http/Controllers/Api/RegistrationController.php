@@ -9,6 +9,7 @@ use App\Models\EventTicketType;
 use App\Models\Payment;
 use App\Models\Registration;
 use App\Models\AuditLog;
+use App\Notifications\RegistrationConfirmedNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -120,6 +121,12 @@ class RegistrationController extends Controller
         });
 
         $registrations = Registration::whereIn('id', $registrationIds)->get()->load(['ticketType']);
+
+        // Send registration confirmation email for free events.
+        if (! $isPaidEvent && $request->user()) {
+            $event->loadMissing(['city', 'region']);
+            $request->user()->notify(new RegistrationConfirmedNotification($event, $primaryRegistration->ticket_number));
+        }
 
         return response()->json([
             'message' => $isPaidEvent ? 'Payment is required to complete this registration.' : 'Registered for event successfully.',

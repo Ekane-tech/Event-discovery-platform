@@ -72,6 +72,21 @@ class Payment extends Model
                     'error' => $e->getMessage(),
                 ]);
             }
+
+            // Send payment confirmation email (separate try/catch — never blocks payment).
+            if ($payment->status === 'paid') {
+                try {
+                    $payment->loadMissing(['user', 'event.city', 'event.region']);
+                    if ($payment->user) {
+                        $payment->user->notify(new \App\Notifications\PaymentReceivedNotification($payment));
+                    }
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning('Payment notification failed.', [
+                        'payment_id' => $payment->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
         });
     }
 }
