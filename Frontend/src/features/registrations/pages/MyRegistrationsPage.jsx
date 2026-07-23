@@ -39,34 +39,32 @@ export default function MyRegistrationsPage() {
         {error && <ErrorState title={t('registrations.errorTitle', 'Unable to load registrations')} message={error} />}
         {!loading && !error && registrationCount === 0 && <EmptyState title={t('registrations.emptyTitle', 'No registrations yet')} message={t('registrations.emptyMessage', 'Register for events to see your tickets and payment status here.')} />}
         {!loading && !error && registrationCount > 0 && (
-          <div className="flex snap-x gap-4 overflow-x-auto pb-4 md:grid md:gap-5 md:overflow-visible md:pb-0">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {registeredEvents.map((event) => {
               const payment = event.registration.payment
               return (
-                <Card key={event.registration.id} className="min-w-[300px] shrink-0 overflow-hidden p-0 md:min-w-0">
-                  <div className="grid md:grid-cols-[220px_1fr]">
-                    <div className="min-h-48 bg-cover bg-center" style={{ backgroundImage: `url(${event.coverImage?.url || '/hero-events.svg'})` }} />
-                    <div className="p-5">
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div>
-                          <h2 className="text-xl font-black text-slate-950">{event.title}</h2>
-                          <p className="mt-1 flex items-center gap-2 text-sm text-slate-600"><CalendarDays className="h-4 w-4 text-teal-700" /> {event.city}, {event.region} • {formatDate(event.startDate)} • {formatPrice(event.price)}</p>
-                        </div>
-                        <StatusBadge status={event.registration.status} checkedInAt={event.registration.checkedInAt} t={t} />
+                <Card key={event.registration.id} className="overflow-hidden p-0">
+                  <div className="h-24 bg-cover bg-center sm:h-32" style={{ backgroundImage: `url(${event.coverImage?.url || '/hero-events.svg'})` }} />
+                  <div className="p-4 sm:p-5">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <h2 className="text-base font-black text-slate-950 leading-tight truncate sm:text-lg">{event.title}</h2>
+                        <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-600 sm:text-sm sm:gap-2"><CalendarDays className="h-3.5 w-3.5 text-teal-700 sm:h-4 sm:w-4" /> <span className="truncate">{formatDate(event.startDate)}</span></p>
                       </div>
-                      <div className="mt-4 grid gap-3 text-sm text-slate-600 md:grid-cols-2">
-                        <p><strong>{t('registrations.ticketLabel', 'Ticket:')}</strong> {event.registration.ticketNumber}</p>
-                        <p><strong>{t('registrations.paymentLabel', 'Payment:')}</strong> {payment ? `${payment.status} (${formatPrice(payment.amount)})` : t('registrations.paymentNotRequired', 'Not required')}</p>
-                        {event.registration.checkedInAt && <p><strong>{t('registrations.checkedInLabel', 'Checked in:')}</strong> {formatDate(event.registration.checkedInAt)}</p>}
-                      </div>
-                      {!canCancelRegistration(event) && <p className="mt-3 text-xs text-slate-500">{t('registrations.cancellationNotAvailable', 'Cancellation is not available for this registration.')}</p>}
-                      <div className="mt-5 flex flex-wrap gap-2">
-                        <Link to={`/registrations/${event.registration.id}`}><Button variant="secondary">{t('registrations.details', 'Details')}</Button></Link>
-                        <Link to={`/tickets/${event.id}`}><Button><Ticket className="mr-2 h-4 w-4" /> {t('registrations.ticketButton', 'Ticket')}</Button></Link>
-                        {payment?.status === 'pending' || payment?.status === 'processing' ? <Link to={`/payments/${payment.id}`}><Button variant="secondary"><CreditCard className="mr-2 h-4 w-4" /> {t('registrations.pay', 'Pay')}</Button></Link> : null}
-                        {event.registration.checkedInAt && <Link to={`/tickets/${event.id}`}><Button variant="outline">{t('registrations.viewCheckedInTicket', 'View checked-in ticket')}</Button></Link>}
-                        {canCancelRegistration(event) && <Button variant="danger" onClick={() => cancelRegistration(event.id)}><XCircle className="mr-2 h-4 w-4" /> {t('registrations.cancel', 'Cancel')}</Button>}
-                      </div>
+                      <StatusBadge status={event.registration.status} checkedInAt={event.registration.checkedInAt} t={t} />
+                    </div>
+                    <div className="mt-3 grid gap-2 text-xs text-slate-600 sm:mt-4 sm:gap-3 sm:text-sm">
+                      <p className="truncate"><strong>{t('registrations.ticketLabel', 'Ticket:')}</strong> <span className="break-all">{event.registration.ticketNumber}</span></p>
+                      <p><strong>{t('registrations.paymentLabel', 'Payment:')}</strong> {payment ? `${payment.status} (${formatPrice(payment.amount)})` : t('registrations.paymentNotRequired', 'Not required')}</p>
+                      {event.registration.checkedInAt && <p><strong>{t('registrations.checkedInLabel', 'Checked in:')}</strong> {formatDate(event.registration.checkedInAt)}</p>}
+                    </div>
+                    {!canCancelRegistration(event) && <p className="mt-2 text-[10px] text-slate-500 sm:mt-3 sm:text-xs">{t('registrations.cancellationNotAvailable', 'Cancellation is not available for this registration.')}</p>}
+                    <div className="mt-3 flex flex-wrap gap-1.5 sm:mt-5 sm:gap-2">
+                      <Link to={`/registrations/${event.registration.id}`} className="flex-1"><Button variant="secondary" className="w-full text-xs sm:text-sm">{t('registrations.details', 'Details')}</Button></Link>
+                      <Link to={`/tickets/${event.id}`} className="flex-1"><Button className="w-full text-xs sm:text-sm"><Ticket className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" /> {t('registrations.ticketButton', 'Ticket')}</Button></Link>
+                      {payment?.status === 'pending' || payment?.status === 'processing' ? <Link to={`/payments/${payment.id}`} className="flex-1"><Button variant="secondary" className="w-full text-xs sm:text-sm"><CreditCard className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" /> {t('registrations.pay', 'Pay')}</Button></Link> : null}
+                      {event.registration.checkedInAt && <Link to={`/tickets/${event.id}`} className="flex-1"><Button variant="outline" className="w-full text-xs sm:text-sm">{t('registrations.viewCheckedInTicket', 'View checked-in ticket')}</Button></Link>}
+                      {canCancelRegistration(event) && <Button variant="danger" onClick={() => cancelRegistration(event.id)} className="flex-1 text-xs sm:text-sm"><XCircle className="mr-1.5 h-3.5 w-3.5 sm:mr-2 sm:h-4 sm:w-4" /> {t('registrations.cancel', 'Cancel')}</Button>}
                     </div>
                   </div>
                 </Card>
