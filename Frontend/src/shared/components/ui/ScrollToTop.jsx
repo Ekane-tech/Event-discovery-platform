@@ -22,7 +22,7 @@ export default function ScrollToTop() {
 
       scrollTimeoutRef.current = setTimeout(() => {
         setVisible(false)
-      }, 2000) // Hide after 2 seconds of no scrolling
+      }, 1000) // Hide after 2 seconds of no scrolling
     }
 
     window.addEventListener('scroll', handleScroll)
