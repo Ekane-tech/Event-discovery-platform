@@ -191,6 +191,7 @@ export default function EventDetailsPage() {
                 <p className="flex gap-3 text-slate-700"><MapPin className="h-5 w-5 text-teal-700" /><span><strong>{t('events.details.locationLabel')}:</strong><br />{event.city}, {event.region}</span></p>
                 <p className="flex gap-3 text-slate-700"><CalendarDays className="h-5 w-5 text-teal-700" /><span><strong>{t('events.details.dateLabel')}:</strong><br />{formatDate(event.startDate)}</span></p>
                 <p className="flex gap-3 text-slate-700"><Users className="h-5 w-5 text-teal-700" /><span><strong>{t('events.details.capacityLabel')}:</strong><br />{event.maximumParticipants || t('events.details.notLimited')}</span></p>
+                <p className="flex gap-3 text-slate-700"><CalendarDays className="h-5 w-5 text-teal-700" /><span><strong>{t('events.details.deadlineLabel', 'Registration deadline')}:</strong><br />{event.registrationDeadline ? formatDate(event.registrationDeadline) : t('events.details.notSpecified')}</span></p>
               </div>
               <div className="mt-6 flex flex-wrap gap-2"><Button type="button" variant="secondary" onClick={shareEvent}><Share2 className="mr-2 h-4 w-4" />{t('events.details.shareEvent')}</Button></div>
               {event.latitude && event.longitude && (

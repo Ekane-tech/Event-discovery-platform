@@ -9,7 +9,7 @@ import Loader from '../../../shared/components/feedback/Loader.jsx'
 import ErrorState from '../../../shared/components/feedback/ErrorState.jsx'
 import EmptyState from '../../../shared/components/feedback/EmptyState.jsx'
 import PageContainer from '../../../shared/components/layout/PageContainer.jsx'
-import { formatPrice } from '../../../shared/utils/currency.js'
+import { formatMoney } from '../../../shared/utils/currency.js'
 import { formatDate } from '../../../shared/utils/formatDate.js'
 import { extractCollection } from '../../events/utils/normalizeEvent.js'
 import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
@@ -117,7 +117,7 @@ export default function OrganizerWalletPage() {
   if (error) return <PageContainer><ErrorState title={t('wallet.errorTitle', 'Wallet error')} message={error} /></PageContainer>
 
   const rules = wallet?.rules || {}
-  const fmt = (v) => formatPrice(v)
+  const fmt = (v) => formatMoney(v)
 
   return (
     <PageContainer>

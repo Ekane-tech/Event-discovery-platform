@@ -241,7 +241,8 @@
       "previousGalleryImages": "Previous gallery images",
       "nextGalleryImages": "Next gallery images",
       "mapHeading": "Location map",
-      "getDirections": "Get directions"
+      "getDirections": "Get directions",
+      "deadlineLabel": "Registration deadline"
     },
     "create": {
       "title": "Create Event",
@@ -698,7 +699,9 @@
       "system": "System"
     },
     "viewEvent": "View Event",
-    "viewFeedback": "View Feedback"
+    "viewFeedback": "View Feedback",
+    "readMore": "Read more",
+    "showLess": "Show less"
   },
   "organizers": {
     "badge": "Organizers",

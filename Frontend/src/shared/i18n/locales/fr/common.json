@@ -241,7 +241,8 @@
       "previousGalleryImages": "Images de galerie précédentes",
       "nextGalleryImages": "Images de galerie suivantes",
       "mapHeading": "Carte du lieu",
-      "getDirections": "Obtenir l'itinéraire"
+      "getDirections": "Obtenir l'itinéraire",
+      "deadlineLabel": "Fin des inscriptions"
     },
     "create": {
       "title": "Créer un événement",
@@ -698,7 +699,9 @@
       "system": "Système"
     },
     "viewEvent": "Voir l'événement",
-    "viewFeedback": "Voir le retour"
+    "viewFeedback": "Voir le retour",
+    "readMore": "Lire plus",
+    "showLess": "Réduire"
   },
   "organizers": {
     "badge": "Organisateurs",

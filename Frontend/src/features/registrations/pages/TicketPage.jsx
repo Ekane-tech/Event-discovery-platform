@@ -37,11 +37,11 @@ export default function TicketPage() {
     <PageContainer>
       <div className="mx-auto max-w-4xl">
         <div className="overflow-hidden rounded-[2rem] bg-white shadow-2xl ring-1 ring-slate-200">
-          <div className="bg-slate-950 bg-cover bg-center p-8 text-white" style={{backgroundImage:`linear-gradient(90deg, rgba(2,6,23,.9), rgba(15,118,110,.7)), url(${event.coverImage?.url || '/hero-events.svg'})`}}>
+          <div className="bg-slate-950 bg-cover bg-center p-5 text-white sm:p-6 md:p-8" style={{backgroundImage:`linear-gradient(90deg, rgba(2,6,23,.9), rgba(15,118,110,.7)), url(${event.coverImage?.url || '/hero-events.svg'})`}}>
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-bold text-teal-100"><ShieldCheck className="h-4 w-4"/> {t('tickets.digitalTicket', 'Digital Ticket')}</p>
-                <h1 className="mt-4 text-3xl font-black">{event.title}</h1>
+                <h1 className="mt-4 text-2xl font-black md:text-3xl">{event.title}</h1>
                 <p className="mt-2 flex items-center gap-2 text-slate-200"><CalendarDays className="h-4 w-4"/> {formatDate(event.startDate)}</p>
               </div>
               <div className="rounded-2xl bg-white p-4 text-slate-950 shadow-xl">
@@ -51,14 +51,14 @@ export default function TicketPage() {
             </div>
           </div>
 
-          <div className="p-8">
+          <div className="p-5 sm:p-6 md:p-8">
             {registration.checkedInAt && <div className="mb-5"><Alert type="success"><CheckCircle2 className="mr-2 inline h-4 w-4" /> {t('tickets.checkedInMessage', 'You are checked in for this event.')} {t('tickets.checkedInOn', 'Checked in on')} <strong>{formatDate(registration.checkedInAt)}</strong>.</Alert></div>}
             {expiredByTime && <div className="mb-5"><Alert type="warning"><AlertTriangle className="mr-2 inline h-4 w-4" /> {t('tickets.expiredMessage', 'This ticket is no longer valid because the event end time has passed.')}</Alert></div>}
             {!available && !expiredByTime && <div className="mb-5"><Alert type="warning">{t('tickets.notAvailableMessage', { status: registration.status, defaultValue: 'This event is no longer publicly available. Your registration status is {{status}}.' })}</Alert></div>}
             <div className="grid gap-5 md:grid-cols-2">
-              <div><p className="text-sm text-slate-500">{t('tickets.ticketNumber', 'Ticket number')}</p><p className="mt-1 text-2xl font-black tracking-wide text-slate-950">{registration.ticketNumber}</p></div>
-              <div><p className="text-sm text-slate-500">{t('tickets.status', 'Status')}</p><p className="mt-1 text-2xl font-black capitalize text-slate-950">{expiredByTime ? t('tickets.expired', 'Expired') : registration.checkedInAt ? t('tickets.checkedIn', 'Checked in') : registration.status}</p></div>
-              {registration.ticketType?.name && <div><p className="text-sm text-slate-500">{t('tickets.ticketType', 'Ticket type')}</p><p className="mt-1 text-2xl font-black capitalize text-slate-950">{registration.ticketType.name}</p></div>}
+              <div><p className="text-sm text-slate-500">{t('tickets.ticketNumber', 'Ticket number')}</p><p className="mt-1 text-lg font-black tracking-wide text-slate-950 sm:text-xl md:text-2xl">{registration.ticketNumber}</p></div>
+              <div><p className="text-sm text-slate-500">{t('tickets.status', 'Status')}</p><p className="mt-1 text-lg font-black capitalize text-slate-950 sm:text-xl md:text-2xl">{expiredByTime ? t('tickets.expired', 'Expired') : registration.checkedInAt ? t('tickets.checkedIn', 'Checked in') : registration.status}</p></div>
+              {registration.ticketType?.name && <div><p className="text-sm text-slate-500">{t('tickets.ticketType', 'Ticket type')}</p><p className="mt-1 text-lg font-black capitalize text-slate-950 sm:text-xl md:text-2xl">{registration.ticketType.name}</p></div>}
               <p className="flex gap-2 text-slate-700"><MapPin className="h-5 w-5 text-teal-700"/> {event.venue}, {event.city}, {event.region}</p>
               <p className="flex gap-2 text-slate-700"><QrCode className="h-5 w-5 text-teal-700"/> {t('tickets.scanHint', 'Scan this QR code to verify the ticket.')}</p>
             </div>

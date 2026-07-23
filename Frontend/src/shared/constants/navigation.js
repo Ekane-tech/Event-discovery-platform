@@ -78,8 +78,8 @@ export function getMobileNavigationGroups(role, isAuthenticated) {
   const groups = [{ title: 'Discover', links: PUBLIC_NAV_LINKS }]
   if (!isAuthenticated) return groups
   if (role === ROLES.USER) return [...groups, { title: 'My Account', links: USER_NAV_LINKS }]
-  if (role === ROLES.ORGANIZER) return [...groups, { title: 'Organizer', links: ORGANIZER_NAV_LINKS }, { title: 'Account', links: ACCOUNT_NAV_LINKS.filter((link) => link.to !== '/notifications') }]
-  if (role === ROLES.ADMIN) return [...groups, { title: 'Administration', links: ADMIN_NAV_LINKS }, { title: 'Account', links: ACCOUNT_NAV_LINKS.filter((link) => link.to !== '/notifications') }]
+  if (role === ROLES.ORGANIZER) return [...groups, { title: 'Organizer', links: ORGANIZER_NAV_LINKS }]
+  if (role === ROLES.ADMIN) return [...groups, { title: 'Administration', links: ADMIN_NAV_LINKS }]
   return [...groups, { title: 'Account', links: ACCOUNT_NAV_LINKS }]
 }
 

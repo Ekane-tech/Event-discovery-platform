@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Bell, ExternalLink } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Badge from '../../../shared/components/ui/Badge.jsx'
@@ -7,6 +8,8 @@ import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
 export default function NotificationItem({ notification, onMarkAsRead }) {
   const { t } = useTranslation()
+  const [expanded, setExpanded] = useState(false)
+  const isLong = (notification.message?.length || 0) > 160
   const typeLabels = {
     interest_match: t('notifications.type.interestMatch', 'Interest match'),
     event_unavailable: t('notifications.type.eventUnavailable', 'Event update'),
@@ -28,7 +31,12 @@ export default function NotificationItem({ notification, onMarkAsRead }) {
             {!notification.read && <span className="rounded-full bg-red-600 px-2 py-0.5 text-xs font-bold text-white">{t('notifications.newBadge', 'New')}</span>}
           </div>
           <h3 className="font-black text-slate-950">{notification.title}</h3>
-          <p className="mt-2 text-sm leading-6 text-slate-600">{notification.message}</p>
+          <p className={`mt-2 text-sm leading-6 text-slate-600 ${!expanded && isLong ? 'line-clamp-3' : ''}`}>{notification.message}</p>
+          {isLong && (
+            <button type="button" onClick={() => setExpanded((current) => !current)} className="mt-1 text-xs font-bold text-teal-700 hover:text-teal-800">
+              {expanded ? t('notifications.showLess', 'Show less') : t('notifications.readMore', 'Read more')}
+            </button>
+          )}
           {notification.reason && <p className="mt-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-900"><strong>{t('notifications.reason', 'Reason:')}</strong> {notification.reason}</p>}
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500"><span>{formatDate(notification.createdAt)}</span>{notification.city && <span>{notification.city}, {notification.region}</span>}</div>
         </div>

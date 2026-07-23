@@ -39,11 +39,11 @@ export default function MyRegistrationsPage() {
         {error && <ErrorState title={t('registrations.errorTitle', 'Unable to load registrations')} message={error} />}
         {!loading && !error && registrationCount === 0 && <EmptyState title={t('registrations.emptyTitle', 'No registrations yet')} message={t('registrations.emptyMessage', 'Register for events to see your tickets and payment status here.')} />}
         {!loading && !error && registrationCount > 0 && (
-          <div className="grid gap-5">
+          <div className="flex snap-x gap-4 overflow-x-auto pb-4 md:grid md:gap-5 md:overflow-visible md:pb-0">
             {registeredEvents.map((event) => {
               const payment = event.registration.payment
               return (
-                <Card key={event.registration.id} className="overflow-hidden p-0">
+                <Card key={event.registration.id} className="min-w-[300px] shrink-0 overflow-hidden p-0 md:min-w-0">
                   <div className="grid md:grid-cols-[220px_1fr]">
                     <div className="min-h-48 bg-cover bg-center" style={{ backgroundImage: `url(${event.coverImage?.url || '/hero-events.svg'})` }} />
                     <div className="p-5">

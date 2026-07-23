@@ -14,7 +14,7 @@ export default function NotificationList({ notifications = [], onMarkAsRead }) {
   }
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-4 md:grid-cols-2">
       {notifications.map((notification) => (
         <NotificationItem key={notification.id} notification={notification} onMarkAsRead={onMarkAsRead} />
       ))}

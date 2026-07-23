@@ -9,7 +9,7 @@ import ErrorState from '../../../../shared/components/feedback/ErrorState.jsx'
 import EmptyState from '../../../../shared/components/feedback/EmptyState.jsx'
 import PageContainer from '../../../../shared/components/layout/PageContainer.jsx'
 import Table from '../../../../shared/components/ui/Table.jsx'
-import { formatPrice } from '../../../../shared/utils/currency.js'
+import { formatMoney } from '../../../../shared/utils/currency.js'
 import { formatDate } from '../../../../shared/utils/formatDate.js'
 import { extractCollection } from '../../../events/utils/normalizeEvent.js'
 import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
@@ -95,7 +95,7 @@ export default function AdminPayoutsPage() {
     }
   }
 
-  const fmt = (v) => formatPrice(v)
+  const fmt = (v) => formatMoney(v)
   const sum = (status) => payouts.filter((p) => p.status === status).reduce((acc, p) => acc + Number(p.amount || 0), 0)
 
   const columns = [
