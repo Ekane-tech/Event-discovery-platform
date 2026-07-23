@@ -62,6 +62,12 @@ export default function EventCard({ event }) {
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <Badge className="bg-white/20 text-white backdrop-blur">{event.category || t('events.card.eventFallback', 'Event')}</Badge>
           <span className="rounded-full bg-teal-500 px-3 py-1 text-sm font-bold text-white">{formatPrice(event.price)}</span>
+          {event.averageRating > 0 && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-sm font-bold text-slate-950 shadow-sm">
+              <Star className="h-3.5 w-3.5 fill-slate-950 text-slate-950" />
+              {Number(event.averageRating).toFixed(1)}
+            </span>
+          )}
         </div>
         <h3 className="text-xl font-black leading-tight drop-shadow-sm">{event.title}</h3>
         <p className="mt-2 line-clamp-2 text-sm leading-6 text-white drop-shadow-sm">{event.description}</p>

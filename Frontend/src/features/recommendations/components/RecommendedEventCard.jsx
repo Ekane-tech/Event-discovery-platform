@@ -1,4 +1,4 @@
-import { BadgeCheck, Bookmark, CalendarDays, Clock, MapPin } from 'lucide-react'
+import { BadgeCheck, Bookmark, CalendarDays, Clock, MapPin, Star } from 'lucide-react'
 import { toast } from 'sonner'
 import { Link, useLocation } from 'react-router-dom'
 import Button from '../../../shared/components/ui/Button.jsx'
@@ -56,6 +56,12 @@ export default function RecommendedEventCard({ event }) {
         </div>
         <div className="absolute bottom-4 left-4 flex flex-wrap gap-2">
           <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white backdrop-blur">{event.category || t('events.card.eventFallback', 'Event')}</span>
+          {event.averageRating > 0 && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-xs font-bold text-slate-950 shadow-sm">
+              <Star className="h-3 w-3 fill-slate-950 text-slate-950" />
+              {Number(event.averageRating).toFixed(1)}
+            </span>
+          )}
           <RecommendationScoreBadge score={event.recommendationScore} />
         </div>
       </div>
