@@ -63,7 +63,6 @@ export function useBookmarks() {
     try {
       await bookmarkService.addBookmark(eventId)
       window.dispatchEvent(new CustomEvent(BOOKMARKS_UPDATED_EVENT))
-      await fetchBookmarks()
       return true
     } catch (error) {
       setBookmarks((prev) => prev.filter((b) => b.eventId !== eventId))
@@ -81,7 +80,6 @@ export function useBookmarks() {
     try {
       await bookmarkService.removeBookmark(eventId)
       window.dispatchEvent(new CustomEvent(BOOKMARKS_UPDATED_EVENT))
-      await fetchBookmarks()
       return false
     } catch (error) {
       setBookmarks(previousBookmarks)

@@ -17,21 +17,23 @@ use App\Models\Division;
 use App\Models\Region;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class LocationController extends Controller
 {
     public function regions(Request $request): JsonResponse
     {
-        $query = Region::query()->withCount(['divisions', 'cities'])->orderBy('name');
+        $includeInactive = $request->boolean('include_inactive');
+        $cacheKey = 'public:regions:'.($includeInactive ? 'all' : 'active');
 
-        if (! $request->boolean('include_inactive')) {
-            $query->where('is_active', true);
-        }
+        $regions = Cache::remember($cacheKey, now()->addHour(), function () use ($includeInactive) {
+            $query = Region::query()->withCount(['divisions', 'cities'])->orderBy('name');
+            if (! $includeInactive) { $query->where('is_active', true); }
+            return $query->get();
+        });
 
-        return response()->json([
-            'regions' => RegionResource::collection($query->get()),
-        ]);
+        return response()->json(['regions' => RegionResource::collection($regions)]);
     }
 
     public function showRegion(Region $region): JsonResponse
@@ -43,19 +45,17 @@ class LocationController extends Controller
 
     public function divisions(Request $request): JsonResponse
     {
+        $hasFilters = $request->filled('region_id') || $request->boolean('include_inactive');
         $query = Division::query()->with(['region'])->withCount('cities')->orderBy('name');
 
-        if ($request->filled('region_id')) {
-            $query->where('region_id', $request->integer('region_id'));
-        }
+        if ($request->filled('region_id')) { $query->where('region_id', $request->integer('region_id')); }
+        if (! $request->boolean('include_inactive')) { $query->where('is_active', true); }
 
-        if (! $request->boolean('include_inactive')) {
-            $query->where('is_active', true);
-        }
+        $divisions = (! $hasFilters)
+            ? Cache::remember('public:divisions', now()->addHour(), fn () => $query->get())
+            : $query->get();
 
-        return response()->json([
-            'divisions' => DivisionResource::collection($query->get()),
-        ]);
+        return response()->json(['divisions' => DivisionResource::collection($divisions)]);
     }
 
     public function showDivision(Division $division): JsonResponse
@@ -67,23 +67,18 @@ class LocationController extends Controller
 
     public function cities(Request $request): JsonResponse
     {
+        $hasFilters = $request->filled('region_id') || $request->filled('division_id') || $request->boolean('include_inactive');
         $query = City::query()->with(['region', 'division'])->orderBy('name');
 
-        if ($request->filled('region_id')) {
-            $query->where('region_id', $request->integer('region_id'));
-        }
+        if ($request->filled('region_id')) { $query->where('region_id', $request->integer('region_id')); }
+        if ($request->filled('division_id')) { $query->where('division_id', $request->integer('division_id')); }
+        if (! $request->boolean('include_inactive')) { $query->where('is_active', true); }
 
-        if ($request->filled('division_id')) {
-            $query->where('division_id', $request->integer('division_id'));
-        }
+        $cities = (! $hasFilters)
+            ? Cache::remember('public:cities', now()->addHour(), fn () => $query->get())
+            : $query->get();
 
-        if (! $request->boolean('include_inactive')) {
-            $query->where('is_active', true);
-        }
-
-        return response()->json([
-            'cities' => CityResource::collection($query->get()),
-        ]);
+        return response()->json(['cities' => CityResource::collection($cities)]);
     }
 
     public function showCity(City $city): JsonResponse
@@ -152,6 +147,7 @@ class LocationController extends Controller
     public function destroyRegion(Region $region): JsonResponse
     {
         $region->delete();
+        $this->flushLocationCache();
 
         return response()->json([
             'message' => 'Region deleted successfully.',
@@ -195,6 +191,7 @@ class LocationController extends Controller
     public function destroyDivision(Division $division): JsonResponse
     {
         $division->delete();
+        $this->flushLocationCache();
 
         return response()->json([
             'message' => 'Division deleted successfully.',
@@ -240,9 +237,18 @@ class LocationController extends Controller
     public function destroyCity(City $city): JsonResponse
     {
         $city->delete();
+        $this->flushLocationCache();
 
         return response()->json([
             'message' => 'City deleted successfully.',
         ]);
+    }
+
+    protected function flushLocationCache(): void
+    {
+        Cache::forget('public:regions:active');
+        Cache::forget('public:regions:all');
+        Cache::forget('public:divisions');
+        Cache::forget('public:cities');
     }
 }

@@ -19,6 +19,7 @@ use App\Notifications\EventUnavailableNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -28,6 +29,24 @@ class EventController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
+        $isAdmin = $request->user()?->hasRole('admin');
+
+        // Cache public (non-admin) event listings for 60s to slash DB load.
+        $cacheKey = null;
+        if (! $isAdmin) {
+            $params = $request->only(['date', 'category_id', 'city_id', 'price', 'sort', 'keyword', 'per_page', 'page']);
+            $cacheKey = 'public:events:'.md5(json_encode($params));
+
+            try {
+                $cached = Cache::get($cacheKey);
+                if ($cached !== null) {
+                    return response($cached, 200, ['Content-Type' => 'application/json']);
+                }
+            } catch (\Throwable) {
+                $cacheKey = null;
+            }
+        }
+
         $query = Event::query()
             ->with(['organizer.role', 'organizer.profile', 'category', 'region', 'division', 'city', 'images', 'ticketTypes'])
             ->withCount(['registrations', 'bookmarks', 'reports']);
@@ -41,9 +60,18 @@ class EventController extends Controller
         $this->applyFilters($query, $request);
         $this->applySorting($query, $request);
 
-        return response()->json([
+        $response = response()->json([
             'events' => EventResource::collection($query->paginate(min((int) $request->input('per_page', 12), 50))),
         ]);
+
+        if ($cacheKey) {
+            try {
+                Cache::put($cacheKey, $response->getContent(), now()->addSeconds(60));
+            } catch (\Throwable) {
+            }
+        }
+
+        return $response;
     }
 
     public function show(Event $event): JsonResponse
