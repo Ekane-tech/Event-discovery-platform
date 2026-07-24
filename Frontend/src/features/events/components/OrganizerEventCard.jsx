@@ -53,7 +53,7 @@ export default function OrganizerEventCard({ event, onDelete, onDuplicate }) {
             <div className="grid shrink-0 grid-cols-2 gap-2 sm:flex sm:flex-wrap 2xl:max-w-[360px] 2xl:justify-end">
               <Link to={`/organizer/events/${event.id}/details`}><Button variant="secondary" className="w-full sm:w-auto">Details</Button></Link>
               <Link to={`/organizer/events/${event.id}/attendees`}><Button variant="secondary" className="w-full sm:w-auto">Attendees</Button></Link>
-              <Link to={`/organizer/events/${event.id}/scanner`}><Button variant="secondary" className="w-full sm:w-auto">Scanner</Button></Link>
+              {!isPast && <Link to={`/organizer/events/${event.id}/scanner`}><Button variant="secondary" className="w-full sm:w-auto">Scanner</Button></Link>}
               {!isPast && <Link to={`/organizer/events/${event.id}/edit`}><Button className="w-full sm:w-auto">Edit</Button></Link>}
               <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => onDuplicate(event.id)}><Copy className="mr-2 h-4 w-4" />{isPast ? 'Duplicate for new date' : 'Duplicate'}</Button>
               <Button type="button" variant="danger" className="w-full sm:w-auto" onClick={() => onDelete(event.id)}><Trash2 className="mr-2 h-4 w-4" />Delete</Button>

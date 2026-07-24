@@ -13,6 +13,7 @@ import SectionHeader from '../../../../shared/components/layout/SectionHeader.js
 import { formatDate } from '../../../../shared/utils/formatDate.js'
 import { eventService } from '../../../events/services/eventService.js'
 import { extractCollection, normalizeEvent } from '../../../events/utils/normalizeEvent.js'
+import { hasEventEnded } from '../../../events/utils/eventLifecycle.js'
 import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
 
 function normalizeAttendee(registration) {
@@ -106,9 +107,14 @@ export default function OrganizerAttendeesPage() {
   if (error) return <PageContainer><ErrorState title="Unable to load attendees" message={error} /></PageContainer>
   if (!event) return <PageContainer><EmptyState title="Event not found" message="The organizer event could not be found." /></PageContainer>
 
+  const isPast = hasEventEnded(event)
   const rows = filteredAttendees.map((attendee) => ({
     ...attendee,
-    checkIn: attendee.checkedInAt ? <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-black text-green-700">Checked in</span> : <Button type="button" variant="secondary" className="!px-3 !py-1.5 text-xs" disabled={checkingIn === attendee.id} onClick={() => handleCheckIn(attendee.id)}><UserCheck className="mr-1 h-3.5 w-3.5" />Check in</Button>,
+    checkIn: attendee.checkedInAt
+      ? <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-black text-green-700">Checked in</span>
+      : isPast
+        ? <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-500">Closed</span>
+        : <Button type="button" variant="secondary" className="!px-3 !py-1.5 text-xs" disabled={checkingIn === attendee.id} onClick={() => handleCheckIn(attendee.id)}><UserCheck className="mr-1 h-3.5 w-3.5" />Check in</Button>,
   }))
 
   return (
@@ -116,8 +122,12 @@ export default function OrganizerAttendeesPage() {
       <SectionHeader
         title="Manage Attendees"
         description={`Attendee list, CSV export and check-in workflow for ${event.title}.`}
-        action={<div className="flex flex-wrap gap-2"><Link to={scannerPath}><Button><QrCode className="mr-2 h-4 w-4" />Open scanner</Button></Link><Link to={backPath}><Button variant="secondary">Back to Events</Button></Link></div>}
+        action={<div className="flex flex-wrap gap-2">{!isPast && <Link to={scannerPath}><Button><QrCode className="mr-2 h-4 w-4" />Open scanner</Button></Link>}<Link to={backPath}><Button variant="secondary">Back to Events</Button></Link></div>}
       />
+
+      {isPast && (
+        <div className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600">This event has ended — check-in is closed.</div>
+      )}
 
       <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
         {[
