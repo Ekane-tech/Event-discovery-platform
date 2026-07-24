@@ -1,5 +1,3 @@
-# Nixpacks build config.
-# Installs the MySQL client so `backup:database` (artisan) can shell out to
-# `mysqldump` on the scheduler service.
 [phases.setup]
-aptPkgs = ["default-mysql-client"]
+nixPackages = ["mysql80"]
+
