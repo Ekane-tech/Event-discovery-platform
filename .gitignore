@@ -1,0 +1,4 @@
+*.patch
+/patches/
+.DS_Store
+Thumbs.db
