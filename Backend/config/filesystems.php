@@ -60,6 +60,15 @@ return [
             'report' => false,
         ],
 
+        // Private, volume-backed disk for database backups. Point BACKUP_DISK_PATH
+        // at a persistent Railway volume mount (on the scheduler service). Never public.
+        'backups' => [
+            'driver' => 'local',
+            'root' => env('BACKUP_DISK_PATH', storage_path('app/backups')),
+            'throw' => true,
+            'report' => false,
+        ],
+
     ],
 
     /*
