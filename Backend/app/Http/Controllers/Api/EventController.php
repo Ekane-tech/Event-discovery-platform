@@ -16,6 +16,7 @@ use App\Models\AuditLog;
 use App\Notifications\EventAvailableNotification;
 use App\Notifications\EventOrganizerModerationNotification;
 use App\Notifications\EventUnavailableNotification;
+use App\Support\ImageStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -168,7 +169,7 @@ class EventController extends Controller
     {
         $user = request()->user();
 
-        if (! $user->hasRole('admin') && ! ($user->hasRole('organizer') && (int) $event->organizer_id === (int) $user->id)) {
+        if (! $event->isManageableBy($user)) {
             abort(403, 'You do not have permission to delete this event.');
         }
 
@@ -183,7 +184,7 @@ class EventController extends Controller
     {
         $user = $request->user();
 
-        if (! $user->hasRole('admin') && ! ($user->hasRole('organizer') && (int) $event->organizer_id === (int) $user->id)) {
+        if (! $event->isManageableBy($user)) {
             abort(403, 'You do not have permission to upload images for this event.');
         }
 
@@ -206,15 +207,15 @@ class EventController extends Controller
 
         if ($request->hasFile('cover')) {
             foreach ($event->images()->where('is_cover', true)->get() as $oldCover) {
-                Storage::disk('public')->delete($oldCover->path);
+                ImageStorage::delete($oldCover->path);
                 $oldCover->delete();
             }
-            $path = $request->file('cover')->store('events/'.$event->id, 'public');
+            $path = ImageStorage::store($request->file('cover'), 'events/'.$event->id);
             $event->images()->create(['path' => $path, 'type' => 'cover', 'is_cover' => true]);
         }
 
         foreach ($request->file('gallery', []) as $image) {
-            $path = $image->store('events/'.$event->id, 'public');
+            $path = ImageStorage::store($image, 'events/'.$event->id);
             $event->images()->create(['path' => $path, 'type' => 'gallery', 'is_cover' => false]);
         }
 
@@ -237,7 +238,7 @@ class EventController extends Controller
             abort(404);
         }
 
-        if (! $user->hasRole('admin') && ! ($user->hasRole('organizer') && (int) $event->organizer_id === (int) $user->id)) {
+        if (! $event->isManageableBy($user)) {
             abort(403, 'You do not have permission to delete images for this event.');
         }
 
@@ -245,7 +246,7 @@ class EventController extends Controller
 
         $wasCover = (bool) $image->is_cover;
 
-        Storage::disk('public')->delete($image->path);
+        ImageStorage::delete($image->path);
         $image->delete();
 
         if ($wasCover) {
@@ -274,7 +275,7 @@ class EventController extends Controller
             abort(404);
         }
 
-        if (! $user->hasRole('admin') && ! ($user->hasRole('organizer') && (int) $event->organizer_id === (int) $user->id)) {
+        if (! $event->isManageableBy($user)) {
             abort(403, 'You do not have permission to manage images for this event.');
         }
 

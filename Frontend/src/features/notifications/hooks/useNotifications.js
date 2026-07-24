@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
 import { extractCollection } from '../../events/utils/normalizeEvent.js'
+import { emitResourceEvent, useResourceEvent } from '../../../shared/hooks/useResourceEvent.js'
 import { notificationService } from '../services/notificationService.js'
 import { useAuth } from '../../auth/hooks/useAuth.js'
 
@@ -60,24 +61,19 @@ export function useNotifications() {
       return
     }
     fetchNotifications()
-
-    function handleNotificationsUpdated() {
-      fetchNotifications()
-    }
-
-    window.addEventListener(NOTIFICATIONS_UPDATED_EVENT, handleNotificationsUpdated)
-    return () => window.removeEventListener(NOTIFICATIONS_UPDATED_EVENT, handleNotificationsUpdated)
   }, [fetchNotifications, isAuthenticated])
+
+  useResourceEvent(NOTIFICATIONS_UPDATED_EVENT, fetchNotifications, isAuthenticated)
 
   async function markAsRead(notificationId) {
     await notificationService.markAsRead(notificationId)
-    window.dispatchEvent(new CustomEvent(NOTIFICATIONS_UPDATED_EVENT))
+    emitResourceEvent(NOTIFICATIONS_UPDATED_EVENT)
     await fetchNotifications()
   }
 
   async function markAllAsRead() {
     await notificationService.markAllAsRead()
-    window.dispatchEvent(new CustomEvent(NOTIFICATIONS_UPDATED_EVENT))
+    emitResourceEvent(NOTIFICATIONS_UPDATED_EVENT)
     await fetchNotifications()
   }
 

@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Profile\UpdateProfileRequest;
 use App\Http\Resources\ProfileResource;
+use App\Support\ImageStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -55,11 +55,9 @@ class ProfileController extends Controller
         $user = $request->user();
         $profile = $user->profile()->firstOrCreate(['user_id' => $user->id]);
 
-        if ($profile->avatar && ! str_starts_with($profile->avatar, 'http')) {
-            Storage::disk('public')->delete($profile->avatar);
-        }
+        ImageStorage::delete($profile->avatar);
 
-        $path = $request->file('avatar')->store('avatars/'.$user->id, 'public');
+        $path = ImageStorage::store($request->file('avatar'), 'avatars/'.$user->id);
         $profile->update(['avatar' => $path]);
 
         return response()->json([
@@ -73,9 +71,7 @@ class ProfileController extends Controller
         $user = $request->user();
         $profile = $user->profile()->firstOrCreate(['user_id' => $user->id]);
 
-        if ($profile->avatar && ! str_starts_with($profile->avatar, 'http')) {
-            Storage::disk('public')->delete($profile->avatar);
-        }
+        ImageStorage::delete($profile->avatar);
 
         $profile->update(['avatar' => null]);
 
