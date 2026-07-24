@@ -8,6 +8,7 @@ use App\Models\Registration;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class MobileMoneyPaymentService
@@ -185,6 +186,12 @@ class MobileMoneyPaymentService
 
             return $this->applyProviderStatus($payment, $payload, 'status_check');
         } catch (\Throwable $exception) {
+            Log::warning('Campay payment status check failed.', [
+                'payment_id' => $payment->id,
+                'provider' => $payment->provider,
+                'error' => $exception->getMessage(),
+            ]);
+
             $payment->update([
                 'metadata' => [
                     ...($payment->metadata ?? []),
