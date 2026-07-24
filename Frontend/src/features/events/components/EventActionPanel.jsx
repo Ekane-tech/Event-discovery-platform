@@ -43,15 +43,14 @@ export default function EventActionPanel({ event }) {
   const registered = isRegistered(event.id)
   const cancellationAllowed = canCancelRegistration(event, registration)
   const selectedTicket = ticketOptions.find((ticket) => String(ticket.id || '') === String(selectedTicketTypeId)) || ticketOptions[0]
-  const showPurchaseForm = (!registered || buyingMore) && !isSoldOut
-  const selectedQuantity = Math.max(1, Number(quantity || 1))
-  const totalAmount = Number(selectedTicket?.price || 0) * selectedQuantity
-
   const maxCapacity = Number(event?.maximumParticipants) || 0
   const confirmedRegistrations = Number(event?.registrations) || 0
   const remaining = maxCapacity > 0 ? Math.max(0, maxCapacity - confirmedRegistrations) : null
   const isSoldOut = remaining !== null && remaining <= 0
   const isLowCapacity = remaining !== null && remaining > 0 && remaining <= 5
+  const showPurchaseForm = (!registered || buyingMore) && !isSoldOut
+  const selectedQuantity = Math.max(1, Number(quantity || 1))
+  const totalAmount = Number(selectedTicket?.price || 0) * selectedQuantity
 
   async function handleBookmark() {
     setBusy(true)
