@@ -212,7 +212,10 @@ class PaymentController extends Controller
         $secret = env('CAMPAY_CALLBACK_SECRET');
 
         if (! $secret) {
-            return true;
+            // Fail open only outside production so local/dev flows keep working.
+            // In production an unsigned callback must never be trusted, otherwise
+            // anyone could mark arbitrary payments as paid.
+            return ! app()->environment('production');
         }
 
         $signature = $request->header('X-Campay-Signature')

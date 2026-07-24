@@ -8,8 +8,7 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    // CORRECTION : On ajoute '*' pour couvrir absolument TOUTES les routes (api, auth, login, etc.)
-    'paths' => ['api/*', 'sanctum/csrf-cookie', '*'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
     'allowed_methods' => ['*'],
 
