@@ -1,0 +1,781 @@
+From 297d1ef48eb80f7c168a155b7bc3e4061a3c5d8c Mon Sep 17 00:00:00 2001
+From: ekane bryan <ekanebryan5@gmail.com>
+Date: Wed, 22 Jul 2026 19:23:52 +0000
+Subject: [PATCH] feat(frontend): organizer wallet page + admin payouts
+ management
+
+- Organizer Wallet page (/organizer/wallet): balances (available/pending/
+  lifetime/paid-out), fee/grace/min rules, request-payout modal (amount +
+  mobile money or bank details), payout requests list + cancel, and a
+  recent-transactions ledger.
+- Admin Payouts page (/admin/payouts): filtered payout table with
+  approve/reject/mark-paid actions, summary cards, and an editable
+  platform-settings panel (fee %, grace hours, min payout).
+- walletService + adminPayoutService API clients, nav links + wallet icon,
+  routes, and EN/FR translations (wallet.*, payouts.*, nav.wallet/payouts).
+---
+ Frontend/src/app/router/AppRouter.jsx         |   4 +
+ .../admin/pages/AdminPayoutsPage.jsx          | 178 +++++++++++++
+ .../wallet/pages/OrganizerWalletPage.jsx      | 243 ++++++++++++++++++
+ .../wallet/services/adminPayoutService.js     |  13 +
+ .../features/wallet/services/walletService.js |  11 +
+ .../shared/components/navigation/NavIcon.jsx  |   2 +
+ Frontend/src/shared/constants/navigation.js   |   2 +
+ .../src/shared/i18n/locales/en/common.json    |  85 +++++-
+ .../src/shared/i18n/locales/fr/common.json    |  85 +++++-
+ 9 files changed, 619 insertions(+), 4 deletions(-)
+ create mode 100644 Frontend/src/features/dashboard/admin/pages/AdminPayoutsPage.jsx
+ create mode 100644 Frontend/src/features/wallet/pages/OrganizerWalletPage.jsx
+ create mode 100644 Frontend/src/features/wallet/services/adminPayoutService.js
+ create mode 100644 Frontend/src/features/wallet/services/walletService.js
+
+diff --git a/Frontend/src/app/router/AppRouter.jsx b/Frontend/src/app/router/AppRouter.jsx
+index f5c9087..ec87248 100644
+--- a/Frontend/src/app/router/AppRouter.jsx
++++ b/Frontend/src/app/router/AppRouter.jsx
+@@ -26,6 +26,7 @@ import UserDashboardPage from '../../features/dashboard/user/pages/UserDashboard
+ import OrganizerDashboardPage from '../../features/dashboard/organizer/pages/OrganizerDashboardPage.jsx'
+ import OrganizerAttendeesPage from '../../features/dashboard/organizer/pages/OrganizerAttendeesPage.jsx'
+ import OrganizerStatisticsPage from '../../features/dashboard/organizer/pages/OrganizerStatisticsPage.jsx'
++import OrganizerWalletPage from '../../features/wallet/pages/OrganizerWalletPage.jsx'
+ import AdminDashboardPage from '../../features/dashboard/admin/pages/AdminDashboardPage.jsx'
+ import AdminUsersPage from '../../features/dashboard/admin/pages/AdminUsersPage.jsx'
+ import AdminEventsPage from '../../features/dashboard/admin/pages/AdminEventsPage.jsx'
+@@ -35,6 +36,7 @@ import AdminReportsPage from '../../features/dashboard/admin/pages/AdminReportsP
+ import AdminNotificationsPage from '../../features/dashboard/admin/pages/AdminNotificationsPage.jsx'
+ import AdminFeedbackPage from '../../features/dashboard/admin/pages/AdminFeedbackPage.jsx'
+ import AdminPaymentsPage from '../../features/dashboard/admin/pages/AdminPaymentsPage.jsx'
++import AdminPayoutsPage from '../../features/dashboard/admin/pages/AdminPayoutsPage.jsx'
+ import AdminAuditLogsPage from '../../features/dashboard/admin/pages/AdminAuditLogsPage.jsx'
+ import AdminEmailPage from '../../features/dashboard/admin/pages/AdminEmailPage.jsx'
+ 
+@@ -147,6 +149,7 @@ export default function AppRouter() {
+               <Route path="/organizer/events/:id/attendees" element={<OrganizerAttendeesPage />} />
+               <Route path="/organizer/events/:id/scanner" element={<TicketScannerPage />} />
+               <Route path="/organizer/statistics" element={<OrganizerStatisticsPage />} />
++              <Route path="/organizer/wallet" element={<OrganizerWalletPage />} />
+             </Route>
+           </Route>
+ 
+@@ -156,6 +159,7 @@ export default function AppRouter() {
+               <Route path="/admin/users" element={<AdminUsersPage />} />
+               <Route path="/admin/events" element={<AdminEventsPage />} />
+               <Route path="/admin/payments" element={<AdminPaymentsPage />} />
++              <Route path="/admin/payouts" element={<AdminPayoutsPage />} />
+               <Route path="/admin/events/:id/details" element={<OrganizerEventDetailsPage />} />
+               <Route path="/admin/events/:id/attendees" element={<OrganizerAttendeesPage />} />
+               <Route path="/admin/events/:id/scanner" element={<TicketScannerPage />} />
+diff --git a/Frontend/src/features/dashboard/admin/pages/AdminPayoutsPage.jsx b/Frontend/src/features/dashboard/admin/pages/AdminPayoutsPage.jsx
+new file mode 100644
+index 0000000..797b6d0
+--- /dev/null
++++ b/Frontend/src/features/dashboard/admin/pages/AdminPayoutsPage.jsx
+@@ -0,0 +1,178 @@
++import { useEffect, useState } from 'react'
++import { toast } from 'sonner'
++import { Banknote, CheckCircle2, Clock, Settings as SettingsIcon, XCircle } from 'lucide-react'
++import Button from '../../../../shared/components/ui/Button.jsx'
++import Card from '../../../../shared/components/ui/Card.jsx'
++import Input from '../../../../shared/components/ui/Input.jsx'
++import Loader from '../../../../shared/components/feedback/Loader.jsx'
++import ErrorState from '../../../../shared/components/feedback/ErrorState.jsx'
++import EmptyState from '../../../../shared/components/feedback/EmptyState.jsx'
++import PageContainer from '../../../../shared/components/layout/PageContainer.jsx'
++import Table from '../../../../shared/components/ui/Table.jsx'
++import { formatPrice } from '../../../../shared/utils/currency.js'
++import { formatDate } from '../../../../shared/utils/formatDate.js'
++import { extractCollection } from '../../../events/utils/normalizeEvent.js'
++import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
++import { adminPayoutService } from '../../../wallet/services/adminPayoutService.js'
++import { useTranslation } from '../../../../shared/i18n/useTranslation.js'
++
++const STATUS_STYLES = {
++  requested: 'bg-amber-50 text-amber-700',
++  approved: 'bg-blue-50 text-blue-700',
++  paid: 'bg-green-50 text-green-700',
++  rejected: 'bg-red-50 text-red-700',
++  cancelled: 'bg-slate-100 text-slate-600',
++}
++
++const FILTERS = ['all', 'requested', 'approved', 'paid', 'rejected']
++
++export default function AdminPayoutsPage() {
++  const { t } = useTranslation()
++  const [payouts, setPayouts] = useState([])
++  const [loading, setLoading] = useState(true)
++  const [error, setError] = useState('')
++  const [filter, setFilter] = useState('requested')
++  const [busy, setBusy] = useState(null)
++  const [settings, setSettings] = useState(null)
++  const [settingsForm, setSettingsForm] = useState({ platform_fee_percent: '', payout_grace_hours: '', min_payout_amount: '' })
++  const [savingSettings, setSavingSettings] = useState(false)
++
++  async function fetchPayouts() {
++    setLoading(true)
++    setError('')
++    try {
++      const params = filter === 'all' ? { per_page: 100 } : { status: filter, per_page: 100 }
++      const res = await adminPayoutService.getPayouts(params)
++      setPayouts(extractCollection(res.data, 'payouts'))
++    } catch (e) {
++      setError(getApiErrorMessage(e, t('payouts.loadError', 'Unable to load payouts.')))
++    } finally {
++      setLoading(false)
++    }
++  }
++
++  async function fetchSettings() {
++    try {
++      const res = await adminPayoutService.getSettings()
++      setSettings(res.data.settings)
++      setSettingsForm({
++        platform_fee_percent: res.data.settings.platform_fee_percent,
++        payout_grace_hours: res.data.settings.payout_grace_hours,
++        min_payout_amount: res.data.settings.min_payout_amount,
++      })
++    } catch { /* non-fatal */ }
++  }
++
++  useEffect(() => { fetchPayouts() }, [filter])
++  useEffect(() => { fetchSettings() }, [])
++
++  async function act(payout, action, payload) {
++    setBusy(payout.id)
++    try {
++      if (action === 'approve') await adminPayoutService.approve(payout.id)
++      if (action === 'reject') await adminPayoutService.reject(payout.id, payload || {})
++      if (action === 'markPaid') await adminPayoutService.markPaid(payout.id, payload || {})
++      toast.success(t(`payouts.${action}Done`, action === 'markPaid' ? 'Marked as paid.' : action === 'approve' ? 'Payout approved.' : 'Payout rejected.'))
++      fetchPayouts()
++    } catch (e) {
++      toast.error(getApiErrorMessage(e, t('payouts.actionFailed', 'Action failed.')))
++    } finally {
++      setBusy(null)
++    }
++  }
++
++  async function saveSettings(event) {
++    event.preventDefault()
++    setSavingSettings(true)
++    try {
++      const res = await adminPayoutService.updateSettings(settingsForm)
++      setSettings(res.data.settings)
++      toast.success(t('payouts.settingsSaved', 'Settings saved.'))
++    } catch (e) {
++      toast.error(getApiErrorMessage(e, t('payouts.settingsSaveFailed', 'Unable to save settings.')))
++    } finally {
++      setSavingSettings(false)
++    }
++  }
++
++  const fmt = (v) => formatPrice(v)
++  const sum = (status) => payouts.filter((p) => p.status === status).reduce((acc, p) => acc + Number(p.amount || 0), 0)
++
++  const columns = [
++    { key: 'organizer', label: t('payouts.organizer', 'Organizer') },
++    { key: 'amount', label: t('payouts.amount', 'Amount') },
++    { key: 'method', label: t('payouts.method', 'Method') },
++    { key: 'status', label: t('payouts.status', 'Status') },
++    { key: 'date', label: t('payouts.date', 'Date') },
++    { key: 'actions', label: '' },
++  ]
++
++  const rows = payouts.map((p) => ({
++    id: p.id,
++    organizer: (
++      <div className="min-w-0">
++        <p className="font-bold text-slate-950">{p.organizer?.name || '—'}</p>
++        <p className="truncate text-xs text-slate-500">{p.organizer?.email}</p>
++      </div>
++    ),
++    amount: <span className="font-black text-slate-950">{fmt(p.amount)}</span>,
++    method: p.method === 'bank' ? t('payouts.bank', 'Bank') : t('payouts.mobileMoney', 'Mobile Money'),
++    status: <span className={`rounded-full px-3 py-1 text-xs font-bold ${STATUS_STYLES[p.status] || 'bg-slate-100 text-slate-600'}`}>{p.status}</span>,
++    date: <span className="text-xs text-slate-500">{formatDate(p.createdAt)}</span>,
++    actions: (
++      <div className="flex flex-wrap gap-1.5">
++        {(p.status === 'requested') && <Button type="button" variant="secondary" className="!px-3 !py-1.5 text-xs" disabled={busy === p.id} onClick={() => act(p, 'approve')}><CheckCircle2 className="mr-1 h-3.5 w-3.5" />{t('payouts.approve', 'Approve')}</Button>}
++        {(p.status === 'requested' || p.status === 'approved') && <Button type="button" variant="outline" className="!px-3 !py-1.5 text-xs" disabled={busy === p.id} onClick={() => act(p, 'reject')}><XCircle className="mr-1 h-3.5 w-3.5" />{t('payouts.reject', 'Reject')}</Button>}
++        {(p.status === 'approved' || p.status === 'requested') && <Button type="button" className="!px-3 !py-1.5 text-xs" disabled={busy === p.id} onClick={() => act(p, 'markPaid')}><Banknote className="mr-1 h-3.5 w-3.5" />{t('payouts.markPaid', 'Mark paid')}</Button>}
++      </div>
++    ),
++  }))
++
++  return (
++    <PageContainer>
++      <section className="rounded-3xl bg-gradient-to-r from-slate-900 to-teal-800 p-8 text-white">
++        <Banknote className="h-10 w-10 text-teal-200" />
++        <h1 className="mt-5 text-4xl font-black">{t('payouts.title', 'Payouts')}</h1>
++        <p className="mt-3 max-w-2xl text-white/90">{t('payouts.subtitle', 'Review organizer withdrawal requests, approve them, and record manual payments.')}</p>
++      </section>
++
++      <div className="mt-6 grid grid-cols-2 gap-4 xl:grid-cols-4">
++        <Card><Clock className="h-6 w-6 text-amber-600" /><p className="mt-3 text-2xl font-black text-slate-950">{fmt(sum('requested'))}</p><p className="text-sm text-slate-500">{t('payouts.requested', 'Requested')}</p></Card>
++        <Card><CheckCircle2 className="h-6 w-6 text-blue-600" /><p className="mt-3 text-2xl font-black text-slate-950">{fmt(sum('approved'))}</p><p className="text-sm text-slate-500">{t('payouts.approved', 'Approved')}</p></Card>
++        <Card><Banknote className="h-6 w-6 text-green-600" /><p className="mt-3 text-2xl font-black text-slate-950">{fmt(sum('paid'))}</p><p className="text-sm text-slate-500">{t('payouts.paid', 'Paid out')}</p></Card>
++        <Card><XCircle className="h-6 w-6 text-red-600" /><p className="mt-3 text-2xl font-black text-slate-950">{payouts.length}</p><p className="text-sm text-slate-500">{t('payouts.inView', 'In current view')}</p></Card>
++      </div>
++
++      <div className="mt-6 flex flex-wrap gap-2">
++        {FILTERS.map((f) => (
++          <button key={f} type="button" onClick={() => setFilter(f)} className={`rounded-full px-4 py-2 text-sm font-bold transition ${filter === f ? 'bg-teal-700 text-white' : 'bg-slate-100 text-slate-600 hover:bg-teal-50 hover:text-teal-700'}`}>{t(`payouts.filter_${f}`, f)}</button>
++        ))}
++      </div>
++
++      <Card className="mt-4">
++        {loading ? <Loader message={t('payouts.loading', 'Loading payouts...')} /> : error ? <ErrorState title={t('payouts.errorTitle', 'Unable to load payouts')} message={error} /> : payouts.length === 0 ? <EmptyState title={t('payouts.empty', 'No payouts')} message={t('payouts.emptyMsg', 'There are no payout requests in this view.')} /> : <Table columns={columns} rows={rows} />}
++      </Card>
++
++      {settings && (
++        <Card className="mt-6">
++          <h2 className="mb-4 flex items-center gap-2 text-xl font-black text-slate-950"><SettingsIcon className="h-5 w-5 text-teal-700" /> {t('payouts.settingsTitle', 'Platform settings')}</h2>
++          <form onSubmit={saveSettings} className="grid gap-4 sm:grid-cols-3">
++            <label className="block">
++              <span className="mb-1 block text-sm font-medium text-slate-700">{t('payouts.feePercent', 'Platform fee (%)')}</span>
++              <Input type="number" step="0.1" min="0" max="100" value={settingsForm.platform_fee_percent} onChange={(e) => setSettingsForm((c) => ({ ...c, platform_fee_percent: e.target.value }))} />
++            </label>
++            <label className="block">
++              <span className="mb-1 block text-sm font-medium text-slate-700">{t('payouts.graceHours', 'Grace period (hours)')}</span>
++              <Input type="number" min="0" value={settingsForm.payout_grace_hours} onChange={(e) => setSettingsForm((c) => ({ ...c, payout_grace_hours: e.target.value }))} />
++            </label>
++            <label className="block">
++              <span className="mb-1 block text-sm font-medium text-slate-700">{t('payouts.minPayout', 'Minimum payout')}</span>
++              <Input type="number" min="0" value={settingsForm.min_payout_amount} onChange={(e) => setSettingsForm((c) => ({ ...c, min_payout_amount: e.target.value }))} />
++            </label>
++            <div className="sm:col-span-3 flex justify-end"><Button type="submit" disabled={savingSettings}>{savingSettings ? t('common.saving', 'Saving...') : t('save', 'Save')}</Button></div>
++          </form>
++        </Card>
++      )}
++    </PageContainer>
++  )
++}
+diff --git a/Frontend/src/features/wallet/pages/OrganizerWalletPage.jsx b/Frontend/src/features/wallet/pages/OrganizerWalletPage.jsx
+new file mode 100644
+index 0000000..3006670
+--- /dev/null
++++ b/Frontend/src/features/wallet/pages/OrganizerWalletPage.jsx
+@@ -0,0 +1,243 @@
++import { useEffect, useState } from 'react'
++import { toast } from 'sonner'
++import { Banknote, Clock, PiggyBank, TrendingUp, Wallet as WalletIcon, X } from 'lucide-react'
++import Button from '../../../shared/components/ui/Button.jsx'
++import Card from '../../../shared/components/ui/Card.jsx'
++import Input from '../../../shared/components/ui/Input.jsx'
++import Modal from '../../../shared/components/ui/Modal.jsx'
++import Loader from '../../../shared/components/feedback/Loader.jsx'
++import ErrorState from '../../../shared/components/feedback/ErrorState.jsx'
++import EmptyState from '../../../shared/components/feedback/EmptyState.jsx'
++import PageContainer from '../../../shared/components/layout/PageContainer.jsx'
++import { formatPrice } from '../../../shared/utils/currency.js'
++import { formatDate } from '../../../shared/utils/formatDate.js'
++import { extractCollection } from '../../events/utils/normalizeEvent.js'
++import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
++import { walletService } from '../services/walletService.js'
++import { useTranslation } from '../../../shared/i18n/useTranslation.js'
++
++const PAYOUT_STATUSES = {
++  requested: 'bg-amber-50 text-amber-700',
++  approved: 'bg-blue-50 text-blue-700',
++  paid: 'bg-green-50 text-green-700',
++  rejected: 'bg-red-50 text-red-700',
++  cancelled: 'bg-slate-100 text-slate-600',
++}
++
++const CREDIT_STATUSES = {
++  held: 'bg-amber-50 text-amber-700',
++  released: 'bg-green-50 text-green-700',
++  reversed: 'bg-red-50 text-red-700',
++}
++
++function StatCard({ icon: Icon, label, value, gradient }) {
++  return (
++    <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm`}>
++      <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/15" />
++      <span className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20"><Icon className="h-5 w-5" /></span>
++      <p className="relative mt-4 text-2xl font-black md:text-3xl">{value}</p>
++      <p className="relative text-sm text-white/85">{label}</p>
++    </div>
++  )
++}
++
++export default function OrganizerWalletPage() {
++  const { t } = useTranslation()
++  const [wallet, setWallet] = useState(null)
++  const [transactions, setTransactions] = useState([])
++  const [payouts, setPayouts] = useState([])
++  const [loading, setLoading] = useState(true)
++  const [error, setError] = useState('')
++  const [modalOpen, setModalOpen] = useState(false)
++  const [submitting, setSubmitting] = useState(false)
++  const [form, setForm] = useState({ amount: '', method: 'mobile_money', operator: 'mtn', number: '', bankName: '', accountName: '', accountNumber: '' })
++
++  async function fetchAll() {
++    setLoading(true)
++    setError('')
++    try {
++      const [walletRes, txRes, payoutRes] = await Promise.all([
++        walletService.getWallet(),
++        walletService.getTransactions({ per_page: 20 }),
++        walletService.getPayouts({ per_page: 20 }),
++      ])
++      setWallet(walletRes.data.wallet)
++      setTransactions(extractCollection(txRes.data, 'transactions'))
++      setPayouts(extractCollection(payoutRes.data, 'payouts'))
++    } catch (e) {
++      setError(getApiErrorMessage(e, t('wallet.loadError', 'Unable to load your wallet.')))
++    } finally {
++      setLoading(false)
++    }
++  }
++
++  useEffect(() => { fetchAll() }, [])
++
++  function openModal() {
++    setForm({ amount: '', method: wallet?.payout_method || 'mobile_money', operator: wallet?.payout_details?.operator || 'mtn', number: wallet?.payout_details?.number || '', bankName: wallet?.payout_details?.bank_name || '', accountName: wallet?.payout_details?.account_name || '', accountNumber: wallet?.payout_details?.account_number || '' })
++    setModalOpen(true)
++  }
++
++  async function submitPayout(event) {
++    event.preventDefault()
++    const amount = Number(form.amount)
++    if (!amount || amount <= 0) return toast.error(t('wallet.invalidAmount', 'Enter a valid amount.'))
++    if (wallet?.rules && amount < wallet.rules.min_payout) return toast.error(t('wallet.belowMin', 'Amount is below the minimum payout.'))
++    if (wallet && amount > wallet.available) return toast.error(t('wallet.exceedsAvailable', 'Amount exceeds your available balance.'))
++
++    const destination = form.method === 'mobile_money'
++      ? { operator: form.operator, number: form.number.replace(/\s+/g, '') }
++      : { bank_name: form.bankName, account_name: form.accountName, account_number: form.accountNumber }
++
++    setSubmitting(true)
++    try {
++      const res = await walletService.requestPayout({ amount, method: form.method, destination })
++      toast.success(t('wallet.requestSent', 'Payout requested. It will be reviewed shortly.'))
++      setWallet(res.data.wallet)
++      setModalOpen(false)
++      walletService.getPayouts({ per_page: 20 }).then((r) => setPayouts(extractCollection(r.data, 'payouts')))
++    } catch (e) {
++      toast.error(getApiErrorMessage(e, t('wallet.requestFailed', 'Unable to request payout.')))
++    } finally {
++      setSubmitting(false)
++    }
++  }
++
++  async function cancelPayout(payout) {
++    try {
++      await walletService.cancelPayout(payout.id)
++      toast.success(t('wallet.cancelled', 'Payout request cancelled.'))
++      fetchAll()
++    } catch (e) {
++      toast.error(getApiErrorMessage(e, t('wallet.cancelFailed', 'Unable to cancel payout.')))
++    }
++  }
++
++  if (loading) return <PageContainer><Loader message={t('wallet.loading', 'Loading your wallet...')} /></PageContainer>
++  if (error) return <PageContainer><ErrorState title={t('wallet.errorTitle', 'Wallet error')} message={error} /></PageContainer>
++
++  const rules = wallet?.rules || {}
++  const fmt = (v) => formatPrice(v)
++
++  return (
++    <PageContainer>
++      <section className="overflow-hidden rounded-3xl bg-gradient-to-r from-teal-700 to-emerald-700 p-8 text-white">
++        <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-bold backdrop-blur"><WalletIcon className="h-4 w-4" /> {t('wallet.badge', 'Earnings & payouts')}</span>
++        <h1 className="mt-5 text-4xl font-black">{t('wallet.title', 'Your wallet')}</h1>
++        <p className="mt-3 max-w-2xl text-white/90">{t('wallet.subtitle', 'Track ticket earnings, request payouts, and follow your transactions.')}</p>
++        <div className="mt-5 flex flex-wrap gap-2 text-xs">
++          {rules.fee_percent != null && <span className="rounded-full bg-white/15 px-3 py-1 font-semibold">{t('wallet.feeNote', { fee: rules.fee_percent, defaultValue: '{{fee}}% platform fee' })}</span>}
++          {rules.grace_hours != null && <span className="rounded-full bg-white/15 px-3 py-1 font-semibold">{t('wallet.graceNote', { hours: rules.grace_hours, defaultValue: 'Available {{hours}}h after the event' })}</span>}
++          <span className="rounded-full bg-white/15 px-3 py-1 font-semibold">{t('wallet.minNote', { min: fmt(rules.min_payout || 0), defaultValue: 'Min payout {{min}}' })}</span>
++        </div>
++      </section>
++
++      <div className="mt-6 grid grid-cols-2 gap-4 xl:grid-cols-4">
++        <StatCard icon={Banknote} label={t('wallet.available', 'Available')} value={fmt(wallet.available)} gradient="from-teal-600 to-emerald-700" />
++        <StatCard icon={Clock} label={t('wallet.pending', 'Pending (held)')} value={fmt(wallet.pending)} gradient="from-amber-500 to-orange-600" />
++        <StatCard icon={TrendingUp} label={t('wallet.lifetime', 'Lifetime earnings')} value={fmt(wallet.lifetime_earnings)} gradient="from-blue-600 to-indigo-700" />
++        <StatCard icon={PiggyBank} label={t('wallet.totalPaidOut', 'Total paid out')} value={fmt(wallet.total_paid_out)} gradient="from-purple-600 to-violet-800" />
++      </div>
++
++      <div className="mt-6 flex justify-end">
++        <Button onClick={openModal} disabled={(wallet.available || 0) <= 0}>{t('wallet.requestPayout', 'Request payout')}</Button>
++      </div>
++
++      <div className="mt-6 grid gap-6 lg:grid-cols-2">
++        <Card>
++          <h2 className="mb-4 text-xl font-black text-slate-950">{t('wallet.payoutsTitle', 'Payout requests')}</h2>
++          {payouts.length === 0 ? <EmptyState title={t('wallet.noPayouts', 'No payouts yet')} message={t('wallet.noPayoutsMsg', 'When you request a payout it will appear here.')} /> : (
++            <div className="grid gap-3">
++              {payouts.map((p) => (
++                <div key={p.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
++                  <div>
++                    <p className="font-black text-slate-950">{fmt(p.amount)} <span className="text-sm font-medium text-slate-500">· {p.method === 'bank' ? t('wallet.bank', 'Bank') : t('wallet.mobileMoney', 'Mobile Money')}</span></p>
++                    <p className="text-xs text-slate-500">{formatDate(p.createdAt)}</p>
++                    {p.reference && <p className="text-xs text-slate-400">{p.reference}</p>}
++                  </div>
++                  <div className="flex items-center gap-2">
++                    <span className={`rounded-full px-3 py-1 text-xs font-bold ${PAYOUT_STATUSES[p.status] || 'bg-slate-100 text-slate-600'}`}>{p.status}</span>
++                    {p.status === 'requested' && <Button type="button" variant="outline" className="!px-3 !py-1.5 text-xs" onClick={() => cancelPayout(p)}>{t('wallet.cancel', 'Cancel')}</Button>}
++                  </div>
++                </div>
++              ))}
++            </div>
++          )}
++        </Card>
++
++        <Card>
++          <h2 className="mb-4 text-xl font-black text-slate-950">{t('wallet.transactionsTitle', 'Recent transactions')}</h2>
++          {transactions.length === 0 ? <EmptyState title={t('wallet.noTransactions', 'No transactions yet')} message={t('wallet.noTransactionsMsg', 'Ticket sales will appear here once attendees pay.')} /> : (
++            <div className="grid gap-3">
++              {transactions.map((tx) => (
++                <div key={tx.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 p-4">
++                  <div className="min-w-0">
++                    <p className="truncate font-bold text-slate-950">{tx.eventTitle || tx.description || t('wallet.credit', 'Ticket sale')}</p>
++                    <p className="text-xs text-slate-500">{formatDate(tx.createdAt)}</p>
++                  </div>
++                  <div className="text-right">
++                    <p className="font-black text-green-700">+{fmt(tx.net)}</p>
++                    <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-bold ${CREDIT_STATUSES[tx.status] || 'bg-slate-100 text-slate-600'}`}>{tx.status}</span>
++                  </div>
++                </div>
++              ))}
++            </div>
++          )}
++        </Card>
++      </div>
++
++      <Modal open={modalOpen} title={t('wallet.requestPayout', 'Request payout')} onClose={() => setModalOpen(false)}>
++        <form onSubmit={submitPayout} className="grid gap-4">
++          <div className="rounded-2xl bg-slate-50 p-3 text-sm text-slate-600">{t('wallet.availableLabel', 'Available')}: <strong className="text-slate-950">{fmt(wallet.available)}</strong></div>
++          <label className="block">
++            <span className="mb-1 block text-sm font-medium text-slate-700">{t('wallet.amount', 'Amount')}</span>
++            <Input type="number" min={rules.min_payout || 0} value={form.amount} onChange={(e) => setForm((c) => ({ ...c, amount: e.target.value }))} placeholder={rules.min_payout || 10000} required />
++          </label>
++          <div className="grid gap-4 sm:grid-cols-2">
++            <label className="block">
++              <span className="mb-1 block text-sm font-medium text-slate-700">{t('wallet.method', 'Method')}</span>
++              <select value={form.method} onChange={(e) => setForm((c) => ({ ...c, method: e.target.value }))} className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-teal-500 focus:bg-white">
++                <option value="mobile_money">{t('wallet.mobileMoney', 'Mobile Money')}</option>
++                <option value="bank">{t('wallet.bank', 'Bank transfer')}</option>
++              </select>
++            </label>
++            {form.method === 'mobile_money' ? (
++              <>
++                <label className="block">
++                  <span className="mb-1 block text-sm font-medium text-slate-700">{t('wallet.operator', 'Operator')}</span>
++                  <select value={form.operator} onChange={(e) => setForm((c) => ({ ...c, operator: e.target.value }))} className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-teal-500 focus:bg-white">
++                    <option value="mtn">MTN</option>
++                    <option value="orange">Orange</option>
++                  </select>
++                </label>
++                <label className="block sm:col-span-2">
++                  <span className="mb-1 block text-sm font-medium text-slate-700">{t('wallet.mobileNumber', 'Mobile money number')}</span>
++                  <Input value={form.number} onChange={(e) => setForm((c) => ({ ...c, number: e.target.value }))} placeholder="6XX XXX XXX" required />
++                </label>
++              </>
++            ) : (
++              <>
++                <label className="block">
++                  <span className="mb-1 block text-sm font-medium text-slate-700">{t('wallet.bankName', 'Bank name')}</span>
++                  <Input value={form.bankName} onChange={(e) => setForm((c) => ({ ...c, bankName: e.target.value }))} placeholder="AFRILAND First Bank" required />
++                </label>
++                <label className="block">
++                  <span className="mb-1 block text-sm font-medium text-slate-700">{t('wallet.accountName', 'Account name')}</span>
++                  <Input value={form.accountName} onChange={(e) => setForm((c) => ({ ...c, accountName: e.target.value }))} required />
++                </label>
++                <label className="block sm:col-span-2">
++                  <span className="mb-1 block text-sm font-medium text-slate-700">{t('wallet.accountNumber', 'Account number')}</span>
++                  <Input value={form.accountNumber} onChange={(e) => setForm((c) => ({ ...c, accountNumber: e.target.value }))} required />
++                </label>
++              </>
++            )}
++          </div>
++          <div className="flex justify-end gap-2">
++            <Button type="button" variant="secondary" onClick={() => setModalOpen(false)}>{t('cancel', 'Cancel')}</Button>
++            <Button type="submit" disabled={submitting}>{submitting ? t('common.saving', 'Submitting...') : t('wallet.requestPayout', 'Request payout')}</Button>
++          </div>
++        </form>
++      </Modal>
++    </PageContainer>
++  )
++}
+diff --git a/Frontend/src/features/wallet/services/adminPayoutService.js b/Frontend/src/features/wallet/services/adminPayoutService.js
+new file mode 100644
+index 0000000..3d8d4d8
+--- /dev/null
++++ b/Frontend/src/features/wallet/services/adminPayoutService.js
+@@ -0,0 +1,13 @@
++import axiosClient from '../../../shared/api/axiosClient.js'
++
++// Admin payouts & platform settings (see backend AdminPayoutController).
++export const adminPayoutService = {
++  getPayouts: (params = {}) => axiosClient.get('/admin/payouts', { params }),
++  getPayout: (id) => axiosClient.get(`/admin/payouts/${id}`),
++  approve: (id) => axiosClient.patch(`/admin/payouts/${id}/approve`),
++  reject: (id, payload = {}) => axiosClient.patch(`/admin/payouts/${id}/reject`, payload),
++  markPaid: (id, payload = {}) => axiosClient.patch(`/admin/payouts/${id}/mark-paid`, payload),
++  getWallet: (userId) => axiosClient.get(`/admin/wallets/${userId}`),
++  getSettings: () => axiosClient.get('/admin/platform-settings'),
++  updateSettings: (payload) => axiosClient.put('/admin/platform-settings', payload),
++}
+diff --git a/Frontend/src/features/wallet/services/walletService.js b/Frontend/src/features/wallet/services/walletService.js
+new file mode 100644
+index 0000000..691acd5
+--- /dev/null
++++ b/Frontend/src/features/wallet/services/walletService.js
+@@ -0,0 +1,11 @@
++import axiosClient from '../../../shared/api/axiosClient.js'
++
++// Organizer wallet & payouts (see backend WalletController).
++export const walletService = {
++  getWallet: () => axiosClient.get('/wallet'),
++  getTransactions: (params = {}) => axiosClient.get('/wallet/transactions', { params }),
++  updatePayoutMethod: (payload) => axiosClient.put('/wallet/payout-method', payload),
++  getPayouts: (params = {}) => axiosClient.get('/wallet/payouts', { params }),
++  requestPayout: (payload) => axiosClient.post('/wallet/payouts', payload),
++  cancelPayout: (payoutId) => axiosClient.post(`/wallet/payouts/${payoutId}/cancel`),
++}
+diff --git a/Frontend/src/shared/components/navigation/NavIcon.jsx b/Frontend/src/shared/components/navigation/NavIcon.jsx
+index b4de177..2c9ead3 100644
+--- a/Frontend/src/shared/components/navigation/NavIcon.jsx
++++ b/Frontend/src/shared/components/navigation/NavIcon.jsx
+@@ -20,6 +20,7 @@ import {
+   Ticket,
+   User,
+   Users,
++  Wallet,
+ } from 'lucide-react'
+ 
+ const iconMap = {
+@@ -44,6 +45,7 @@ const iconMap = {
+   ticket: Ticket,
+   user: User,
+   users: Users,
++  wallet: Wallet,
+ }
+ 
+ export default function NavIcon({ name, className = '' }) {
+diff --git a/Frontend/src/shared/constants/navigation.js b/Frontend/src/shared/constants/navigation.js
+index 03c8772..bc54852 100644
+--- a/Frontend/src/shared/constants/navigation.js
++++ b/Frontend/src/shared/constants/navigation.js
+@@ -27,6 +27,7 @@ export const ORGANIZER_NAV_LINKS = [
+   { label: 'Organizer Dashboard', labelKey: 'nav.organizerDashboard', to: '/organizer/dashboard', icon: 'layoutDashboard' },
+   { label: 'My Events', labelKey: 'nav.myEvents', to: '/organizer/events', icon: 'calendarDays' },
+   { label: 'Statistics', labelKey: 'nav.statistics', to: '/organizer/statistics', icon: 'barChart3' },
++  { label: 'Wallet', labelKey: 'nav.wallet', to: '/organizer/wallet', icon: 'wallet' },
+   { label: 'Notifications', labelKey: 'nav.notifications', to: '/notifications', badge: 'notifications', icon: 'bell' },
+   { label: 'Settings', labelKey: 'nav.settings', to: '/settings', icon: 'settings' },
+ ]
+@@ -36,6 +37,7 @@ export const ADMIN_NAV_LINKS = [
+   { label: 'Users', labelKey: 'nav.users', to: '/admin/users', icon: 'users' },
+   { label: 'Events', labelKey: 'nav.events', to: '/admin/events', icon: 'calendarCheck' },
+   { label: 'Payments', labelKey: 'nav.payments', to: '/admin/payments', icon: 'creditCard' },
++  { label: 'Payouts', labelKey: 'nav.payouts', to: '/admin/payouts', icon: 'wallet' },
+   { label: 'Categories', labelKey: 'nav.categories', to: '/admin/categories', icon: 'boxes' },
+   { label: 'Locations', labelKey: 'nav.locations', to: '/admin/locations', icon: 'mapPin' },
+   { label: 'Reports', labelKey: 'nav.adminReports', to: '/admin/reports', icon: 'barChart3' },
+diff --git a/Frontend/src/shared/i18n/locales/en/common.json b/Frontend/src/shared/i18n/locales/en/common.json
+index 8b85431..52ad285 100644
+--- a/Frontend/src/shared/i18n/locales/en/common.json
++++ b/Frontend/src/shared/i18n/locales/en/common.json
+@@ -40,7 +40,9 @@
+     "announcements": "Announcements",
+     "adminFeedback": "Feedback",
+     "admin": "Admin",
+-    "home": "Home"
++    "home": "Home",
++    "wallet": "Wallet",
++    "payouts": "Payouts"
+   },
+   "home": {
+     "badge": "Discover Mboa Events",
+@@ -982,5 +984,84 @@
+   "ui": {
+     "scrollToTop": "Scroll to top"
+   },
+-  "viewAll": "View all"
++  "viewAll": "View all",
++  "wallet": {
++    "loadError": "Unable to load your wallet.",
++    "loading": "Loading your wallet...",
++    "errorTitle": "Wallet error",
++    "badge": "Earnings & payouts",
++    "title": "Your wallet",
++    "subtitle": "Track ticket earnings, request payouts, and follow your transactions.",
++    "feeNote": "{{fee}}% platform fee",
++    "graceNote": "Available {{hours}}h after the event",
++    "minNote": "Min payout {{min}}",
++    "available": "Available",
++    "pending": "Pending (held)",
++    "lifetime": "Lifetime earnings",
++    "totalPaidOut": "Total paid out",
++    "requestPayout": "Request payout",
++    "payoutsTitle": "Payout requests",
++    "noPayouts": "No payouts yet",
++    "noPayoutsMsg": "When you request a payout it will appear here.",
++    "bank": "Bank",
++    "mobileMoney": "Mobile Money",
++    "cancel": "Cancel",
++    "cancelled": "Payout request cancelled.",
++    "cancelFailed": "Unable to cancel payout.",
++    "transactionsTitle": "Recent transactions",
++    "noTransactions": "No transactions yet",
++    "noTransactionsMsg": "Ticket sales will appear here once attendees pay.",
++    "credit": "Ticket sale",
++    "invalidAmount": "Enter a valid amount.",
++    "belowMin": "Amount is below the minimum payout.",
++    "exceedsAvailable": "Amount exceeds your available balance.",
++    "requestSent": "Payout requested. It will be reviewed shortly.",
++    "requestFailed": "Unable to request payout.",
++    "availableLabel": "Available",
++    "amount": "Amount",
++    "method": "Method",
++    "operator": "Operator",
++    "mobileNumber": "Mobile money number",
++    "bankName": "Bank name",
++    "accountName": "Account name",
++    "accountNumber": "Account number"
++  },
++  "payouts": {
++    "loadError": "Unable to load payouts.",
++    "title": "Payouts",
++    "subtitle": "Review organizer withdrawal requests, approve them, and record manual payments.",
++    "requested": "Requested",
++    "approved": "Approved",
++    "paid": "Paid out",
++    "inView": "In current view",
++    "loading": "Loading payouts...",
++    "errorTitle": "Unable to load payouts",
++    "empty": "No payouts",
++    "emptyMsg": "There are no payout requests in this view.",
++    "organizer": "Organizer",
++    "amount": "Amount",
++    "method": "Method",
++    "status": "Status",
++    "date": "Date",
++    "approve": "Approve",
++    "reject": "Reject",
++    "markPaid": "Mark paid",
++    "approveDone": "Payout approved.",
++    "rejectDone": "Payout rejected.",
++    "markPaidDone": "Marked as paid.",
++    "actionFailed": "Action failed.",
++    "bank": "Bank",
++    "mobileMoney": "Mobile Money",
++    "settingsTitle": "Platform settings",
++    "feePercent": "Platform fee (%)",
++    "graceHours": "Grace period (hours)",
++    "minPayout": "Minimum payout",
++    "settingsSaved": "Settings saved.",
++    "settingsSaveFailed": "Unable to save settings.",
++    "filter_all": "All",
++    "filter_requested": "Requested",
++    "filter_approved": "Approved",
++    "filter_paid": "Paid",
++    "filter_rejected": "Rejected"
++  }
+ }
+diff --git a/Frontend/src/shared/i18n/locales/fr/common.json b/Frontend/src/shared/i18n/locales/fr/common.json
+index 1f5c62e..0f3be9a 100644
+--- a/Frontend/src/shared/i18n/locales/fr/common.json
++++ b/Frontend/src/shared/i18n/locales/fr/common.json
+@@ -40,7 +40,9 @@
+     "adminFeedback": "Avis",
+     "admin": "Admin",
+     "settings": "Paramètres",
+-    "home": "Accueil"
++    "home": "Accueil",
++    "wallet": "Portefeuille",
++    "payouts": "Paiements"
+   },
+   "home": {
+     "badge": "Decouvrez les événements du Mboa",
+@@ -982,5 +984,84 @@
+   "ui": {
+     "scrollToTop": "Remonter en haut"
+   },
+-  "viewAll": "Voir tout"
++  "viewAll": "Voir tout",
++  "wallet": {
++    "loadError": "Impossible de charger votre portefeuille.",
++    "loading": "Chargement de votre portefeuille...",
++    "errorTitle": "Erreur du portefeuille",
++    "badge": "Revenus & paiements",
++    "title": "Votre portefeuille",
++    "subtitle": "Suivez vos revenus de billets, demandez des paiements et consultez vos transactions.",
++    "feeNote": "{{fee}}% de frais de plateforme",
++    "graceNote": "Disponible {{hours}}h après l'événement",
++    "minNote": "Paiement min. {{min}}",
++    "available": "Disponible",
++    "pending": "En attente (bloqué)",
++    "lifetime": "Revenus totaux",
++    "totalPaidOut": "Total payé",
++    "requestPayout": "Demander un paiement",
++    "payoutsTitle": "Demandes de paiement",
++    "noPayouts": "Aucun paiement",
++    "noPayoutsMsg": "Lorsque vous demandez un paiement, il apparaîtra ici.",
++    "bank": "Banque",
++    "mobileMoney": "Mobile Money",
++    "cancel": "Annuler",
++    "cancelled": "Demande de paiement annulée.",
++    "cancelFailed": "Impossible d'annuler le paiement.",
++    "transactionsTitle": "Transactions récentes",
++    "noTransactions": "Aucune transaction",
++    "noTransactionsMsg": "Les ventes de billets apparaîtront ici une fois les participants payés.",
++    "credit": "Vente de billet",
++    "invalidAmount": "Saisissez un montant valide.",
++    "belowMin": "Le montant est inférieur au paiement minimum.",
++    "exceedsAvailable": "Le montant dépasse votre solde disponible.",
++    "requestSent": "Paiement demandé. Il sera examiné sous peu.",
++    "requestFailed": "Impossible de demander le paiement.",
++    "availableLabel": "Disponible",
++    "amount": "Montant",
++    "method": "Méthode",
++    "operator": "Opérateur",
++    "mobileNumber": "Numéro Mobile Money",
++    "bankName": "Nom de la banque",
++    "accountName": "Nom du compte",
++    "accountNumber": "Numéro de compte"
++  },
++  "payouts": {
++    "loadError": "Impossible de charger les paiements.",
++    "title": "Paiements",
++    "subtitle": "Examinez les demandes de retrait des organisateurs, approuvez-les et enregistrez les paiements manuels.",
++    "requested": "Demandé",
++    "approved": "Approuvé",
++    "paid": "Payé",
++    "inView": "Dans la vue actuelle",
++    "loading": "Chargement des paiements...",
++    "errorTitle": "Impossible de charger les paiements",
++    "empty": "Aucun paiement",
++    "emptyMsg": "Aucune demande de paiement dans cette vue.",
++    "organizer": "Organisateur",
++    "amount": "Montant",
++    "method": "Méthode",
++    "status": "Statut",
++    "date": "Date",
++    "approve": "Approuver",
++    "reject": "Rejeter",
++    "markPaid": "Marquer payé",
++    "approveDone": "Paiement approuvé.",
++    "rejectDone": "Paiement rejeté.",
++    "markPaidDone": "Marqué comme payé.",
++    "actionFailed": "Échec de l'action.",
++    "bank": "Banque",
++    "mobileMoney": "Mobile Money",
++    "settingsTitle": "Paramètres de la plateforme",
++    "feePercent": "Frais de plateforme (%)",
++    "graceHours": "Délai de grâce (heures)",
++    "minPayout": "Paiement minimum",
++    "settingsSaved": "Paramètres enregistrés.",
++    "settingsSaveFailed": "Impossible d'enregistrer les paramètres.",
++    "filter_all": "Tous",
++    "filter_requested": "Demandés",
++    "filter_approved": "Approuvés",
++    "filter_paid": "Payés",
++    "filter_rejected": "Rejetés"
++  }
+ }
+-- 
+2.47.3
+

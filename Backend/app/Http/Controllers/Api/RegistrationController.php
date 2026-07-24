@@ -5,11 +5,14 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\RegistrationResource;
 use App\Models\Event;
+use App\Models\EventTicketType;
 use App\Models\Payment;
 use App\Models\Registration;
 use App\Models\AuditLog;
+use App\Notifications\RegistrationConfirmedNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class RegistrationController extends Controller
@@ -18,7 +21,7 @@ class RegistrationController extends Controller
     {
         $registrations = Registration::query()
             ->where('user_id', $request->user()->id)
-            ->with(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'checkedInBy.role', 'checkedInBy.profile'])
+            ->with(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
             ->latest()
             ->paginate(min((int) $request->input('per_page', 12), 50));
 
@@ -35,7 +38,7 @@ class RegistrationController extends Controller
 
         return response()->json([
             'registration' => new RegistrationResource(
-                $registration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'checkedInBy.role', 'checkedInBy.profile'])
+                $registration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
             ),
         ]);
     }
@@ -43,72 +46,105 @@ class RegistrationController extends Controller
     public function store(Request $request, Event $event): JsonResponse
     {
         $this->ensureEventCanBeRegistered($event);
-        $this->ensureCapacityIsAvailable($event);
 
-        $activeRegistration = Registration::query()
+        $validated = $request->validate([
+            'ticket_type_id' => ['nullable', 'integer', 'exists:event_ticket_types,id'],
+            'quantity' => ['nullable', 'integer', 'min:1', 'max:10'],
+        ]);
+
+        $quantity = (int) ($validated['quantity'] ?? 1);
+        $ticketType = $this->resolveTicketType($event, $validated['ticket_type_id'] ?? null);
+        $ticketPrice = $ticketType ? (float) $ticketType->price : (float) $event->price;
+        $totalPrice = $ticketPrice * $quantity;
+
+        $this->ensureCapacityIsAvailable($event, $quantity);
+        $this->ensureTicketTypeCapacityIsAvailable($ticketType, $quantity);
+
+        $pendingRegistration = Registration::query()
             ->where('user_id', $request->user()->id)
             ->where('event_id', $event->id)
-            ->whereIn('status', ['confirmed', 'pending_payment'])
+            ->where('status', 'pending_payment')
             ->latest()
             ->first();
 
-        if ($activeRegistration) {
+        if ($pendingRegistration) {
             return response()->json([
-                'message' => $activeRegistration->status === 'confirmed'
-                    ? 'You are already registered for this event.'
-                    : 'You already have a pending payment for this event.',
+                'message' => 'You already have a pending payment for this event.',
                 'registration' => new RegistrationResource(
-                    $activeRegistration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'checkedInBy.role', 'checkedInBy.profile'])
+                    $pendingRegistration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
                 ),
-            ], $activeRegistration->status === 'pending_payment' ? 202 : 200);
+            ], 202);
         }
 
-        $isPaidEvent = (float) $event->price > 0;
-
-        $registration = Registration::create([
-            'user_id' => $request->user()->id,
-            'event_id' => $event->id,
-            'status' => $isPaidEvent ? 'pending_payment' : 'confirmed',
-            'ticket_number' => $this->generateTicketNumber($event),
-            'registered_at' => now(),
-        ]);
-
+        $isPaidEvent = $totalPrice > 0;
         $payment = null;
 
-        if ($isPaidEvent) {
-            $payment = Payment::updateOrCreate(
-                [
+        [$primaryRegistration, $registrationIds] = DB::transaction(function () use ($request, $event, $ticketType, $quantity, $isPaidEvent, $totalPrice, &$payment) {
+            $registrationIds = collect();
+
+            for ($index = 0; $index < $quantity; $index++) {
+                $registration = Registration::create([
                     'user_id' => $request->user()->id,
                     'event_id' => $event->id,
-                    'registration_id' => $registration->id,
-                    'status' => 'pending',
-                ],
-                [
-                    'amount' => $event->price,
+                    'ticket_type_id' => $ticketType?->id,
+                    'status' => $isPaidEvent ? 'pending_payment' : 'confirmed',
+                    'ticket_number' => $this->generateTicketNumber($event),
+                    'registered_at' => now(),
+                ]);
+                $registrationIds->push($registration->id);
+            }
+
+            $primaryRegistration = Registration::find($registrationIds->first());
+
+            if ($isPaidEvent) {
+                $payment = Payment::create([
+                    'user_id' => $request->user()->id,
+                    'event_id' => $event->id,
+                    'registration_id' => $primaryRegistration->id,
+                    'amount' => $totalPrice,
                     'currency' => 'XAF',
+                    'status' => 'pending',
                     'provider' => env('PAYMENT_PROVIDER', 'mock'),
                     'reference' => $this->generatePaymentReference($event),
-                    'metadata' => ['registration_attempt_id' => $registration->id],
-                ]
-            );
+                    'metadata' => [
+                        'registration_attempt_id' => $primaryRegistration->id,
+                        'registration_ids' => $registrationIds->values()->all(),
+                        'quantity' => $quantity,
+                        'unit_price' => $totalPrice / $quantity,
+                        'ticket_type_id' => $ticketType?->id,
+                        'ticket_type_name' => $ticketType?->name,
+                    ],
+                ]);
+            }
+
+            return [$primaryRegistration, $registrationIds];
+        });
+
+        $registrations = Registration::whereIn('id', $registrationIds)->get()->load(['ticketType']);
+
+        // Send registration confirmation email for free events.
+        if (! $isPaidEvent && $request->user()) {
+            $event->loadMissing(['city', 'region']);
+            $request->user()->notify(new RegistrationConfirmedNotification($event, $primaryRegistration->ticket_number));
         }
 
         return response()->json([
             'message' => $isPaidEvent ? 'Payment is required to complete this registration.' : 'Registered for event successfully.',
             'payment_required' => $isPaidEvent,
+            'quantity' => $quantity,
             'registration' => new RegistrationResource(
-                $registration->fresh()->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'checkedInBy.role', 'checkedInBy.profile'])
+                $primaryRegistration->fresh()->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
             ),
+            'registrations' => RegistrationResource::collection($registrations),
             'payment' => $payment ? new \App\Http\Resources\PaymentResource($payment->load(['event', 'registration'])) : null,
         ], $isPaidEvent ? 202 : 201);
     }
-
 
     public function verifyTicket(string $ticketNumber): JsonResponse
     {
         $registration = Registration::query()
             ->where('ticket_number', $ticketNumber)
-            ->with(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'user.profile', 'checkedInBy.profile'])
+            ->with(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'user.profile', 'ticketType', 'checkedInBy.profile'])
             ->first();
 
         if (! $registration) {
@@ -122,18 +158,27 @@ class RegistrationController extends Controller
         $eventIsAvailable = $event
             && $event->status === 'published'
             && $event->visibility === 'public';
+        $eventHasEnded = $event && $this->eventHasEnded($event);
 
-        $registrationIsValid = $registration->status === 'confirmed' && $eventIsAvailable;
+        $registrationIsValid = $registration->status === 'confirmed' && $eventIsAvailable && ! $eventHasEnded;
+        $message = match (true) {
+            $registrationIsValid => 'Ticket is valid.',
+            $eventHasEnded => 'Ticket is no longer valid because the event end time has passed.',
+            default => 'Ticket is not currently valid.',
+        };
 
         return response()->json([
             'valid' => $registrationIsValid,
-            'message' => $registrationIsValid
-                ? 'Ticket is valid.'
-                : 'Ticket is not currently valid.',
+            'message' => $message,
             'ticket' => [
                 'registration_id' => $registration->id,
                 'ticket_number' => $registration->ticket_number,
                 'status' => $registration->status,
+                'ticket_type' => $registration->ticketType ? [
+                    'id' => $registration->ticketType->id,
+                    'name' => $registration->ticketType->name,
+                    'price' => $registration->ticketType->price,
+                ] : null,
                 'registered_at' => $registration->registered_at,
                 'checked_in_at' => $registration->checked_in_at,
                 'checked_in_by' => $registration->checkedInBy?->name,
@@ -148,6 +193,7 @@ class RegistrationController extends Controller
                     'status' => $event->status,
                     'visibility' => $event->visibility,
                     'start_date' => $event->start_date,
+                    'end_date' => $event->end_date,
                     'venue' => $event->venue,
                     'city' => $event->city?->name,
                     'region' => $event->region?->name,
@@ -172,6 +218,13 @@ class RegistrationController extends Controller
         if ($registration->status !== 'confirmed') {
             return response()->json([
                 'message' => 'Only confirmed registrations can be checked in.',
+                'registration' => new RegistrationResource($registration),
+            ], 422);
+        }
+
+        if ($this->eventHasEnded($event)) {
+            return response()->json([
+                'message' => 'This ticket can no longer be checked in because the event end time has passed.',
                 'registration' => new RegistrationResource($registration),
             ], 422);
         }
@@ -236,6 +289,45 @@ class RegistrationController extends Controller
         ]);
     }
 
+
+    private function eventHasEnded(?Event $event): bool
+    {
+        if (! $event) {
+            return true;
+        }
+
+        $effectiveEndDate = $event->end_date ?: $event->start_date;
+
+        return $effectiveEndDate ? now()->greaterThan($effectiveEndDate) : false;
+    }
+
+
+    private function resolveTicketType(Event $event, ?int $ticketTypeId): ?EventTicketType
+    {
+        $query = $event->ticketTypes()->where('is_active', true);
+
+        if ($ticketTypeId) {
+            return (clone $query)->whereKey($ticketTypeId)->firstOrFail();
+        }
+
+        return $query->orderBy('sort_order')->orderBy('price')->first();
+    }
+
+    private function ensureTicketTypeCapacityIsAvailable(?EventTicketType $ticketType, int $requestedQuantity = 1): void
+    {
+        if (! $ticketType || ! $ticketType->quantity) {
+            return;
+        }
+
+        $reservedRegistrations = $ticketType->registrations()
+            ->whereIn('status', ['confirmed', 'pending_payment'])
+            ->count();
+
+        if ($reservedRegistrations + $requestedQuantity > $ticketType->quantity) {
+            abort(422, 'This ticket type does not have enough remaining tickets.');
+        }
+    }
+
     private function ensureEventCanBeRegistered(Event $event): void
     {
         if ($event->status !== 'published' || $event->visibility !== 'public') {
@@ -251,16 +343,16 @@ class RegistrationController extends Controller
         }
     }
 
-    private function ensureCapacityIsAvailable(Event $event): void
+    private function ensureCapacityIsAvailable(Event $event, int $requestedQuantity = 1): void
     {
         if (! $event->maximum_participants) {
             return;
         }
 
-        $confirmedRegistrations = $event->registrations()->where('status', 'confirmed')->count();
+        $confirmedRegistrations = $event->registrations()->whereIn('status', ['confirmed', 'pending_payment'])->count();
 
-        if ($confirmedRegistrations >= $event->maximum_participants) {
-            abort(422, 'This event is already full.');
+        if ($confirmedRegistrations + $requestedQuantity > $event->maximum_participants) {
+            abort(422, 'This event does not have enough remaining places.');
         }
     }
 

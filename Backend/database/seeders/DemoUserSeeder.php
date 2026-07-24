@@ -11,7 +11,10 @@ class DemoUserSeeder extends Seeder
 {
     public function run(): void
     {
-        $users = [ ['name' => 'Ekane Bryan', 'email' => 'ekanebryan5@gmail.com', 'role' => 'admin', 'city' => 'Douala', 'region' => 'Littoral'],
+        $users = [
+            ['name' => 'Ekane Bryan', 'email' => 'ekanebryan5@gmail.com', 'role' => 'admin', 'password' => 'myadminpass123', 'city' => 'Douala', 'region' => 'Littoral'],
+            ['name' => 'Maurice Nympha', 'email' => 'mauricenympha@gmail.com', 'role' => 'user', 'password' => 'maurice123', 'city' => 'Douala', 'region' => 'Littoral'],
+            ['name' => 'Ekane Bryan', 'email' => 'ekanebryan618@gmail.com', 'role' => 'organizer', 'password' => 'myadminpass123', 'city' => 'Douala', 'region' => 'Littoral'],
         ];
 
         foreach ($users as $demo) {
@@ -21,7 +24,7 @@ class DemoUserSeeder extends Seeder
                 ['email' => $demo['email']],
                 [
                     'name' => $demo['name'],
-                    'password' => Hash::make('myadminpass123'),
+                    'password' => Hash::make($demo['password']),
                     'role_id' => $role?->id,
                 ]
             );

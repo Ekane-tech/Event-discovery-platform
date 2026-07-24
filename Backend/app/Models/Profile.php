@@ -12,6 +12,7 @@ class Profile extends Model
     protected $fillable = [
         'user_id',
         'organization_name',
+        'is_verified_organizer',
         'phone',
         'city',
         'region',

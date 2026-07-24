@@ -8,6 +8,7 @@ export const adminService = {
   getUsers: (params = {}) => axiosClient.get('/admin/users', { params }),
   updateUserRole: (userId, role) => axiosClient.patch(`/admin/users/${userId}/role`, { role }),
   updateUserStatus: (userId, status, reason = '') => axiosClient.patch(`/admin/users/${userId}/status`, { status, reason: reason || null }),
+  updateOrganizerVerification: (userId, isVerified) => axiosClient.patch(`/admin/users/${userId}/organizer-verification`, { is_verified_organizer: isVerified }),
 
   getEvents: (params = {}) => axiosClient.get('/admin/events', { params }),
   getPayments: (params = {}) => axiosClient.get('/admin/payments', { params }),

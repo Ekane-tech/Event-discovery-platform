@@ -20,6 +20,7 @@ import {
   Ticket,
   User,
   Users,
+  Wallet,
 } from 'lucide-react'
 
 const iconMap = {
@@ -44,6 +45,7 @@ const iconMap = {
   ticket: Ticket,
   user: User,
   users: Users,
+  wallet: Wallet,
 }
 
 export default function NavIcon({ name, className = '' }) {

@@ -37,6 +37,13 @@ class StoreEventRequest extends FormRequest
             'images.*.path' => ['required_with:images', 'string', 'max:2048'],
             'images.*.type' => ['nullable', 'string', 'max:50'],
             'images.*.is_cover' => ['nullable', 'boolean'],
+            'ticket_types' => ['nullable', 'array', 'max:6'],
+            'ticket_types.*.id' => ['nullable', 'integer', 'exists:event_ticket_types,id'],
+            'ticket_types.*.name' => ['required_with:ticket_types', 'string', 'max:80'],
+            'ticket_types.*.description' => ['nullable', 'string', 'max:500'],
+            'ticket_types.*.price' => ['required_with:ticket_types', 'numeric', 'min:0'],
+            'ticket_types.*.quantity' => ['nullable', 'integer', 'min:1'],
+            'ticket_types.*.is_active' => ['nullable', 'boolean'],
         ];
     }
 }

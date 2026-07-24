@@ -1,8 +1,10 @@
 import { Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import Input from '../../../shared/components/ui/Input.jsx'
+import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
 export default function SearchSuggestInput({ label, placeholder, value, onChange, suggestions = [] }) {
+  const { t } = useTranslation()
   const [focused, setFocused] = useState(false)
   const query = String(value || '').trim().toLowerCase()
 
@@ -38,7 +40,7 @@ export default function SearchSuggestInput({ label, placeholder, value, onChange
       {showDropdown && (
         <div className="absolute z-30 mt-1 max-h-56 w-full overflow-auto rounded-xl border border-slate-200 bg-white p-1 text-left shadow-xl">
           {matches.length === 0 ? (
-            <div className="rounded-lg px-3 py-2 text-sm text-slate-500">No matches found</div>
+            <div className="rounded-lg px-3 py-2 text-sm text-slate-500">{t('searchPage.noMatches', 'No matches found')}</div>
           ) : (
             matches.map((suggestion) => (
               <button

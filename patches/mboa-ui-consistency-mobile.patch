@@ -1,0 +1,525 @@
+diff --git a/Frontend/src/features/auth/pages/EmailVerificationPage.jsx b/Frontend/src/features/auth/pages/EmailVerificationPage.jsx
+index d50cbec..9400b55 100644
+--- a/Frontend/src/features/auth/pages/EmailVerificationPage.jsx
++++ b/Frontend/src/features/auth/pages/EmailVerificationPage.jsx
+@@ -50,7 +50,7 @@ export default function EmailVerificationPage() {
+   async function resendEmail() {
+     setSending(true)
+     setError('')
+-    setMessage('')t(auth.vERe)
++    setMessage('')
+     try {
+       const response = await authService.resendVerificationEmail()
+       setMessage(response.data.message || 'Verification email sent successfully.')
+diff --git a/Frontend/src/features/dashboard/admin/components/AdminMetricCard.jsx b/Frontend/src/features/dashboard/admin/components/AdminMetricCard.jsx
+index 3b58f2b..1857c9f 100644
+--- a/Frontend/src/features/dashboard/admin/components/AdminMetricCard.jsx
++++ b/Frontend/src/features/dashboard/admin/components/AdminMetricCard.jsx
+@@ -4,7 +4,7 @@ export default function AdminMetricCard({ label, value, icon: Icon, gradient = '
+       <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/15" />
+       <div className="relative flex items-center justify-between">
+         {Icon && <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20"><Icon className="h-5 w-5" /></span>}
+-        <span className="text-3xl font-black">{value}</span>
++        <span className="text-2xl font-black md:text-3xl">{value}</span>
+       </div>
+       <p className="relative mt-5 text-sm font-bold text-white/90">{label}</p>
+       {description && <p className="relative mt-1 text-xs text-white/75">{description}</p>}
+diff --git a/Frontend/src/features/dashboard/admin/pages/AdminDashboardPage.jsx b/Frontend/src/features/dashboard/admin/pages/AdminDashboardPage.jsx
+index c7f19a1..ac360ab 100644
+--- a/Frontend/src/features/dashboard/admin/pages/AdminDashboardPage.jsx
++++ b/Frontend/src/features/dashboard/admin/pages/AdminDashboardPage.jsx
+@@ -24,7 +24,7 @@ export default function AdminDashboardPage() {
+   const events=normalizeEvents(extractCollection(dashboard||{},'events_needing_review'))
+   const metrics=[['Users',s.users_count||0,Users,'from-indigo-600 to-blue-700'],['Events',s.events_count||0,CalendarCheck,'from-teal-600 to-emerald-700'],['Organizers',s.organizers_count||0,ShieldCheck,'from-purple-600 to-violet-800'],['Open reports',s.open_reports_count||0,AlertTriangle,'from-rose-600 to-pink-700'],['Published',s.published_events_count||0,Bell,'from-green-600 to-teal-700'],['Categories',s.categories_count||0,FolderTree,'from-amber-500 to-orange-700'],['Regions',s.regions_count||0,MapPin,'from-cyan-600 to-blue-700'],['Registrations',s.registrations_count||0,MessageSquare,'from-slate-600 to-slate-800']]
+   return <PageContainer><AdminHero title="System overview" description="Monitor users, events, reports, feedback and platform activity." action={<Link to="/admin/events"><Button variant="light">Moderate Events</Button></Link>} />
+-    <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">{metrics.map(([label,value,Icon,gradient])=><AdminMetricCard key={label} label={label} value={value} icon={Icon} gradient={gradient}/>)}</div>
++    <div className="mt-6 grid grid-cols-2 gap-4 xl:grid-cols-4">{metrics.map(([label,value,Icon,gradient])=><AdminMetricCard key={label} label={label} value={value} icon={Icon} gradient={gradient}/>)}</div>
+     <div className="mt-8 grid gap-6 lg:grid-cols-2"><Card><div className="mb-4 flex items-center justify-between"><h2 className="font-black text-slate-950">Recent reports</h2><Link to="/admin/reports" className="text-sm font-bold text-teal-700">View all</Link></div><div className="grid gap-3">{reports.length===0?<p className="text-sm text-slate-600">No reports yet.</p>:reports.slice(0,4).map(r=><div key={r.id} className="rounded-2xl border border-slate-200 p-4"><p className="font-bold text-slate-950">{r.type}</p><p className="text-sm text-slate-600">{r.event?.title||'No event'} • {r.status}</p></div>)}</div></Card><Card><div className="mb-4 flex items-center justify-between"><h2 className="font-black text-slate-950">Events needing attention</h2><Link to="/admin/events" className="text-sm font-bold text-teal-700">Manage</Link></div><div className="grid gap-3">{events.length===0?<p className="text-sm text-slate-600">No events need review.</p>:events.slice(0,4).map(e=><div key={e.id} className="rounded-2xl border border-slate-200 p-4"><p className="font-bold text-slate-950">{e.title}</p><p className="text-sm text-slate-600">{e.category} • {e.status}</p></div>)}</div></Card></div>
+     <div className="mt-8 flex flex-wrap gap-3"><Link to="/admin/users"><Button>Manage Users</Button></Link><Link to="/admin/feedback"><Button variant="secondary">Review Feedback</Button></Link><Link to="/admin/notifications"><Button variant="secondary">Send Announcement</Button></Link></div>
+   </PageContainer>
+diff --git a/Frontend/src/features/dashboard/admin/pages/AdminEmailPage.jsx b/Frontend/src/features/dashboard/admin/pages/AdminEmailPage.jsx
+index a02e114..2121cfd 100644
+--- a/Frontend/src/features/dashboard/admin/pages/AdminEmailPage.jsx
++++ b/Frontend/src/features/dashboard/admin/pages/AdminEmailPage.jsx
+@@ -1,4 +1,4 @@
+-import { Mail, Send, Search } from 'lucide-react'
++import { Mail, RefreshCw, Search, Send, ShieldCheck } from 'lucide-react'
+ import { useEffect, useMemo, useState } from 'react'
+ import { toast } from 'sonner'
+ import Alert from '../../../../shared/components/feedback/Alert.jsx'
+@@ -17,128 +17,26 @@ import { extractCollection } from '../../../events/utils/normalizeEvent.js'
+ import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
+ 
+ function normalizeEmailLog(log) {
+-  return {
+-    id: log.id,
+-    recipient: log.recipient,
+-    subject: log.subject || '—',
+-    type: log.type || '—',
+-    status: log.status,
+-    error: log.error_message || '—',
+-    sentAt: log.sent_at ? formatDate(log.sent_at) : '—',
+-    createdAt: formatDate(log.created_at),
+-  }
++  return { id: log.id, recipient: log.recipient, subject: log.subject || '—', type: log.type || '—', status: log.status, error: log.error_message || '—', sentAt: log.sent_at ? formatDate(log.sent_at) : '—', createdAt: formatDate(log.created_at) }
+ }
++function StatusPill({ status }) { const failed = status === 'failed'; return <span className={`rounded-full px-3 py-1 text-xs font-black capitalize ${failed ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>{status}</span> }
+ 
+ export default function AdminEmailPage() {
+   const [form, setForm] = useState({ recipient: '', subject: 'Email delivery test', message: 'This confirms that production email delivery is working.' })
+-  const [logs, setLogs] = useState([])
+-  const [keyword, setKeyword] = useState('')
+-  const [loading, setLoading] = useState(true)
+-  const [sending, setSending] = useState(false)
+-  const [error, setError] = useState('')
+-  const [success, setSuccess] = useState('')
+-
+-  async function fetchLogs() {
+-    setLoading(true)
+-    setError('')
+-    try {
+-      const response = await adminService.getEmailLogs({ per_page: 50 })
+-      setLogs(extractCollection(response.data, 'email_logs').map(normalizeEmailLog))
+-    } catch (fetchError) {
+-      setError(getApiErrorMessage(fetchError, 'Unable to load email logs.'))
+-    } finally {
+-      setLoading(false)
+-    }
+-  }
+-
++  const [logs, setLogs] = useState([]); const [keyword, setKeyword] = useState(''); const [loading, setLoading] = useState(true); const [sending, setSending] = useState(false); const [refreshing, setRefreshing] = useState(false); const [error, setError] = useState(''); const [success, setSuccess] = useState('')
++  async function fetchLogs({ silent = false } = {}) { if (silent) setRefreshing(true); else setLoading(true); setError(''); try { const response = await adminService.getEmailLogs({ per_page: 50 }); setLogs(extractCollection(response.data, 'email_logs').map(normalizeEmailLog)) } catch (fetchError) { setError(getApiErrorMessage(fetchError, 'Unable to load email logs.')) } finally { setLoading(false); setRefreshing(false) } }
+   useEffect(() => { fetchLogs() }, [])
+-
+-  const visibleLogs = useMemo(() => {
+-    const value = keyword.trim().toLowerCase()
+-    if (!value) return logs
+-    return logs.filter((log) => [log.recipient, log.subject, log.type, log.status, log.error].some((field) => String(field || '').toLowerCase().includes(value)))
+-  }, [logs, keyword])
+-
+-  function updateField(event) {
+-    setForm((current) => ({ ...current, [event.target.name]: event.target.value }))
+-  }
+-
+-  async function sendTestEmail(event) {
+-    event.preventDefault()
+-    setSending(true)
+-    setError('')
+-    setSuccess('')
+-    try {
+-      const response = await adminService.sendTestEmail(form)
+-      const message = response.data.message || 'Test email sent successfully.'
+-      setSuccess(message)
+-      toast.success(message)
+-      await fetchLogs()
+-    } catch (sendError) {
+-      const message = getApiErrorMessage(sendError, 'Unable to send test email.')
+-      setError(message)
+-      toast.error(message)
+-      await fetchLogs()
+-    } finally {
+-      setSending(false)
+-    }
+-  }
+-
++  const visibleLogs = useMemo(() => { const value = keyword.trim().toLowerCase(); if (!value) return logs; return logs.filter((log) => [log.recipient, log.subject, log.type, log.status, log.error].some((field) => String(field || '').toLowerCase().includes(value))) }, [logs, keyword])
++  const stats = useMemo(() => ({ total: logs.length, sent: logs.filter((log) => log.status !== 'failed').length, failed: logs.filter((log) => log.status === 'failed').length }), [logs])
++  function updateField(event) { setForm((current) => ({ ...current, [event.target.name]: event.target.value })) }
++  async function sendTestEmail(event) { event.preventDefault(); setSending(true); setError(''); setSuccess(''); try { const response = await adminService.sendTestEmail(form); const message = response.data.message || 'Test email sent successfully.'; setSuccess(message); toast.success(message); await fetchLogs({ silent: true }) } catch (sendError) { const message = getApiErrorMessage(sendError, 'Unable to send test email.'); setError(message); toast.error(message); await fetchLogs({ silent: true }) } finally { setSending(false) } }
+   return (
+     <PageContainer>
+-      <SectionHeader title="Email Delivery" description="Send production Brevo test emails and review email delivery failures." />
+-
+-      <div className="grid gap-6 xl:grid-cols-[420px_1fr]">
+-        <Card>
+-          <div className="mb-5 rounded-3xl bg-gradient-to-br from-teal-700 to-slate-950 p-5 text-white">
+-            <Mail className="h-8 w-8 text-teal-100" />
+-            <h2 className="mt-3 text-2xl font-black">Send test email</h2>
+-          </div>
+-
+-          {success && <div className="mb-4"><Alert type="success">{success}</Alert></div>}
+-          {error && <div className="mb-4"><Alert type="error">{error}</Alert></div>}
+-
+-          <form onSubmit={sendTestEmail} className="grid gap-4">
+-            <label className="block"><span className="mb-1 block text-sm font-semibold text-slate-700">Recipient email</span><Input name="recipient" type="email" value={form.recipient} onChange={updateField} placeholder="admin@example.com" required /></label>
+-            <label className="block"><span className="mb-1 block text-sm font-semibold text-slate-700">Subject</span><Input name="subject" value={form.subject} onChange={updateField} required /></label>
+-            <label className="block"><span className="mb-1 block text-sm font-semibold text-slate-700">Message</span><Textarea name="message" value={form.message} onChange={updateField} rows="4" required /></label>
+-            <Button type="submit" disabled={sending}><Send className="mr-2 h-4 w-4" />{sending ? 'Sending...' : 'Send test email'}</Button>
+-          </form>
+-        </Card>
+-
+-        <div>
+-          <Card className="mb-5">
+-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+-              <div>
+-                <h2 className="text-lg font-black text-slate-950">Email logs</h2>
+-                <p className="text-sm text-slate-600">Review test email results and mail notification failures.</p>
+-              </div>
+-              <div className="relative">
+-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+-                <Input value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder="Search logs" className="pl-9" />
+-              </div>
+-            </div>
+-          </Card>
+-
+-          {loading && <Loader message="Loading email logs..." />}
+-          {!loading && error && logs.length === 0 && <ErrorState title="Unable to load email logs" message={error} />}
+-          {!loading && (
+-            <Table
+-              columns={[
+-                { key: 'recipient', label: 'Recipient' },
+-                { key: 'subject', label: 'Subject' },
+-                { key: 'type', label: 'Type' },
+-                { key: 'status', label: 'Status' },
+-                { key: 'error', label: 'Error' },
+-                { key: 'createdAt', label: 'Date' },
+-              ]}
+-              rows={visibleLogs.map((log) => ({
+-                ...log,
+-                status: <span className={`rounded-full px-3 py-1 text-xs font-black capitalize ${log.status === 'failed' ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>{log.status}</span>,
+-              }))}
+-            />
+-          )}
+-        </div>
++      <SectionHeader title="Email Delivery" description="Test production email delivery and monitor outgoing mail results." />
++      <div className="mb-6 grid grid-cols-3 gap-3 sm:gap-4">{[['Total logs', stats.total, 'from-slate-700 to-slate-950'], ['Sent', stats.sent, 'from-teal-600 to-emerald-700'], ['Failed', stats.failed, 'from-rose-600 to-pink-700']].map(([label, value, gradient]) => <div key={label} className={`rounded-3xl bg-gradient-to-br ${gradient} p-4 text-white shadow-sm sm:p-5`}><p className="text-xs font-semibold text-white/75 sm:text-sm">{label}</p><p className="mt-2 text-2xl font-black sm:text-3xl">{value}</p></div>)}</div>
++      <div className="grid gap-6 2xl:grid-cols-[520px_1fr]">
++        <Card className="overflow-hidden p-0"><div className="bg-gradient-to-br from-teal-700 to-slate-950 p-6 text-white"><div className="flex items-center gap-4"><span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15"><Mail className="h-7 w-7 text-teal-100" /></span><div><h2 className="text-2xl font-black">Send test email</h2><p className="mt-1 text-sm text-slate-200">Use this to verify Brevo delivery after deployment changes.</p></div></div></div><div className="p-5">{success && <div className="mb-4"><Alert type="success">{success}</Alert></div>}{error && <div className="mb-4"><Alert type="error">{error}</Alert></div>}<form onSubmit={sendTestEmail} className="grid gap-4"><label className="block"><span className="mb-1 block text-sm font-semibold text-slate-700">Recipient email</span><Input name="recipient" type="email" value={form.recipient} onChange={updateField} placeholder="admin@example.com" required /></label><label className="block"><span className="mb-1 block text-sm font-semibold text-slate-700">Subject</span><Input name="subject" value={form.subject} onChange={updateField} required /></label><label className="block"><span className="mb-1 block text-sm font-semibold text-slate-700">Message</span><Textarea name="message" value={form.message} onChange={updateField} rows="5" required /></label><Button type="submit" disabled={sending} className="h-12"><Send className="mr-2 h-4 w-4" />{sending ? 'Sending...' : 'Send test email'}</Button></form></div></Card>
++        <div className="min-w-0"><Card className="mb-5"><div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"><div><h2 className="flex items-center gap-2 text-lg font-black text-slate-950"><ShieldCheck className="h-5 w-5 text-teal-700" /> Email logs</h2><p className="text-sm text-slate-600">Search delivery attempts, failures and recipient addresses.</p></div><div className="flex flex-col gap-2 sm:flex-row"><div className="relative min-w-0 sm:w-72"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><Input value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder="Search logs" className="pl-9" /></div><Button type="button" variant="secondary" onClick={() => fetchLogs({ silent: true })} disabled={refreshing}><RefreshCw className="mr-2 h-4 w-4" />Refresh</Button></div></div></Card>{loading && <Loader message="Loading email logs..." />}{!loading && error && logs.length === 0 && <ErrorState title="Unable to load email logs" message={error} />}{!loading && <><div className="grid gap-3 lg:hidden">{visibleLogs.map((log) => <Card key={log.id} className="p-4"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate font-bold text-slate-950">{log.recipient}</p><p className="mt-1 text-sm text-slate-600">{log.subject}</p></div><StatusPill status={log.status} /></div><div className="mt-3 grid gap-2 text-xs text-slate-500"><p><strong>Type:</strong> {log.type}</p><p><strong>Date:</strong> {log.createdAt}</p>{log.error !== '—' && <p className="text-red-600"><strong>Error:</strong> {log.error}</p>}</div></Card>)}</div><div className="hidden lg:block"><Table columns={[{ key: 'recipient', label: 'Recipient' }, { key: 'subject', label: 'Subject' }, { key: 'type', label: 'Type' }, { key: 'status', label: 'Status' }, { key: 'error', label: 'Error' }, { key: 'createdAt', label: 'Date' }]} rows={visibleLogs.map((log) => ({ ...log, status: <StatusPill status={log.status} /> }))} /></div></>}</div>
+       </div>
+     </PageContainer>
+   )
+diff --git a/Frontend/src/features/dashboard/admin/pages/AdminEventsPage.jsx b/Frontend/src/features/dashboard/admin/pages/AdminEventsPage.jsx
+index 2f5a50e..eaf692d 100644
+--- a/Frontend/src/features/dashboard/admin/pages/AdminEventsPage.jsx
++++ b/Frontend/src/features/dashboard/admin/pages/AdminEventsPage.jsx
+@@ -195,11 +195,11 @@ export default function AdminEventsPage() {
+     <PageContainer>
+       <AdminHero title="Moderate events" description="Review submitted events, publish valid listings, and block problematic content." />
+ 
+-      <div className="mt-6 grid gap-4 md:grid-cols-4">
+-        <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-blue-700 p-5 text-white"><p className="text-sm text-white/80">Total events</p><p className="mt-2 text-3xl font-black">{metrics.total}</p></div>
+-        <div className="rounded-3xl bg-gradient-to-br from-amber-500 to-orange-700 p-5 text-white"><p className="text-sm text-white/80">Pending</p><p className="mt-2 text-3xl font-black">{metrics.pending}</p></div>
+-        <div className="rounded-3xl bg-gradient-to-br from-green-600 to-teal-700 p-5 text-white"><p className="text-sm text-white/80">Published</p><p className="mt-2 text-3xl font-black">{metrics.published}</p></div>
+-        <div className="rounded-3xl bg-gradient-to-br from-rose-600 to-pink-700 p-5 text-white"><p className="text-sm text-white/80">Reported</p><p className="mt-2 text-3xl font-black">{metrics.flagged}</p></div>
++      <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
++        <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-blue-700 p-5 text-white"><p className="text-sm text-white/80">Total events</p><p className="mt-2 text-2xl font-black md:text-3xl">{metrics.total}</p></div>
++        <div className="rounded-3xl bg-gradient-to-br from-amber-500 to-orange-700 p-5 text-white"><p className="text-sm text-white/80">Pending</p><p className="mt-2 text-2xl font-black md:text-3xl">{metrics.pending}</p></div>
++        <div className="rounded-3xl bg-gradient-to-br from-green-600 to-teal-700 p-5 text-white"><p className="text-sm text-white/80">Published</p><p className="mt-2 text-2xl font-black md:text-3xl">{metrics.published}</p></div>
++        <div className="rounded-3xl bg-gradient-to-br from-rose-600 to-pink-700 p-5 text-white"><p className="text-sm text-white/80">Reported</p><p className="mt-2 text-2xl font-black md:text-3xl">{metrics.flagged}</p></div>
+       </div>
+ 
+       <div className="my-6 grid gap-3 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_180px_auto]">
+diff --git a/Frontend/src/features/dashboard/admin/pages/AdminPaymentsPage.jsx b/Frontend/src/features/dashboard/admin/pages/AdminPaymentsPage.jsx
+index 4541e71..c55195a 100644
+--- a/Frontend/src/features/dashboard/admin/pages/AdminPaymentsPage.jsx
++++ b/Frontend/src/features/dashboard/admin/pages/AdminPaymentsPage.jsx
+@@ -69,7 +69,7 @@ export default function AdminPaymentsPage() {
+     <PageContainer>
+       <SectionHeader title="Payment Tracking" description="Monitor event payments, pending revenue and completed mobile money transactions." />
+ 
+-      <div className="mb-6 grid gap-4 md:grid-cols-4">
++      <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+         {[
+           ['Total revenue', formatPrice(summary?.total_revenue || 0), 'from-teal-600 to-emerald-700'],
+           ['Pending revenue', formatPrice(summary?.pending_revenue || 0), 'from-amber-500 to-orange-700'],
+diff --git a/Frontend/src/features/dashboard/admin/pages/AdminReportsPage.jsx b/Frontend/src/features/dashboard/admin/pages/AdminReportsPage.jsx
+index 62fe415..dbc8ae1 100644
+--- a/Frontend/src/features/dashboard/admin/pages/AdminReportsPage.jsx
++++ b/Frontend/src/features/dashboard/admin/pages/AdminReportsPage.jsx
+@@ -19,7 +19,7 @@ import AdminStatusBadge from '../components/AdminStatusBadge.jsx'
+ import { adminService } from '../services/adminService.js'
+ 
+ function ReportMetric({ label, value, icon: Icon, gradient }) {
+-  return <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm`}><div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/15"/><Icon className="relative h-6 w-6"/><p className="relative mt-3 text-3xl font-black">{value}</p><p className="relative text-sm text-white/85">{label}</p></div>
++  return <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm`}><div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/15"/><Icon className="relative h-6 w-6"/><p className="relative mt-3 text-2xl font-black md:text-3xl">{value}</p><p className="relative text-sm text-white/85">{label}</p></div>
+ }
+ 
+ export default function AdminReportsPage() {
+@@ -71,7 +71,7 @@ export default function AdminReportsPage() {
+   }))
+ 
+   return <PageContainer><AdminHero title="Reports" description="Review user reports and resolve trust or quality issues." />
+-    <div className="mt-6 grid gap-4 md:grid-cols-4"><ReportMetric label="Total reports" value={metrics.total} icon={FileSearch} gradient="from-indigo-600 to-blue-700"/><ReportMetric label="Open" value={metrics.open} icon={AlertTriangle} gradient="from-rose-600 to-pink-700"/><ReportMetric label="Reviewing" value={metrics.reviewing} icon={Eye} gradient="from-amber-500 to-orange-700"/><ReportMetric label="Resolved" value={metrics.resolved} icon={ShieldCheck} gradient="from-teal-600 to-emerald-700"/></div>
++    <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4"><ReportMetric label="Total reports" value={metrics.total} icon={FileSearch} gradient="from-indigo-600 to-blue-700"/><ReportMetric label="Open" value={metrics.open} icon={AlertTriangle} gradient="from-rose-600 to-pink-700"/><ReportMetric label="Reviewing" value={metrics.reviewing} icon={Eye} gradient="from-amber-500 to-orange-700"/><ReportMetric label="Resolved" value={metrics.resolved} icon={ShieldCheck} gradient="from-teal-600 to-emerald-700"/></div>
+     <Card className="my-6"><div className="grid gap-3 md:grid-cols-[1fr_180px_190px_auto_auto]"><div className="relative"><Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"/><Input name="keyword" value={filters.keyword} onChange={updateFilter} placeholder="Search reports" className="pl-10"/></div><Select name="status" value={filters.status} onChange={updateFilter}><option value="all">All statuses</option><option value="open">Open</option><option value="reviewing">Reviewing</option><option value="resolved">Resolved</option><option value="rejected">Rejected</option></Select><Select name="type" value={filters.type} onChange={updateFilter}><option value="all">All types</option><option value="fake_event">Fake event</option><option value="wrong_information">Wrong information</option><option value="wrong_location">Wrong location</option><option value="inappropriate_content">Inappropriate content</option><option value="duplicate_event">Duplicate event</option><option value="scam_or_fraud">Scam or fraud</option><option value="other">Other</option></Select><Button onClick={fetchReports}>Search</Button><Button variant="secondary" onClick={resetFilters}>Reset</Button></div></Card>
+     {loading && <Loader message="Loading reports..."/>}{error && <ErrorState title="Unable to load reports" message={error}/>} {!loading && !error && <Table columns={[{key:'type',label:'Type'},{key:'target',label:'Target'},{key:'reportedBy',label:'Reported By'},{key:'createdAt',label:'Date'},{key:'status',label:'Status'},{key:'actions',label:'Actions'}]} rows={rows}/>} 
+     <Modal open={Boolean(selected)} title="Report details" onClose={() => setSelected(null)}>{selected && <div className="grid gap-4"><div className="rounded-3xl bg-gradient-to-br from-rose-600 to-amber-600 p-5 text-white"><p className="text-sm font-bold uppercase text-white/80">Report</p><h3 className="mt-1 text-2xl font-black">{selected.type}</h3><p className="mt-2 text-sm text-white/90">Status: {selected.status}</p></div><div className="grid gap-2 text-sm text-slate-600"><p><strong>Event:</strong> {selected.event?.title || '—'}</p><p><strong>Reporter:</strong> {selected.reporter?.email || '—'}</p><p><strong>Date:</strong> {formatDate(selected.created_at)}</p></div><Card><p className="whitespace-pre-wrap text-sm leading-6 text-slate-700">{selected.message || 'No message provided.'}</p></Card><div className="flex flex-wrap justify-end gap-2"><Button variant="secondary" onClick={() => setSelected(null)}>Close</Button>{selected.status !== 'reviewing' && <Button variant="secondary" onClick={() => updateStatus(selected.id, 'reviewing')}>Mark reviewing</Button>}{selected.status !== 'resolved' && <Button onClick={() => updateStatus(selected.id, 'resolved')}>Resolve</Button>}{selected.status !== 'rejected' && <Button variant="danger" onClick={() => updateStatus(selected.id, 'rejected')}>Reject</Button>}</div></div>}</Modal>
+diff --git a/Frontend/src/features/dashboard/admin/pages/AdminUsersPage.jsx b/Frontend/src/features/dashboard/admin/pages/AdminUsersPage.jsx
+index 2dde5c2..b68fb03 100644
+--- a/Frontend/src/features/dashboard/admin/pages/AdminUsersPage.jsx
++++ b/Frontend/src/features/dashboard/admin/pages/AdminUsersPage.jsx
+@@ -25,7 +25,7 @@ function RoleBadge({ role }) {
+   const styles = { admin: 'bg-purple-100 text-purple-800', organizer: 'bg-blue-100 text-blue-800', user: 'bg-teal-100 text-teal-800' }
+   return <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold capitalize ${styles[role] || 'bg-slate-100 text-slate-700'}`}>{role || 'unknown'}</span>
+ }
+-function UserMetric({ label, value, icon: Icon, gradient }) { return <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm`}><div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/15"/><Icon className="relative h-6 w-6"/><p className="relative mt-3 text-3xl font-black">{value}</p><p className="relative text-sm text-white/85">{label}</p></div> }
++function UserMetric({ label, value, icon: Icon, gradient }) { return <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm`}><div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/15"/><Icon className="relative h-6 w-6"/><p className="relative mt-3 text-2xl font-black md:text-3xl">{value}</p><p className="relative text-sm text-white/85">{label}</p></div> }
+ 
+ const SUSPENSION_REASONS = [
+   'Violation of platform terms',
+@@ -104,7 +104,7 @@ export default function AdminUsersPage() {
+   })
+ 
+   return <PageContainer><AdminHero title="Manage users" description="Review accounts, roles and access status across the platform." />
+-    <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4"><UserMetric label="Total users" value={metrics.total} icon={Users} gradient="from-indigo-600 to-blue-700"/><UserMetric label="Active" value={metrics.active} icon={UserCheck} gradient="from-teal-600 to-emerald-700"/><UserMetric label="Suspended" value={metrics.suspended} icon={UserX} gradient="from-rose-600 to-pink-700"/><UserMetric label="Organizers" value={metrics.organizers} icon={ShieldCheck} gradient="from-amber-500 to-orange-700"/></div>
++    <div className="mt-6 grid grid-cols-2 gap-4 xl:grid-cols-4"><UserMetric label="Total users" value={metrics.total} icon={Users} gradient="from-indigo-600 to-blue-700"/><UserMetric label="Active" value={metrics.active} icon={UserCheck} gradient="from-teal-600 to-emerald-700"/><UserMetric label="Suspended" value={metrics.suspended} icon={UserX} gradient="from-rose-600 to-pink-700"/><UserMetric label="Organizers" value={metrics.organizers} icon={ShieldCheck} gradient="from-amber-500 to-orange-700"/></div>
+     <Card className="my-6"><div className="grid gap-3 lg:grid-cols-[1fr_180px_180px_auto_auto]"><div className="relative"><Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"/><Input name="keyword" value={filters.keyword} onChange={updateFilter} placeholder="Search by name or email" className="pl-10"/></div><Select name="role" value={filters.role} onChange={updateFilter}><option value="all">All roles</option><option value="user">Users</option><option value="organizer">Organizers</option><option value="admin">Admins</option></Select><Select name="status" value={filters.status} onChange={updateFilter}><option value="all">All statuses</option><option value="active">Active</option><option value="pending_approval">Pending approval</option><option value="suspended">Suspended</option></Select><Button type="button" onClick={fetchUsers}>Search</Button><Button type="button" variant="secondary" onClick={resetFilters}>Reset</Button></div></Card>
+     {loading && <Loader message="Loading users..."/>}{error && <ErrorState title="Unable to load users" message={error}/>} {!loading && !error && <Table columns={[{key:'user',label:'User'},{key:'email',label:'Email'},{key:'role',label:'Role'},{key:'location',label:'Location'},{key:'status',label:'Status'},{key:'joined',label:'Joined'},{key:'actions',label:'Actions'}]} rows={rows}/>} 
+     <Modal open={statusModal.open} title={statusModal.status === 'suspended' ? 'Suspend account' : 'Activate account'} onClose={closeStatusModal}>
+diff --git a/Frontend/src/features/dashboard/organizer/pages/OrganizerAttendeesPage.jsx b/Frontend/src/features/dashboard/organizer/pages/OrganizerAttendeesPage.jsx
+index 3d97e44..42a658f 100644
+--- a/Frontend/src/features/dashboard/organizer/pages/OrganizerAttendeesPage.jsx
++++ b/Frontend/src/features/dashboard/organizer/pages/OrganizerAttendeesPage.jsx
+@@ -119,7 +119,7 @@ export default function OrganizerAttendeesPage() {
+         action={<div className="flex flex-wrap gap-2"><Link to={scannerPath}><Button><QrCode className="mr-2 h-4 w-4" />Open scanner</Button></Link><Link to={backPath}><Button variant="secondary">Back to Events</Button></Link></div>}
+       />
+ 
+-      <div className="mb-6 grid gap-4 md:grid-cols-5">
++      <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
+         {[
+           ['Total registrations', summary.registrations_count || 0, 'from-teal-600 to-emerald-700'],
+           ['Confirmed', summary.confirmed_count || 0, 'from-blue-600 to-indigo-700'],
+diff --git a/Frontend/src/features/dashboard/organizer/pages/OrganizerDashboardPage.jsx b/Frontend/src/features/dashboard/organizer/pages/OrganizerDashboardPage.jsx
+index 742ead2..ac18af9 100644
+--- a/Frontend/src/features/dashboard/organizer/pages/OrganizerDashboardPage.jsx
++++ b/Frontend/src/features/dashboard/organizer/pages/OrganizerDashboardPage.jsx
+@@ -12,7 +12,7 @@ import { extractCollection, normalizeEvents } from '../../../events/utils/normal
+ import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
+ 
+ function StatCard({ title, value, icon: Icon, gradient }) {
+-  return <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl`}><div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/15"/><span className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20"><Icon className="h-5 w-5"/></span><p className="relative mt-4 text-sm text-white/80">{title}</p><p className="relative mt-1 text-3xl font-black">{value}</p></div>
++  return <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl`}><div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/15"/><span className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20"><Icon className="h-5 w-5"/></span><p className="relative mt-4 text-sm text-white/80">{title}</p><p className="relative mt-1 text-2xl font-black md:text-3xl">{value}</p></div>
+ }
+ 
+ export default function OrganizerDashboardPage() {
+diff --git a/Frontend/src/features/dashboard/organizer/pages/OrganizerStatisticsPage.jsx b/Frontend/src/features/dashboard/organizer/pages/OrganizerStatisticsPage.jsx
+index 3b35a64..eb87e94 100644
+--- a/Frontend/src/features/dashboard/organizer/pages/OrganizerStatisticsPage.jsx
++++ b/Frontend/src/features/dashboard/organizer/pages/OrganizerStatisticsPage.jsx
+@@ -255,13 +255,13 @@ export default function OrganizerStatisticsPage() {
+ 
+       <section className="mt-6">
+         {loading ? (
+-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
++          <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
+             {Array.from({ length: 6 }).map((_, index) => (
+               <StatCardSkeleton key={index} />
+             ))}
+           </div>
+         ) : (
+-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
++          <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
+             {metrics.map((metric) => (
+               <MetricCard key={metric.label} {...metric} />
+             ))}
+diff --git a/Frontend/src/features/dashboard/user/pages/UserDashboardPage.jsx b/Frontend/src/features/dashboard/user/pages/UserDashboardPage.jsx
+index f3db105..84b10ee 100644
+--- a/Frontend/src/features/dashboard/user/pages/UserDashboardPage.jsx
++++ b/Frontend/src/features/dashboard/user/pages/UserDashboardPage.jsx
+@@ -19,7 +19,7 @@ function StatCard({ title, value, to, icon: Icon, gradient, iconBg }) {
+         <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/15" />
+         <div className="relative flex items-center justify-between">
+           <span className={`flex h-12 w-12 items-center justify-center rounded-2xl ${iconBg}`}><Icon className="h-5 w-5" /></span>
+-          <span className="text-3xl font-black">{value}</span>
++          <span className="text-2xl font-black md:text-3xl">{value}</span>
+         </div>
+         <h3 className="relative mt-5 font-bold text-white/95">{title}</h3>
+       </div>
+diff --git a/Frontend/src/features/profile/pages/ProfilePage.jsx b/Frontend/src/features/profile/pages/ProfilePage.jsx
+index 0ef1103..a24de34 100644
+--- a/Frontend/src/features/profile/pages/ProfilePage.jsx
++++ b/Frontend/src/features/profile/pages/ProfilePage.jsx
+@@ -29,7 +29,7 @@ function MetricCard({ label, value, icon: Icon, gradient }) {
+     <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm`}>
+       <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/15" />
+       <Icon className="relative h-6 w-6" />
+-      <p className="relative mt-3 text-3xl font-black">{value}</p>
++      <p className="relative mt-3 text-2xl font-black md:text-3xl">{value}</p>
+       <p className="relative text-sm text-white/85">{label}</p>
+     </div>
+   )
+@@ -151,7 +151,7 @@ export default function ProfilePage() {
+       {error && <div className="mt-6"><Alert type="error">{error}</Alert></div>}
+       {dashboardError && <div className="mt-6"><Alert type="warning">{dashboardError}</Alert></div>}
+ 
+-      <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
++      <div className="mt-6 grid grid-cols-2 gap-4 xl:grid-cols-4">
+         {metrics.map(([label, value, Icon, gradient]) => <MetricCard key={label} label={label} value={value} icon={Icon} gradient={gradient} />)}
+       </div>
+ 
+diff --git a/Frontend/src/features/recommendations/components/RecommendationSummary.jsx b/Frontend/src/features/recommendations/components/RecommendationSummary.jsx
+index 10897c2..3368f90 100644
+--- a/Frontend/src/features/recommendations/components/RecommendationSummary.jsx
++++ b/Frontend/src/features/recommendations/components/RecommendationSummary.jsx
+@@ -12,7 +12,7 @@ export default function RecommendationSummary({ summary, loading = false }) {
+   ]
+ 
+   return (
+-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
++    <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+       {cards.map((card) => {
+         const Icon = card.icon
+         return (
+@@ -20,7 +20,7 @@ export default function RecommendationSummary({ summary, loading = false }) {
+             <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/15" />
+             <div className="relative flex items-center justify-between">
+               <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20"><Icon className="h-5 w-5" /></span>
+-              <span className="text-3xl font-black">{card.value}</span>
++              <span className="text-2xl font-black md:text-3xl">{card.value}</span>
+             </div>
+             <p className="relative mt-5 text-sm font-bold text-white/90">{card.label}</p>
+           </div>
+diff --git a/Frontend/src/shared/components/feedback/StatCardSkeleton.jsx b/Frontend/src/shared/components/feedback/StatCardSkeleton.jsx
+index 5ebb41f..0f8fcaf 100644
+--- a/Frontend/src/shared/components/feedback/StatCardSkeleton.jsx
++++ b/Frontend/src/shared/components/feedback/StatCardSkeleton.jsx
+@@ -14,7 +14,7 @@ export default function StatCardSkeleton({ compact = false }) {
+ 
+ export function StatGridSkeleton({ count = 4 }) {
+   return (
+-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
++    <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+       {Array.from({ length: count }).map((_, index) => <StatCardSkeleton key={index} />)}
+     </div>
+   )
+diff --git a/Frontend/src/shared/components/forms/DateTimeField.jsx b/Frontend/src/shared/components/forms/DateTimeField.jsx
+index 3664747..b5405e5 100644
+--- a/Frontend/src/shared/components/forms/DateTimeField.jsx
++++ b/Frontend/src/shared/components/forms/DateTimeField.jsx
+@@ -1,4 +1,5 @@
+ import { CalendarClock } from 'lucide-react'
++import { useState } from 'react'
+ import DatePicker from 'react-datepicker'
+ import 'react-datepicker/dist/react-datepicker.css'
+ 
+@@ -8,30 +9,15 @@ function parseDateTimeLocal(value) {
+   return Number.isNaN(date.getTime()) ? null : date
+ }
+ 
+-function pad(value) {
+-  return String(value).padStart(2, '0')
+-}
++function pad(value) { return String(value).padStart(2, '0') }
+ 
+ function formatDateTimeLocal(date) {
+   if (!date) return ''
+-
+-  return [
+-    date.getFullYear(),
+-    '-',
+-    pad(date.getMonth() + 1),
+-    '-',
+-    pad(date.getDate()),
+-    'T',
+-    pad(date.getHours()),
+-    ':',
+-    pad(date.getMinutes()),
+-  ].join('')
++  return [date.getFullYear(), '-', pad(date.getMonth() + 1), '-', pad(date.getDate()), 'T', pad(date.getHours()), ':', pad(date.getMinutes())].join('')
+ }
+ 
+ function isSameDay(dateA, dateB) {
+-  return dateA?.getFullYear() === dateB?.getFullYear()
+-    && dateA?.getMonth() === dateB?.getMonth()
+-    && dateA?.getDate() === dateB?.getDate()
++  return dateA?.getFullYear() === dateB?.getFullYear() && dateA?.getMonth() === dateB?.getMonth() && dateA?.getDate() === dateB?.getDate()
+ }
+ 
+ function atTime(hours, minutes) {
+@@ -40,16 +26,8 @@ function atTime(hours, minutes) {
+   return date
+ }
+ 
+-export default function DateTimeField({
+-  label,
+-  helper,
+-  value,
+-  onChange,
+-  name,
+-  required = false,
+-  disablePast = true,
+-  className = '',
+-}) {
++export default function DateTimeField({ label, helper, value, onChange, name, required = false, disablePast = true, className = '' }) {
++  const [open, setOpen] = useState(false)
+   const selectedDate = parseDateTimeLocal(value)
+   const now = new Date()
+   const minSelectableDate = disablePast ? now : undefined
+@@ -58,34 +36,34 @@ export default function DateTimeField({
+   const maxSelectableTime = atTime(23, 45)
+ 
+   function handleDateChange(date) {
+-    onChange({
+-      target: {
+-        name,
+-        value: formatDateTimeLocal(date),
+-      },
+-    })
++    const previousDate = selectedDate
++    onChange({ target: { name, value: formatDateTimeLocal(date) } })
++    if (date && previousDate && isSameDay(date, previousDate) && (date.getHours() !== previousDate.getHours() || date.getMinutes() !== previousDate.getMinutes())) {
++      setOpen(false)
++    }
+   }
+ 
+   return (
+     <label className="block">
+-      <span className="mb-1 block text-sm font-semibold text-slate-700">
+-        {label}{required && <span className="text-red-500"> *</span>}
+-      </span>
+-
++      <span className="mb-1 block text-sm font-semibold text-slate-700">{label}{required && <span className="text-red-500"> *</span>}</span>
+       <div className="relative rounded-2xl bg-gradient-to-r from-teal-50 to-blue-50 p-[1px] shadow-sm">
+-        <span className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-teal-700">
+-          <CalendarClock className="h-5 w-5" />
+-        </span>
+-
++        <span className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-teal-700"><CalendarClock className="h-5 w-5" /></span>
+         <DatePicker
+           selected={selectedDate}
++          open={open}
++          onInputClick={() => setOpen(true)}
++          onClickOutside={() => setOpen(false)}
++          onCalendarClose={() => setOpen(false)}
+           onChange={handleDateChange}
+           showTimeSelect
+           timeIntervals={15}
+           dateFormat="MMM d, yyyy h:mm aa"
+           placeholderText="Select date and time"
+           wrapperClassName="w-full"
+-          popperClassName="z-50"
++          popperClassName="z-50 mboa-datepicker-popper"
++          popperPlacement="bottom-start"
++          showPopperArrow={false}
++          shouldCloseOnSelect={false}
+           calendarClassName="rounded-2xl border border-slate-200 shadow-xl"
+           className={`relative h-12 w-full rounded-2xl border-0 bg-white pl-12 pr-4 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-400 hover:bg-slate-50 focus:bg-white focus:ring-4 focus:ring-teal-100 ${className}`}
+           isClearable={!required}
+@@ -96,7 +74,6 @@ export default function DateTimeField({
+           filterTime={(time) => !disablePast || time.getTime() >= now.getTime() || !isSameDay(time, now)}
+         />
+       </div>
+-
+       {helper && <p className="mt-1 text-xs text-slate-500">{helper}</p>}
+     </label>
+   )
+diff --git a/Frontend/src/shared/styles/global.css b/Frontend/src/shared/styles/global.css
+index d0106f0..2dc9dbd 100644
+--- a/Frontend/src/shared/styles/global.css
++++ b/Frontend/src/shared/styles/global.css
+@@ -100,3 +100,14 @@ select {
+   animation: fadeInUp 0.6s ease-out forwards;
+   opacity: 0;
+ }
++
++
++/* Better mobile layout for date/time picker popups */
++.mboa-datepicker-popper { z-index: 80 !important; }
++@media (max-width: 640px) {
++  .mboa-datepicker-popper { position: fixed !important; inset: auto 0 0 0 !important; transform: none !important; width: 100vw !important; padding: 0.75rem !important; }
++  .mboa-datepicker-popper .react-datepicker { width: 100% !important; display: flex !important; justify-content: center !important; }
++  .mboa-datepicker-popper .react-datepicker__month-container { flex: 1 1 auto !important; max-width: 340px !important; }
++  .mboa-datepicker-popper .react-datepicker__time-container,
++  .mboa-datepicker-popper .react-datepicker__time-box { width: 86px !important; }
++}

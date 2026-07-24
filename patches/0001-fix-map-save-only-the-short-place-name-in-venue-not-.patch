@@ -1,0 +1,42 @@
+From 6379fbede0617769b3f17656ab4d05ee6d833dd6 Mon Sep 17 00:00:00 2001
+From: ekane bryan <ekanebryan5@gmail.com>
+Date: Wed, 22 Jul 2026 17:49:50 +0000
+Subject: [PATCH] fix(map): save only the short place name in venue, not the
+ full address
+
+Searching a location filled 'venue' with Nominatim's full display_name
+(e.g. 'Akwa Palace, Boulevard..., Douala, Littoral, Cameroon'). Now only
+the first segment (the place name, e.g. 'Akwa Palace') is used, and only
+when the organizer hasn't typed a venue. City/region are already stored
+separately.
+---
+ Frontend/src/shared/components/map/LocationPicker.jsx | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/Frontend/src/shared/components/map/LocationPicker.jsx b/Frontend/src/shared/components/map/LocationPicker.jsx
+index 158bdc9..7eee459 100644
+--- a/Frontend/src/shared/components/map/LocationPicker.jsx
++++ b/Frontend/src/shared/components/map/LocationPicker.jsx
+@@ -16,7 +16,9 @@ async function geocode(query) {
+ /**
+  * Form-friendly location picker: search an address (Nominatim) + a draggable map.
+  * Calls onChange({ latitude, longitude, venue? }). `venue` is only sent when a
+- * geocoded place name is found and the host hasn't typed one yet.
++ * place is found AND the host hasn't typed one yet — and only the short place
++ * name (first segment of the address), e.g. "Akwa Palace", not the full address
++ * (city/region are stored separately).
+  */
+ export default function LocationPicker({ value, onChange, height = 280 }) {
+   const { venue, latitude, longitude } = value
+@@ -35,7 +37,7 @@ export default function LocationPicker({ value, onChange, height = 280 }) {
+         setError('Location not found. Try a more specific address or place name.')
+         return
+       }
+-      onChange({ latitude: result.lat, longitude: result.lng, venue: venue ? undefined : result.name })
++      onChange({ latitude: result.lat, longitude: result.lng, venue: venue ? undefined : result.name.split(',')[0].trim() })
+     } catch {
+       setError('Unable to search right now. You can still drag the pin to set the location.')
+     } finally {
+-- 
+2.47.3
+

@@ -14,6 +14,7 @@ import { categoryService} from '../../categories/services/categoryService.js'
 import { locationService } from '../../locations/services/locationService.js'
 import SearchSuggestInput from '../../search/components/SearchSuggestInput.jsx'
 import { useTranslation } from '../../../shared/i18n/useTranslation.js'
+import { Stagger, StaggerItem } from '../../../shared/components/motion/Stagger.jsx'
 
 export default function HomePage()  {
   const navigate = useNavigate()
@@ -92,7 +93,7 @@ export default function HomePage()  {
     <div>
       <section className="relative min-h-112.5 overflow-visible bg-cover bg-center text-white" style={{ backgroundImage: 'url(/Hero-Image.jpg)' }}>
         <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-8">
-          <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100 backdrop-blur animate-fade-in-up"> {t('home.badge')}</p>
+          <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-white backdrop-blur animate-fade-in-up"> {t('home.badge')}</p>
           <h1 className="mt-4 max-w-4xl text-3xl font-black leading-tight md:text-4xl animate-fade-in-up" style={{ animationDelay: '0.1s' }}>{t('home.title')}</h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-100 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>{t('home.subtitle')}</p>
 
@@ -115,18 +116,20 @@ export default function HomePage()  {
         <section>
           <SectionHeader title={t('home.featuredCategories')} description={t('home.featuredCategoriesDescription')} />
           {loading ? <EventGridSkeleton count={6} /> :
-          <div className="grid gap-5 max-sm:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <Stagger className="grid gap-5 max-sm:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {categories.slice(0, 20).map((category) => (
-              <Link key={category.id} to={`/events?category_id=${category.id}`} className="group relative min-h-47.5 overflow-hidden rounded-xl bg-slate-900 p-5 text-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-xl">
-                <div className="absolute inset-0 bg-cover bg-center transition duration-500 group-hover:scale-105" style={{ backgroundImage: `url(${category.image_url || '/hero-events.svg'})` }} />
-                <div className="absolute inset-0 bg-linear-to-t from-slate-950/30 via-slate-950/10 to-transparent" />
+              <StaggerItem key={category.id}>
+              <Link to={`/events?category_id=${category.id}`} className="group relative block min-h-47.5 overflow-hidden rounded-xl bg-slate-900 p-5 text-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-xl">
+                <img src={category.image_url || '/hero-events.svg'} alt={category.name} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-linear-to-t from-slate-950/85 via-slate-950/45 to-slate-950/5" />
                 <div className="relative flex min-h-37.5 flex-col justify-end overflow-hidden">
                 <h3 className="text-xl max-md:text-base font-black drop-shadow-sm truncate w-full" title={category.name}>{category.name}</h3>
-                  <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-50 drop-shadow-sm">{category.description}</p>
+                  <p className="mt-1 line-clamp-2 text-sm leading-6 text-white drop-shadow-sm">{category.description}</p>
                 </div>
               </Link>
+              </StaggerItem>
             ))}
-          </div> }
+          </Stagger> }
         </section>
 
         <section className="mt-8">

@@ -1,4 +1,4 @@
-﻿import { MailCheck, RefreshCw, ShieldCheck } from 'lucide-react'
+import { MailCheck, RefreshCw, ShieldCheck } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import Alert from '../../../shared/components/feedback/Alert.jsx'
@@ -29,7 +29,7 @@ export default function EmailVerificationPage() {
 
   useEffect(() => {
     if (status === 'verified') {
-      setMessage(t('auth.verifyEmailTitle'))
+      setMessage(t('auth.emailVerifiedSuccess'))
       if (isAuthenticated) refreshUser().catch(() => {})
       return
     }
@@ -39,7 +39,10 @@ export default function EmailVerificationPage() {
       return
     }
 
-    if (status === 'sent') {
+    if (status === 'initial') {
+      setMessage(t('auth.verificationEmailSent'))
+    }
+    if (status === 'resent') {
       setMessage(t('auth.verificationEmailResent'))
     }
   }, [status, isAuthenticated, refreshUser, t])
@@ -69,16 +72,16 @@ export default function EmailVerificationPage() {
           <h2 className="mt-6 text-3xl font-black leading-tight">{t('auth.verifyEmailTitle')}</h2>
           <p className="mt-3 text-sm leading-7 text-slate-200">{t('auth.verifyEmailDescription')}</p>
           <div className="mt-6 rounded-3xl bg-white/10 p-5 backdrop-blur">
-            <p className="text-xs font-bold uppercase tracking-wide text-teal-100">Verification email sent to</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-teal-100">{t('auth.verificationEmailSentTo', 'Verification email sent to')}</p>
             <p className="mt-2 text-lg font-black">{maskedEmail}</p>
           </div>
         </section>
 
         <div className="mx-auto w-full max-w-xl">
           <AuthCard
-            eyebrow={t('auth.verifyEmailTitle')}
-            title={verified ? t('auth.verifyEmailTitle') : t('auth.verifyEmailTitle')}
-            description={verified ? t('auth.verifyEmailDescription') : t('auth.verifyEmailDescription')}
+            eyebrow={verified ? t('auth.emailVerifiedSuccess') : t('auth.verifyEmailTitle')}
+            title={verified ? t('auth.emailVerifiedSuccess') : t('auth.verifyEmailTitle')}
+            description={verified ? t('auth.emailVerifiedDescription') : t('auth.verifyEmailDescription')}
             footer={<><Link className="font-bold text-teal-700" to="/login">{t('auth.backToLogin')}</Link>{verified && <> {t('or', 'or')} <Link className="font-bold text-teal-700" to="/dashboard">{t('auth.createAccount')}</Link></>}</>}
           >
             {message && <div className="mb-5"><Alert type="success">{message}</Alert></div>}

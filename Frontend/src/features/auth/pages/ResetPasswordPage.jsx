@@ -1,4 +1,4 @@
-﻿import { ArrowLeft, CheckCircle2, KeyRound, LockKeyhole, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, KeyRound, LockKeyhole, ShieldCheck } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import Alert from '../../../shared/components/feedback/Alert.jsx'
@@ -118,7 +118,7 @@ export default function ResetPasswordPage() {
                 <div className="flex items-center gap-3">
                   <ShieldCheck className="h-5 w-5 text-teal-700" />
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Account</p>
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{t('auth.account', 'Account')}</p>
                     <p className="text-sm font-bold text-slate-900">{maskEmail(email)}</p>
                   </div>
                 </div>
