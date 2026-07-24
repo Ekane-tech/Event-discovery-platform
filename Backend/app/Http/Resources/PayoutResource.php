@@ -17,7 +17,10 @@ class PayoutResource extends JsonResource
             'destination' => $this->destination,
             'status' => $this->status,
             'reference' => $this->reference,
-            'adminNotes' => $this->admin_notes,
+            'adminNotes' => $this->when(
+                $request->user()?->hasRole('admin'),
+                $this->admin_notes
+            ),
             'processedAt' => $this->processed_at,
             'createdAt' => $this->created_at,
             'organizer' => $this->when(
