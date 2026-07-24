@@ -10,6 +10,7 @@ import { getApiErrorMessage, isEmailVerificationError } from '../../auth/utils/n
 import { useBookmarks } from '../../bookmarks/hooks/useBookmarks.js'
 import { useRegistrations } from '../../registrations/hooks/useRegistrations.js'
 import { formatPrice } from '../../../shared/utils/currency.js'
+import { getEventLifecycle } from '../utils/eventLifecycle.js'
 import ReportEventModal from '../../reports/components/ReportEventModal.jsx'
 import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
@@ -41,14 +42,15 @@ export default function EventActionPanel({ event }) {
   const bookmarked = isBookmarked(event.id)
   const registration = getRegistration(event.id)
   const registered = isRegistered(event.id)
-  const cancellationAllowed = canCancelRegistration(event, registration)
+  const isPast = getEventLifecycle(event).isPast
+  const cancellationAllowed = canCancelRegistration(event, registration) && !isPast
   const selectedTicket = ticketOptions.find((ticket) => String(ticket.id || '') === String(selectedTicketTypeId)) || ticketOptions[0]
   const maxCapacity = Number(event?.maximumParticipants) || 0
   const confirmedRegistrations = Number(event?.registrations) || 0
   const remaining = maxCapacity > 0 ? Math.max(0, maxCapacity - confirmedRegistrations) : null
   const isSoldOut = remaining !== null && remaining <= 0
   const isLowCapacity = remaining !== null && remaining > 0 && remaining <= 5
-  const showPurchaseForm = (!registered || buyingMore) && !isSoldOut
+  const showPurchaseForm = (!registered || buyingMore) && !isSoldOut && !isPast
   const selectedQuantity = Math.max(1, Number(quantity || 1))
   const totalAmount = Number(selectedTicket?.price || 0) * selectedQuantity
 
@@ -159,8 +161,12 @@ export default function EventActionPanel({ event }) {
         <div className="mt-4"><Alert type="info">{t('eventAction.registrationCancelled')}</Alert></div>
       )}
 
-      {!registered && isLowCapacity && !isSoldOut && (
+      {!registered && isLowCapacity && !isSoldOut && !isPast && (
         <div className="mt-4"><Alert type="warning">{t('eventAction.lowCapacity', { count: remaining, defaultValue: 'Only {{count}} spots left — register soon!' })}</Alert></div>
+      )}
+
+      {isPast && (
+        <div className="mt-4"><Alert type="info">{t('eventAction.eventEndedInfo', 'This event has ended.')}</Alert></div>
       )}
 
       {showPurchaseForm && (
@@ -194,9 +200,11 @@ export default function EventActionPanel({ event }) {
         {registered && !buyingMore ? (
           <>
             <Link to={`/tickets/${event.id}`}><Button disabled={busy}>{t('eventAction.viewTicket')}</Button></Link>
-            <Button type="button" variant="secondary" disabled={busy} onClick={() => setBuyingMore(true)}>Buy more tickets</Button>
+            {!isPast && <Button type="button" variant="secondary" disabled={busy} onClick={() => setBuyingMore(true)}>Buy more tickets</Button>}
             {cancellationAllowed && <Button type="button" variant="danger" disabled={busy} onClick={handleCancelRegistration}>{t('eventAction.cancelRegistration')}</Button>}
           </>
+        ) : isPast ? (
+          <Button type="button" disabled>{t('eventAction.eventEnded', 'Event has ended')}</Button>
         ) : isSoldOut ? (
           <Button type="button" disabled>{t('eventAction.soldOut', 'Sold out')}</Button>
         ) : (
@@ -212,7 +220,7 @@ export default function EventActionPanel({ event }) {
       <ReportEventModal
         open={reportOpen}
         event={event}
-        onClose={() => setReportOpen(false)}
+        onClose={() => { setReportOpen(false) }}
         onSubmitted={() => { toast.success(t('eventAction.reportSubmitted')); setMessage(t('eventAction.reportSubmittedReview')) }}
       />
     </Card>

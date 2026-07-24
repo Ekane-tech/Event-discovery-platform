@@ -149,6 +149,8 @@
     "userRoleInfo": "Registration, bookmarks, and user reports are available only for registered user accounts. Your current role is {{role}}.",
     "viewTicket": "View Ticket",
     "cancelRegistration": "Cancel Registration",
+    "eventEnded": "Event has ended",
+    "eventEndedInfo": "This event has ended.",
     "registerForEvent": "Register for Event",
     "processing": "Processing...",
     "removeBookmark": "Remove Bookmark",

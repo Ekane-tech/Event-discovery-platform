@@ -148,6 +148,8 @@
     "userRoleInfo": "Les inscriptions, favoris et signalements sont disponibles uniquement pour les comptes utilisateur enregistrés. Votre rôle actuel est {{role}}.",
     "viewTicket": "Voir le billet",
     "cancelRegistration": "Annuler l'inscription",
+    "eventEnded": "Événement terminé",
+    "eventEndedInfo": "Cet événement est terminé.",
     "registerForEvent": "S'inscrire à l'événement",
     "processing": "Traitement...",
     "removeBookmark": "Supprimer des favoris",

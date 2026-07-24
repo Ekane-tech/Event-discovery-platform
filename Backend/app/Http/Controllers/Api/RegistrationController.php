@@ -281,6 +281,13 @@ class RegistrationController extends Controller
             ], 422);
         }
 
+        if ($this->eventHasEnded($event)) {
+            return response()->json([
+                'message' => 'This event has already ended and can no longer be cancelled.',
+                'status' => $registration->status,
+            ], 422);
+        }
+
         $registration->update(['status' => 'cancelled_by_user']);
 
         return response()->json([
