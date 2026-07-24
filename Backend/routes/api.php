@@ -36,6 +36,35 @@ Route::get('/health', function () {
     ]);
 });
 
+// Deep readiness check: verifies the database + Redis (cache/queue/session broker)
+// are reachable. Returns HTTP 503 if any dependency is down — point an uptime
+// monitor (UptimeRobot) here to catch DB/Redis outages, not just app crashes.
+Route::get('/health/ready', function () {
+    $checks = [];
+    $healthy = true;
+
+    try {
+        \Illuminate\Support\Facades\DB::connection()->getPdo();
+        $checks['database'] = 'ok';
+    } catch (\Throwable $e) {
+        $checks['database'] = 'failed';
+        $healthy = false;
+    }
+
+    try {
+        \Illuminate\Support\Facades\Redis::connection()->ping();
+        $checks['redis'] = 'ok';
+    } catch (\Throwable $e) {
+        $checks['redis'] = 'failed';
+        $healthy = false;
+    }
+
+    return response()->json([
+        'status' => $healthy ? 'ok' : 'degraded',
+        'checks' => $checks,
+    ], $healthy ? 200 : 503);
+})->middleware('throttle:public-read');
+
 Route::get('/categories', [CategoryController::class, 'index'])->middleware('throttle:public-read');
 Route::get('/categories/{category}', [CategoryController::class, 'show'])->middleware('throttle:public-read');
 Route::get('/interests', [InterestController::class, 'index'])->middleware('throttle:public-read');
