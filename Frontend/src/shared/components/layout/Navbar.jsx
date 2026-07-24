@@ -66,7 +66,7 @@ export default function Navbar() {
                   <Avatar name={user?.name} src={user?.avatar} />
                 </Link>
                 <Link to="/profile" className="max-w-48 truncate text-sm text-slate-600 hover:text-teal-700">
-                  {user?.name} <span className="text-slate-400">({role})</span>
+                  {user?.name}
                 </Link>
                 <button type="button" onClick={handleLogout}><Button variant="secondary">{t('logout', 'Logout')}</Button></button>
               </>
