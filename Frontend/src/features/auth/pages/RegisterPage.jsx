@@ -1,5 +1,5 @@
-﻿import { ArrowRight, CalendarCheck, CheckCircle2, Ticket, Users } from 'lucide-react'
-import { useState } from 'react'
+import { ArrowRight, CalendarCheck, CheckCircle2, Ticket, Users } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Alert from '../../../shared/components/feedback/Alert.jsx'
 import Button from '../../../shared/components/ui/Button.jsx'
@@ -10,7 +10,7 @@ import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 import { useAuth } from '../hooks/useAuth.js'
 import { getDashboardPathByRole } from '../utils/authRedirects.js'
 
-const TERMS_URL = 'terms-of-service'
+const TERMS_URL = '/terms-of-service'
 const PRIVACY_URL = '/privacy-policy'
 
 const ACCOUNT_TYPES = [
@@ -21,7 +21,7 @@ const ACCOUNT_TYPES = [
 export default function RegisterPage() {
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { register } = useAuth()
+  const { register, isAuthenticated, role, loading } = useAuth()
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [form, setForm] = useState({
@@ -35,6 +35,12 @@ export default function RegisterPage() {
     passwordConfirmation: '',
     termsAccepted: false,
   })
+
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      navigate(getDashboardPathByRole(role), { replace: true })
+    }
+  }, [isAuthenticated, role, loading, navigate])
 
   function updateField(event) {
     const { name, value, type, checked } = event.target
@@ -61,7 +67,7 @@ export default function RegisterPage() {
     setSubmitting(true)
     try {
       const user = await register(form)
-      navigate(user.emailVerifiedAt ? (user.role === 'user' ? '/interests' : getDashboardPathByRole(user.role)) : '/verify-email?status=sent', { replace: true })
+      navigate(user.emailVerifiedAt ? getDashboardPathByRole(user.role) : '/verify-email?status=initial', { replace: true })
     } catch (registerError) {
       setError(registerError.message)
     } finally {
@@ -82,7 +88,7 @@ export default function RegisterPage() {
             <div className="mt-6 grid gap-3 text-sm text-slate-100">
               <p className="flex gap-2"><CheckCircle2 className="h-5 w-5 text-teal-300" /> Discover events across Cameroon.</p>
               <p className="flex gap-2"><CheckCircle2 className="h-5 w-5 text-teal-300" /> Manage registrations, tickets and check-ins.</p>
-              <p className="flex gap-2"><CheckCircle2 className="h-5 w-5 text-teal-300" /> Receive important updates by email.</p>
+              <p className="flex gap-2"><CheckCircle2 className="h-5 w-5 text-teal-300" /> {t('auth.registerBenefit2', 'Receive important updates by email.')}</p>
             </div>
           </div>
         </div>

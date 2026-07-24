@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             InterestSeeder::class,
             RegionSeeder::class,
             DemoUserSeeder::class,
+            EventSeeder::class,
         ]);
     }
 }

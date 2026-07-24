@@ -4,9 +4,11 @@ namespace App\Services\Payments;
 
 use App\Models\AuditLog;
 use App\Models\Payment;
+use App\Models\Registration;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class MobileMoneyPaymentService
@@ -48,12 +50,16 @@ class MobileMoneyPaymentService
             'metadata' => $metadata,
         ]);
 
-        if ($mappedStatus === 'paid' && $payment->registration) {
-            $payment->registration->update(['status' => 'confirmed']);
+        $registrationIds = $payment->metadata['registration_ids'] ?? [$payment->registration_id];
+
+        if ($mappedStatus === 'paid') {
+            Registration::whereIn('id', array_filter($registrationIds))->update(['status' => 'confirmed']);
         }
 
-        if ($mappedStatus === 'failed' && $payment->registration && $payment->registration->status === 'pending_payment') {
-            $payment->registration->update(['status' => 'payment_failed']);
+        if ($mappedStatus === 'failed') {
+            Registration::whereIn('id', array_filter($registrationIds))
+                ->where('status', 'pending_payment')
+                ->update(['status' => 'payment_failed']);
         }
 
         AuditLog::record(null, 'payment.status.updated', $payment, 'Payment status updated by provider.', [
@@ -136,8 +142,9 @@ class MobileMoneyPaymentService
                 'status' => $mappedStatus,
             ]);
 
-            if ($mappedStatus === 'paid' && $payment->registration) {
-                $payment->registration->update(['status' => 'confirmed']);
+            if ($mappedStatus === 'paid') {
+                $registrationIds = $payment->metadata['registration_ids'] ?? [$payment->registration_id];
+                Registration::whereIn('id', array_filter($registrationIds))->update(['status' => 'confirmed']);
             }
 
             return $payment->fresh();
@@ -179,6 +186,12 @@ class MobileMoneyPaymentService
 
             return $this->applyProviderStatus($payment, $payload, 'status_check');
         } catch (\Throwable $exception) {
+            Log::warning('Campay payment status check failed.', [
+                'payment_id' => $payment->id,
+                'provider' => $payment->provider,
+                'error' => $exception->getMessage(),
+            ]);
+
             $payment->update([
                 'metadata' => [
                     ...($payment->metadata ?? []),
@@ -202,6 +215,11 @@ class MobileMoneyPaymentService
                 'error' => $exception->getMessage(),
             ],
         ]);
+
+        $registrationIds = $payment->metadata['registration_ids'] ?? [$payment->registration_id];
+        Registration::whereIn('id', array_filter($registrationIds))
+            ->where('status', 'pending_payment')
+            ->update(['status' => 'payment_failed']);
 
         AuditLog::record($payment->user, 'payment.failed', $payment, 'Payment initiation failed.', [
             'provider' => $payment->provider,

@@ -14,6 +14,8 @@ class RegistrationResource extends JsonResource
             'user_id' => $this->user_id,
             'event_id' => $this->event_id,
             'status' => $this->status,
+            'ticket_type_id' => $this->ticket_type_id,
+            'ticket_type' => new EventTicketTypeResource($this->whenLoaded('ticketType')),
             'ticket_number' => $this->ticket_number,
             'registered_at' => $this->registered_at,
             'checked_in_at' => $this->checked_in_at,

@@ -20,6 +20,7 @@ class ProfileResource extends JsonResource
                 'label' => $this->role?->label,
             ]),
             'organization_name' => $this->profile?->organization_name,
+            'is_verified_organizer' => (bool) $this->profile?->is_verified_organizer,
             'phone' => $this->profile?->phone,
             'city' => $this->profile?->city,
             'region' => $this->profile?->region,

@@ -127,6 +127,11 @@ class Event extends Model
         return $this->hasMany(EventImage::class);
     }
 
+    public function ticketTypes()
+    {
+        return $this->hasMany(EventTicketType::class)->orderBy('sort_order')->orderBy('price');
+    }
+
     public function registrations()
     {
         return $this->hasMany(Registration::class);
@@ -145,6 +150,11 @@ class Event extends Model
     public function eventViews()
     {
         return $this->hasMany(EventView::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(EventReview::class);
     }
 
     public function scopePublishedPublic($query)

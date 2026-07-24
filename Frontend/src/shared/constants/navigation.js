@@ -2,16 +2,19 @@ import { ROLES } from './roles.js'
 
 export const PUBLIC_NAV_LINKS = [
   { label: 'Browse Events', labelKey: 'nav.browseEvents', to: '/events', icon: 'calendarSearch' },
-  { label: 'About', labelKey: 'nav.about', to: '/about', icon: 'star' },
+  { label: 'Organizers', labelKey: 'nav.organizers', to: '/organizers', icon: 'users' },
+  { label: 'About', labelKey: 'nav.about', to: '/about', icon: 'calendarSearch' },
+  { label: 'Feedback', labelKey: 'nav.feedback', to: '/feedback', icon: 'heart' },
 ]
 
 export const USER_NAV_LINKS = [
   { label: 'Dashboard', labelKey: 'nav.dashboard', to: '/dashboard', icon: 'layoutDashboard' },
-  { label: 'Recommendations', labelKey: 'nav.recommendations', to: '/recommendations', icon: 'star' },
+  { label: 'Recommendations', labelKey: 'nav.recommendations', to: '/recommendations', icon: 'calendarSearch' },
   { label: 'Events', labelKey: 'nav.events', to: '/events', icon: 'calendarDays' },
   { label: 'My Interests', labelKey: 'nav.interests', to: '/my-interests', icon: 'heart' },
   { label: 'Bookmarks', labelKey: 'nav.bookmarks', to: '/bookmarks', icon: 'bookmark' },
   { label: 'Registrations', labelKey: 'nav.registrations', to: '/registrations', icon: 'ticket' },
+  { label: 'Notifications', labelKey: 'nav.notifications', to: '/notifications', badge: 'notifications', icon: 'bell' },
   { label: 'My Reports', labelKey: 'nav.reports', to: '/reports', icon: 'barChart3' },
   { label: 'Settings', labelKey: 'nav.settings', to: '/settings', icon: 'settings' },
 ]
@@ -24,6 +27,9 @@ export const ORGANIZER_NAV_LINKS = [
   { label: 'Organizer Dashboard', labelKey: 'nav.organizerDashboard', to: '/organizer/dashboard', icon: 'layoutDashboard' },
   { label: 'My Events', labelKey: 'nav.myEvents', to: '/organizer/events', icon: 'calendarDays' },
   { label: 'Statistics', labelKey: 'nav.statistics', to: '/organizer/statistics', icon: 'barChart3' },
+  { label: 'Wallet', labelKey: 'nav.wallet', to: '/organizer/wallet', icon: 'wallet' },
+  { label: 'Notifications', labelKey: 'nav.notifications', to: '/notifications', badge: 'notifications', icon: 'bell' },
+  { label: 'Settings', labelKey: 'nav.settings', to: '/settings', icon: 'settings' },
 ]
 
 export const ADMIN_NAV_LINKS = [
@@ -31,6 +37,7 @@ export const ADMIN_NAV_LINKS = [
   { label: 'Users', labelKey: 'nav.users', to: '/admin/users', icon: 'users' },
   { label: 'Events', labelKey: 'nav.events', to: '/admin/events', icon: 'calendarCheck' },
   { label: 'Payments', labelKey: 'nav.payments', to: '/admin/payments', icon: 'creditCard' },
+  { label: 'Payouts', labelKey: 'nav.payouts', to: '/admin/payouts', icon: 'wallet' },
   { label: 'Categories', labelKey: 'nav.categories', to: '/admin/categories', icon: 'boxes' },
   { label: 'Locations', labelKey: 'nav.locations', to: '/admin/locations', icon: 'mapPin' },
   { label: 'Reports', labelKey: 'nav.adminReports', to: '/admin/reports', icon: 'barChart3' },
@@ -58,10 +65,9 @@ export function getDesktopNavbarLinks(role, isAuthenticated) {
   const links = [
     ...PUBLIC_NAV_LINKS,
     { label: 'Dashboard', labelKey: 'nav.dashboard', to: getPrimaryDashboardPath(role), icon: 'layoutDashboard' },
-    { label: 'Notifications', labelKey: 'nav.notifications', to: getNotificationPathByRole(role), badge: 'notifications', icon: 'bell' },
   ]
 
-  if (role === ROLES.USER) links.push({ label: 'Recommendations', labelKey: 'nav.recommendations', to: '/recommendations', icon: 'star' })
+  if (role === ROLES.USER) links.push({ label: 'Recommendations', labelKey: 'nav.recommendations', to: '/recommendations', icon: 'calendarSearch' })
   if (role === ROLES.ORGANIZER) links.push({ label: 'My Events', labelKey: 'nav.myEvents', to: '/organizer/events', icon: 'calendarDays' })
   if (role === ROLES.ADMIN) links.push({ label: 'Admin', labelKey: 'nav.admin', to: '/admin/dashboard', icon: 'shield' })
 
@@ -72,8 +78,8 @@ export function getMobileNavigationGroups(role, isAuthenticated) {
   const groups = [{ title: 'Discover', links: PUBLIC_NAV_LINKS }]
   if (!isAuthenticated) return groups
   if (role === ROLES.USER) return [...groups, { title: 'My Account', links: USER_NAV_LINKS }]
-  if (role === ROLES.ORGANIZER) return [...groups, { title: 'Organizer', links: ORGANIZER_NAV_LINKS }, { title: 'Account', links: ACCOUNT_NAV_LINKS.filter((link) => link.to !== '/notifications') }]
-  if (role === ROLES.ADMIN) return [...groups, { title: 'Administration', links: ADMIN_NAV_LINKS }, { title: 'Account', links: ACCOUNT_NAV_LINKS.filter((link) => link.to !== '/notifications') }]
+  if (role === ROLES.ORGANIZER) return [...groups, { title: 'Organizer', links: ORGANIZER_NAV_LINKS }]
+  if (role === ROLES.ADMIN) return [...groups, { title: 'Administration', links: ADMIN_NAV_LINKS }]
   return [...groups, { title: 'Account', links: ACCOUNT_NAV_LINKS }]
 }
 

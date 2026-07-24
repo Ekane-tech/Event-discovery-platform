@@ -11,20 +11,29 @@ use App\Models\Category;
 use App\Support\ImageStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = Category::query()->withCount('events')->orderBy('name');
+        $includeInactive = $request->boolean('include_inactive');
+        $cacheKey = 'public:categories:'.($includeInactive ? 'all' : 'active');
 
-        if (! $request->boolean('include_inactive')) {
-            $query->where('is_active', true);
-        }
+        $categories = Cache::remember($cacheKey, now()->addHour(), function () use ($includeInactive) {
+            $query = Category::query()->withCount('events')->orderBy('name');
+
+            if (! $includeInactive) {
+                $query->where('is_active', true);
+            }
+
+            return $query->get();
+        });
 
         return response()->json([
-            'categories' => CategoryResource::collection($query->get()),
+            'categories' => CategoryResource::collection($categories),
         ]);
     }
 
@@ -53,6 +62,8 @@ class CategoryController extends Controller
         AuditLog::record($request->user(), 'category.created', $category, 'Category created.', [
             'has_image' => (bool) $imagePath,
         ]);
+
+        $this->flushCategoryCache();
 
         return response()->json([
             'message' => 'Category created successfully.',
@@ -86,6 +97,8 @@ class CategoryController extends Controller
             'has_image' => (bool) $imagePath,
         ]);
 
+        $this->flushCategoryCache();
+
         return response()->json([
             'message' => 'Category updated successfully.',
             'category' => new CategoryResource($category->fresh()),
@@ -101,9 +114,16 @@ class CategoryController extends Controller
         ]);
 
         $category->delete();
+        $this->flushCategoryCache();
 
         return response()->json([
             'message' => 'Category deleted successfully.',
         ]);
+    }
+
+    protected function flushCategoryCache(): void
+    {
+        Cache::forget('public:categories:active');
+        Cache::forget('public:categories:all');
     }
 }

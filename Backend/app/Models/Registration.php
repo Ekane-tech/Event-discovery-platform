@@ -12,6 +12,7 @@ class Registration extends Model
     protected $fillable = [
         'user_id',
         'event_id',
+        'ticket_type_id',
         'status',
         'ticket_number',
         'registered_at',
@@ -40,6 +41,11 @@ class Registration extends Model
     public function payment()
     {
         return $this->hasOne(Payment::class);
+    }
+
+    public function ticketType()
+    {
+        return $this->belongsTo(EventTicketType::class, 'ticket_type_id');
     }
 
     public function checkedInBy()

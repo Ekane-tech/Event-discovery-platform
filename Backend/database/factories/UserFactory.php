@@ -11,7 +11,6 @@ use Illuminate\Support\Str;
  * @extends Factory<User>
  */
 class UserFactory extends Factory
-//yet
 {
     /**
      * The current password being used by the factory.

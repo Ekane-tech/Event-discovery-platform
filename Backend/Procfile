@@ -1,2 +1,3 @@
-web: php artisan serve --host 0.0.0.0 --port $PORT
+web: mkdir -p /app/storage/app/public && php artisan storage:link --force && php artisan config:clear && php artisan route:clear && php artisan view:clear && php artisan optimize:clear && php artisan serve --host 0.0.0.0 --port $PORT
 worker: php artisan queue:work --tries=3 --timeout=90
+scheduler: php artisan schedule:work

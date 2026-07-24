@@ -14,7 +14,7 @@ export default function StatCardSkeleton({ compact = false }) {
 
 export function StatGridSkeleton({ count = 4 }) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
       {Array.from({ length: count }).map((_, index) => <StatCardSkeleton key={index} />)}
     </div>
   )

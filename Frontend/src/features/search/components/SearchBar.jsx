@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import Button from '../../../shared/components/ui/Button.jsx'
 import Input from '../../../shared/components/ui/Input.jsx'
+import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
 export default function SearchBar({ value = '', onSearch }) {
+  const { t } = useTranslation()
   const [keyword, setKeyword] = useState(value)
 
   useEffect(() => {
@@ -19,9 +21,9 @@ export default function SearchBar({ value = '', onSearch }) {
       <Input
         value={keyword}
         onChange={(event) => setKeyword(event.target.value)}
-        placeholder="Search by event name, category, city, venue, or organizer..."
+        placeholder={t('searchPage.placeholder', 'Search by event name, category, city, venue, or organizer...')}
       />
-      <Button type="submit" className="sm:w-36">Search</Button>
+      <Button type="submit" className="sm:w-36">{t('search', 'Search')}</Button>
     </form>
   )
 }

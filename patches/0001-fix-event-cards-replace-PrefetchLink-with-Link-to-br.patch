@@ -1,0 +1,91 @@
+From e2bc5a14a8cbb37f39d5a4f1284cb807224dcfd2 Mon Sep 17 00:00:00 2001
+From: Mboa Dev <dev@mboa237.local>
+Date: Thu, 23 Jul 2026 21:56:14 +0000
+Subject: [PATCH] fix(event cards): replace PrefetchLink with Link to break
+ chunk cycle
+
+- EventCard & RecommendedEventCard now use plain <Link> instead of
+  <PrefetchLink importer={() => import('.../EventDetailsPage.jsx')}>
+- Removes the card -> details-page dynamic import that created a circular
+  chunk dependency surfacing at runtime as
+  'Cannot access "<var>" before initialization' on the event details page.
+- Complete the lost reviews edit: EventCard rating badge (Star now used).
+---
+ Frontend/src/features/events/components/EventCard.jsx | 11 ++++++++---
+ .../components/RecommendedEventCard.jsx               |  5 ++---
+ 2 files changed, 10 insertions(+), 6 deletions(-)
+
+diff --git a/Frontend/src/features/events/components/EventCard.jsx b/Frontend/src/features/events/components/EventCard.jsx
+index cc7847b..4b8c5cf 100644
+--- a/Frontend/src/features/events/components/EventCard.jsx
++++ b/Frontend/src/features/events/components/EventCard.jsx
+@@ -4,7 +4,6 @@ import { Link, useLocation } from 'react-router-dom'
+ import Badge from '../../../shared/components/ui/Badge.jsx'
+ import Avatar from '../../../shared/components/ui/Avatar.jsx'
+ import Button from '../../../shared/components/ui/Button.jsx'
+-import PrefetchLink from '../../../shared/components/navigation/PrefetchLink.jsx'
+ import { ROLES } from '../../../shared/constants/roles.js'
+ import { useAuth } from '../../auth/hooks/useAuth.js'
+ import { useBookmarks } from '../../bookmarks/hooks/useBookmarks.js'
+@@ -38,7 +37,7 @@ export default function EventCard({ event }) {
+   }
+ 
+   return (
+-    <PrefetchLink to={`/events/${event.id}`} state={{ from: `${location.pathname}${location.search}` }} importer={() => import('../pages/EventDetailsPage.jsx')} className="group relative flex h-full min-h-[360px] flex-col overflow-hidden rounded-xl bg-slate-900 shadow-sm ring-1 ring-slate-200 transition duration-300 hover:-translate-y-1 hover:shadow-2xl">
++    <Link to={`/events/${event.id}`} state={{ from: `${location.pathname}${location.search}` }} className="group relative flex h-full min-h-[360px] flex-col overflow-hidden rounded-xl bg-slate-900 shadow-sm ring-1 ring-slate-200 transition duration-300 hover:-translate-y-1 hover:shadow-2xl">
+       <img src={bg} alt={event.title} loading="lazy" decoding="async" srcSet={variantSrcSet(event.coverImage?.path)} sizes="(max-width: 768px) 50vw, 33vw" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/35 to-slate-950/5" />
+       <div className="absolute right-4 top-4 z-10 flex gap-2">
+@@ -63,6 +62,12 @@ export default function EventCard({ event }) {
+         <div className="mb-3 flex flex-wrap items-center gap-2">
+           <Badge className="bg-white/20 text-white backdrop-blur">{event.category || t('events.card.eventFallback', 'Event')}</Badge>
+           <span className="rounded-full bg-teal-500 px-3 py-1 text-sm font-bold text-white">{formatPrice(event.price)}</span>
++          {event.averageRating > 0 && (
++            <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-sm font-bold text-slate-950 shadow-sm">
++              <Star className="h-3.5 w-3.5 fill-slate-950 text-slate-950" />
++              {Number(event.averageRating).toFixed(1)}
++            </span>
++          )}
+         </div>
+         <h3 className="text-xl font-black leading-tight drop-shadow-sm">{event.title}</h3>
+         <p className="mt-2 line-clamp-2 text-sm leading-6 text-white drop-shadow-sm">{event.description}</p>
+@@ -90,6 +95,6 @@ export default function EventCard({ event }) {
+           <Button className="w-auto rounded-full bg-teal-600 px-5 text-white hover:bg-teal-700">{t('viewDetails', 'View Details')}</Button>
+         </div>
+       </div>
+-    </PrefetchLink>
++    </Link>
+   )
+ }
+diff --git a/Frontend/src/features/recommendations/components/RecommendedEventCard.jsx b/Frontend/src/features/recommendations/components/RecommendedEventCard.jsx
+index 8fa22d2..6668111 100644
+--- a/Frontend/src/features/recommendations/components/RecommendedEventCard.jsx
++++ b/Frontend/src/features/recommendations/components/RecommendedEventCard.jsx
+@@ -1,7 +1,6 @@
+ import { BadgeCheck, Bookmark, CalendarDays, Clock, MapPin } from 'lucide-react'
+ import { toast } from 'sonner'
+ import { Link, useLocation } from 'react-router-dom'
+-import PrefetchLink from '../../../shared/components/navigation/PrefetchLink.jsx'
+ import Button from '../../../shared/components/ui/Button.jsx'
+ import Avatar from '../../../shared/components/ui/Avatar.jsx'
+ import { useBookmarks } from '../../bookmarks/hooks/useBookmarks.js'
+@@ -33,7 +32,7 @@ export default function RecommendedEventCard({ event }) {
+   }
+ 
+   return (
+-    <PrefetchLink to={`/events/${event.id}`} state={{ from: `${location.pathname}${location.search}` }} importer={() => import('../../events/pages/EventDetailsPage.jsx')} className="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-2xl">
++    <Link to={`/events/${event.id}`} state={{ from: `${location.pathname}${location.search}` }} className="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-2xl">
+       <div className="relative h-52 overflow-hidden bg-slate-900 shrink-0">
+         <img src={bg} alt={event.title} loading="lazy" decoding="async" srcSet={variantSrcSet(event.coverImage?.path)} sizes="(max-width: 768px) 100vw, 33vw" className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/30 to-transparent" />
+@@ -93,6 +92,6 @@ export default function RecommendedEventCard({ event }) {
+           </div>
+         </div>
+       </div>
+-    </PrefetchLink>
++    </Link>
+   )
+ }
+-- 
+2.47.3
+

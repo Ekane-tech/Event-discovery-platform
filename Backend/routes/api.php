@@ -1,19 +1,24 @@
 <?php
 
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\AdminPayoutController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BookmarkController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\EventController;
+use App\Http\Controllers\Api\EventReviewController;
 use App\Http\Controllers\Api\FeedbackController;
+use App\Http\Controllers\Api\ImageVariantController;
 use App\Http\Controllers\Api\InterestController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\OrganizerController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\RecommendationController;
 use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\RegistrationController;
 use App\Http\Middleware\EnsureEmailIsVerified;
 use Illuminate\Support\Facades\Route;
@@ -22,12 +27,43 @@ Route::get('/public/notifications', [NotificationController::class, 'publicAnnou
 Route::post('/feedback', [FeedbackController::class, 'store'])->middleware('throttle:feedback-submit');
 Route::post('/payments/callback/campay', [PaymentController::class, 'campayCallback'])->middleware('throttle:payments');
 
+Route::get('/img', [ImageVariantController::class, 'show'])->middleware('throttle:public-read');
+
 Route::get('/health', function () {
     return response()->json([
         'status' => 'ok',
         'message' => 'Mboa Events 237 API is running',
     ]);
 });
+
+// Deep readiness check: verifies the database + Redis (cache/queue/session broker)
+// are reachable. Returns HTTP 503 if any dependency is down — point an uptime
+// monitor (UptimeRobot) here to catch DB/Redis outages, not just app crashes.
+Route::get('/health/ready', function () {
+    $checks = [];
+    $healthy = true;
+
+    try {
+        \Illuminate\Support\Facades\DB::connection()->getPdo();
+        $checks['database'] = 'ok';
+    } catch (\Throwable $e) {
+        $checks['database'] = 'failed';
+        $healthy = false;
+    }
+
+    try {
+        \Illuminate\Support\Facades\Redis::connection()->ping();
+        $checks['redis'] = 'ok';
+    } catch (\Throwable $e) {
+        $checks['redis'] = 'failed';
+        $healthy = false;
+    }
+
+    return response()->json([
+        'status' => $healthy ? 'ok' : 'degraded',
+        'checks' => $checks,
+    ], $healthy ? 200 : 503);
+})->middleware('throttle:public-read');
 
 Route::get('/categories', [CategoryController::class, 'index'])->middleware('throttle:public-read');
 Route::get('/categories/{category}', [CategoryController::class, 'show'])->middleware('throttle:public-read');
@@ -47,6 +83,8 @@ Route::get('/cities/{city}', [LocationController::class, 'showCity'])->middlewar
 Route::get('/events', [EventController::class, 'index'])->middleware('throttle:public-read');
 Route::get('/events/{event}', [EventController::class, 'show'])->middleware('throttle:public-read');
 Route::get('/tickets/verify/{ticketNumber}', [RegistrationController::class, 'verifyTicket'])->middleware('throttle:ticket-verify');
+Route::get('/organizers', [OrganizerController::class, 'index'])->middleware('throttle:public-read');
+Route::get('/organizers/{organizer}', [OrganizerController::class, 'show'])->middleware('throttle:public-read');
 
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:auth-register');
@@ -101,12 +139,25 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/events/{event}/register', [RegistrationController::class, 'store'])->middleware(['role:user', EnsureEmailIsVerified::class, 'throttle:event-write']);
     Route::delete('/events/{event}/registration', [RegistrationController::class, 'destroy'])->middleware(['role:user', EnsureEmailIsVerified::class, 'throttle:event-write']);
 
+    // Post-event reviews & ratings
+    Route::post('/events/{event}/reviews', [EventReviewController::class, 'store'])->middleware(['role:user', EnsureEmailIsVerified::class, 'throttle:event-write']);
+    Route::put('/events/{event}/reviews/{review}', [EventReviewController::class, 'update'])->middleware(['role:user', EnsureEmailIsVerified::class, 'throttle:event-write']);
+    Route::delete('/events/{event}/reviews/{review}', [EventReviewController::class, 'destroy'])->middleware('throttle:event-write');
+
     Route::get('/organizer/events', [EventController::class, 'myEvents'])->middleware('role:organizer')->middleware('throttle:authenticated-read');
     Route::get('/organizer/events/{event}', [EventController::class, 'organizerShow'])->middleware('role:organizer,admin')->middleware('throttle:authenticated-read');
     Route::get('/organizer/events/{event}/attendees', [EventController::class, 'attendees'])->middleware('role:organizer,admin')->middleware('throttle:authenticated-read');
     Route::get('/organizer/events/{event}/attendees/export', [EventController::class, 'exportAttendees'])->middleware('role:organizer,admin')->middleware('throttle:authenticated-read');
     Route::post('/organizer/events/{event}/duplicate', [EventController::class, 'duplicate'])->middleware(['role:organizer,admin', 'throttle:event-write']);
     Route::patch('/organizer/registrations/{registration}/check-in', [RegistrationController::class, 'checkIn'])->middleware(['role:organizer,admin', 'throttle:check-in']);
+
+    // Organizer wallet & payouts
+    Route::get('/wallet', [WalletController::class, 'show'])->middleware('role:organizer')->middleware('throttle:authenticated-read');
+    Route::get('/wallet/transactions', [WalletController::class, 'transactions'])->middleware('role:organizer')->middleware('throttle:authenticated-read');
+    Route::put('/wallet/payout-method', [WalletController::class, 'updatePayoutMethod'])->middleware(['role:organizer', EnsureEmailIsVerified::class, 'throttle:event-write']);
+    Route::get('/wallet/payouts', [WalletController::class, 'payouts'])->middleware('role:organizer')->middleware('throttle:authenticated-read');
+    Route::post('/wallet/payouts', [WalletController::class, 'requestPayout'])->middleware(['role:organizer', EnsureEmailIsVerified::class, 'throttle:event-write']);
+    Route::post('/wallet/payouts/{payout}/cancel', [WalletController::class, 'cancelPayout'])->middleware(['role:organizer', 'throttle:event-write']);
     Route::post('/events', [EventController::class, 'store'])->middleware(['role:organizer,admin', EnsureEmailIsVerified::class, 'throttle:event-write']);
     Route::put('/events/{event}', [EventController::class, 'update'])->middleware(['role:organizer,admin', EnsureEmailIsVerified::class, 'throttle:event-write']);
     Route::delete('/events/{event}', [EventController::class, 'destroy'])->middleware(['role:organizer,admin', 'throttle:event-write']);
@@ -130,11 +181,22 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/users', [AdminController::class, 'users'])->middleware('throttle:admin-actions');
         Route::patch('/admin/users/{user}/role', [AdminController::class, 'updateUserRole'])->middleware('throttle:admin-actions');
         Route::patch('/admin/users/{user}/status', [AdminController::class, 'updateUserStatus'])->middleware('throttle:admin-actions');
+        Route::patch('/admin/users/{user}/organizer-verification', [AdminController::class, 'updateOrganizerVerification'])->middleware('throttle:admin-actions');
 
         Route::get('/admin/events', [AdminController::class, 'events'])->middleware('throttle:admin-actions');
 
         Route::get('/admin/payments', [AdminController::class, 'payments'])->middleware('throttle:admin-actions');
         Route::get('/admin/payments/summary', [AdminController::class, 'paymentSummary'])->middleware('throttle:admin-actions');
+
+        // Admin payouts & platform settings
+        Route::get('/admin/payouts', [AdminPayoutController::class, 'index'])->middleware('throttle:admin-actions');
+        Route::get('/admin/payouts/{payout}', [AdminPayoutController::class, 'show'])->middleware('throttle:admin-actions');
+        Route::patch('/admin/payouts/{payout}/approve', [AdminPayoutController::class, 'approve'])->middleware('throttle:admin-actions');
+        Route::patch('/admin/payouts/{payout}/reject', [AdminPayoutController::class, 'reject'])->middleware('throttle:admin-actions');
+        Route::patch('/admin/payouts/{payout}/mark-paid', [AdminPayoutController::class, 'markPaid'])->middleware('throttle:admin-actions');
+        Route::get('/admin/wallets/{user}', [AdminPayoutController::class, 'wallet'])->middleware('throttle:admin-actions');
+        Route::get('/admin/platform-settings', [AdminPayoutController::class, 'platformSettings'])->middleware('throttle:admin-actions');
+        Route::put('/admin/platform-settings', [AdminPayoutController::class, 'updatePlatformSettings'])->middleware('throttle:admin-actions');
         Route::get('/admin/audit-logs', [AdminController::class, 'auditLogs'])->middleware('throttle:admin-actions');
         Route::get('/admin/email-logs', [AdminController::class, 'emailLogs'])->middleware('throttle:admin-actions');
         Route::post('/admin/test-email', [AdminController::class, 'sendTestEmail'])->middleware('throttle:admin-actions');

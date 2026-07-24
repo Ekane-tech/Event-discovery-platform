@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import EmptyState from '../../../shared/components/feedback/EmptyState.jsx'
+import ErrorState from '../../../shared/components/feedback/ErrorState.jsx'
 import PageContainer from '../../../shared/components/layout/PageContainer.jsx'
 import SectionHeader from '../../../shared/components/layout/SectionHeader.jsx'
 import EventGrid from '../../events/components/EventGrid.jsx'
@@ -10,10 +11,13 @@ import SearchBar from '../components/SearchBar.jsx'
 import SearchResultsHeader from '../components/SearchResultsHeader.jsx'
 import { useEventSearch } from '../hooks/useEventSearch.js'
 import { extractCollection, normalizeEvents } from '../../events/utils/normalizeEvent.js'
+import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
 export default function SearchResultsPage() {
+  const { t } = useTranslation()
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const {
     filters,
     filteredEvents,
@@ -24,11 +28,12 @@ export default function SearchResultsPage() {
 
   useEffect(() => {
     async function fetchEvents() {
+      setError('')
       try {
         const response = await eventService.getEvents({ per_page: 100 })
         setEvents(normalizeEvents(extractCollection(response.data, 'events')))
-      } catch (error) {
-        console.error('Failed to fetch events:', error)
+      } catch (fetchError) {
+        setError(getApiErrorMessage(fetchError, 'Unable to load events.'))
       } finally {
         setLoading(false)
       }
@@ -40,10 +45,10 @@ export default function SearchResultsPage() {
     return (
       <PageContainer>
         <SectionHeader
-          title="Search Events"
-          description="Find events by keyword, category, region, city, date, price, organizer, and popularity."
+          title={t('searchPage.title', 'Search Events')}
+          description={t('searchPage.description', 'Find events by keyword, category, region, city, date, price, organizer, and popularity.')}
         />
-        <div className="text-center text-slate-500">Loading events...</div>
+        <div className="text-center text-slate-500">{t('searchPage.loadingEvents', 'Loading events...')}</div>
       </PageContainer>
     )
   }
@@ -51,8 +56,8 @@ export default function SearchResultsPage() {
   return (
     <PageContainer>
       <SectionHeader
-        title="Search Events"
-        description="Find events by keyword, category, region, city, date, price, organizer, and popularity."
+        title={t('searchPage.title', 'Search Events')}
+        description={t('searchPage.description', 'Find events by keyword, category, region, city, date, price, organizer, and popularity.')}
       />
 
       <div className="grid gap-5">
@@ -61,10 +66,12 @@ export default function SearchResultsPage() {
         <ActiveFilters filters={filters} onReset={resetFilters} />
         <SearchResultsHeader totalResults={totalResults} totalEvents={events.length} />
 
-        {filteredEvents.length === 0 ? (
+        {error ? (
+          <ErrorState title="Unable to load events" message={error} />
+        ) : filteredEvents.length === 0 ? (
           <EmptyState
-            title="No events found"
-            message="Try changing the keyword, category, region, date, or price filter."
+            title={t('searchPage.noResults', 'No events found')}
+            message={t('searchPage.noResultsMessage', 'Try changing the keyword, category, region, date, or price filter.')}
           />
         ) : (
           <EventGrid events={filteredEvents} />

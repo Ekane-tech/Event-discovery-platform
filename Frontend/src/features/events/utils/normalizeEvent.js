@@ -6,6 +6,20 @@ function getStorageUrl(path) {
   return `${baseUrl}/storage/${path}`
 }
 
+function normalizeTicketType(ticketType) {
+  return {
+    id: ticketType.id,
+    eventId: ticketType.event_id,
+    name: ticketType.name,
+    description: ticketType.description || '',
+    price: Number(ticketType.price || 0),
+    quantity: ticketType.quantity || '',
+    isActive: ticketType.is_active ?? true,
+    remainingQuantity: ticketType.remaining_quantity,
+    raw: ticketType,
+  }
+}
+
 function normalizeImage(image) {
   return {
     id: image.id,
@@ -36,6 +50,10 @@ export function extractCollection(payload, key) {
 export function normalizeEvent(apiEvent) {
   if (!apiEvent) return null
 
+  const organizerProfile = apiEvent.organizer?.profile || {}
+  const organizerName = organizerProfile.organization_name || apiEvent.organizer?.name || ''
+  const organizerAvatar = getStorageUrl(organizerProfile.avatar)
+
   return {
     id: apiEvent.id,
     organizerId: apiEvent.organizer_id,
@@ -60,17 +78,24 @@ export function normalizeEvent(apiEvent) {
     price: Number(apiEvent.price || 0),
     maximumParticipants: apiEvent.maximum_participants || '',
     organizer: apiEvent.organizer?.name || '',
+    organizerId: apiEvent.organizer?.id || apiEvent.organizer_id,
+    organizerName,
+    organizerAvatar,
+    organizerVerified: Boolean(organizerProfile.is_verified_organizer),
     status: apiEvent.status || 'draft',
     visibility: apiEvent.visibility || 'public',
     views: apiEvent.views || 0,
     registrations: apiEvent.registrations_count || 0,
     bookmarks: apiEvent.bookmarks_count || 0,
     reports: apiEvent.reports_count || 0,
+    reviewsCount: apiEvent.reviews_count || 0,
+    averageRating: apiEvent.average_rating != null ? Number(apiEvent.average_rating) : null,
     recommendationScore: apiEvent.recommendation_score || 0,
     recommendationReasons: apiEvent.recommendation_reasons || [],
     popularity: apiEvent.views ? Math.min(100, Math.round(Number(apiEvent.views) / 10)) : 0,
     images: (apiEvent.images || []).map(normalizeImage),
     coverImage: (apiEvent.images || []).map(normalizeImage).find((image) => image.isCover) || null,
+    ticketTypes: (apiEvent.ticket_types || []).map(normalizeTicketType),
     raw: apiEvent,
   }
 }
@@ -99,10 +124,21 @@ export function eventToFormValues(event) {
     visibility: event?.visibility || 'public',
     existingCoverImage: event?.coverImage || null,
     existingGalleryImages: event?.images?.filter((image) => !image.isCover) || [],
+    ticketTypes: event?.ticketTypes?.length ? event.ticketTypes.map((ticketType) => ({
+      id: ticketType.id,
+      name: ticketType.name,
+      description: ticketType.description || '',
+      price: String(ticketType.price ?? 0),
+      quantity: ticketType.quantity ? String(ticketType.quantity) : '',
+      is_active: ticketType.isActive ?? true,
+    })) : [{ name: 'Classic', description: 'Standard access', price: String(event?.price ?? 0), quantity: '', is_active: true }],
   }
 }
 
 export function formValuesToApiPayload(form, status = 'pending') {
+  const validTicketTypes = (form.ticketTypes || []).filter((ticket) => ticket.name?.trim())
+  const basePrice = validTicketTypes.length ? Math.min(...validTicketTypes.map((ticket) => Number(ticket.price || 0))) : Number(form.price || 0)
+
   return {
     title: form.title,
     description: form.description,
@@ -115,10 +151,18 @@ export function formValuesToApiPayload(form, status = 'pending') {
     start_date: form.startDate,
     end_date: form.endDate || null,
     registration_deadline: form.registrationDeadline || null,
-    price: Number(form.price || 0),
+    price: basePrice,
     maximum_participants: form.maximumParticipants ? Number(form.maximumParticipants) : null,
     status,
     visibility: form.visibility || 'public',
+    ticket_types: validTicketTypes.map((ticket) => ({
+      id: ticket.id || null,
+      name: ticket.name,
+      description: ticket.description || null,
+      price: Number(ticket.price || 0),
+      quantity: ticket.quantity ? Number(ticket.quantity) : null,
+      is_active: ticket.is_active ?? true,
+    })),
   }
 }
 

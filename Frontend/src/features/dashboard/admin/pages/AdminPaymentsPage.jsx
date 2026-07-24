@@ -69,7 +69,7 @@ export default function AdminPaymentsPage() {
     <PageContainer>
       <SectionHeader title="Payment Tracking" description="Monitor event payments, pending revenue and completed mobile money transactions." />
 
-      <div className="mb-6 grid gap-4 md:grid-cols-4">
+      <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         {[
           ['Total revenue', formatPrice(summary?.total_revenue || 0), 'from-teal-600 to-emerald-700'],
           ['Pending revenue', formatPrice(summary?.pending_revenue || 0), 'from-amber-500 to-orange-700'],

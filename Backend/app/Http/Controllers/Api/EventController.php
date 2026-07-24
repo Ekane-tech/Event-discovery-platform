@@ -10,6 +10,7 @@ use App\Http\Resources\RegistrationResource;
 use App\Jobs\SendEventInterestNotificationsJob;
 use App\Models\Event;
 use App\Models\EventImage;
+use App\Models\EventTicketType;
 use App\Models\EventView;
 use App\Models\AuditLog;
 use App\Notifications\EventAvailableNotification;
@@ -19,6 +20,7 @@ use App\Support\ImageStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -28,9 +30,28 @@ class EventController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
+        $isAdmin = $request->user()?->hasRole('admin');
+
+        // Cache public (non-admin) event listings for 60s to slash DB load.
+        $cacheKey = null;
+        if (! $isAdmin) {
+            $params = $request->only(['date', 'category_id', 'city_id', 'price', 'sort', 'keyword', 'per_page', 'page']);
+            $cacheKey = 'public:events:'.md5(json_encode($params));
+
+            try {
+                $cached = Cache::get($cacheKey);
+                if ($cached !== null) {
+                    return response($cached, 200, ['Content-Type' => 'application/json']);
+                }
+            } catch (\Throwable) {
+                $cacheKey = null;
+            }
+        }
+
         $query = Event::query()
-            ->with(['organizer.role', 'organizer.profile', 'category', 'region', 'division', 'city', 'images'])
-            ->withCount(['registrations', 'bookmarks', 'reports']);
+            ->with(['organizer.role', 'organizer.profile', 'category', 'region', 'division', 'city', 'images', 'ticketTypes'])
+            ->withCount(['registrations', 'bookmarks', 'reports', 'reviews'])
+            ->withAvg('reviews', 'rating');
 
         if (! $request->user()?->hasRole('admin')) {
             $query->publishedPublic();
@@ -41,9 +62,18 @@ class EventController extends Controller
         $this->applyFilters($query, $request);
         $this->applySorting($query, $request);
 
-        return response()->json([
+        $response = response()->json([
             'events' => EventResource::collection($query->paginate(min((int) $request->input('per_page', 12), 50))),
         ]);
+
+        if ($cacheKey) {
+            try {
+                Cache::put($cacheKey, $response->getContent(), now()->addSeconds(60));
+            } catch (\Throwable) {
+            }
+        }
+
+        return $response;
     }
 
     public function show(Event $event): JsonResponse
@@ -59,7 +89,7 @@ class EventController extends Controller
         $this->recordUniqueView($event, request());
 
         return response()->json([
-            'event' => new EventResource($event->fresh()->load(Event::DETAIL_RELATIONS)->loadCount(['registrations', 'bookmarks', 'reports'])),
+            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])->loadCount(['registrations', 'bookmarks', 'reports', 'reviews'])->loadAvg('reviews', 'rating')),
         ]);
     }
 
@@ -70,14 +100,14 @@ class EventController extends Controller
         }
 
         return response()->json([
-            'event' => new EventResource($event->load(Event::DETAIL_RELATIONS)->loadCount(['registrations', 'bookmarks', 'reports'])),
+            'event' => new EventResource($event->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])->loadCount(['registrations', 'bookmarks', 'reports'])),
         ]);
     }
 
     public function store(StoreEventRequest $request): JsonResponse
     {
         $validated = $request->validated();
-        $eventData = Arr::except($validated, ['category_ids', 'images']);
+        $eventData = Arr::except($validated, ['category_ids', 'images', 'ticket_types']);
 
         $event = Event::create([
             ...$eventData,
@@ -88,6 +118,7 @@ class EventController extends Controller
         ]);
 
         $this->syncCategories($event, $validated);
+        $this->syncTicketTypes($event, $validated['ticket_types'] ?? []);
         $this->syncImages($event, $validated['images'] ?? []);
 
         if ($event->status === 'published' && $event->visibility === 'public') {
@@ -96,19 +127,18 @@ class EventController extends Controller
 
         return response()->json([
             'message' => 'Event created successfully.',
-            'event' => new EventResource($event->load(Event::DETAIL_RELATIONS)),
+            'event' => new EventResource($event->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])),
         ], 201);
     }
 
     public function update(UpdateEventRequest $request, Event $event): JsonResponse
     {
+        $this->ensureEventCanBeEdited($event);
+
         $wasAvailable = $event->status === 'published' && $event->visibility === 'public';
         $validated = $request->validated();
-        $eventData = Arr::except($validated, ['category_ids', 'images']);
+        $eventData = Arr::except($validated, ['category_ids', 'images', 'ticket_types']);
 
-        if (! $request->user()->hasRole('admin')) {
-            unset($eventData['status']);
-        }
 
         $event->update([
             ...$eventData,
@@ -117,6 +147,9 @@ class EventController extends Controller
         ]);
 
         $this->syncCategories($event, $validated);
+        if (array_key_exists('ticket_types', $validated)) {
+            $this->syncTicketTypes($event, $validated['ticket_types'] ?? []);
+        }
 
         if (array_key_exists('images', $validated)) {
             $event->images()->delete();
@@ -128,7 +161,7 @@ class EventController extends Controller
 
         return response()->json([
             'message' => 'Event updated successfully.',
-            'event' => new EventResource($event->fresh()->load(Event::DETAIL_RELATIONS)),
+            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])),
         ]);
     }
 
@@ -154,6 +187,8 @@ class EventController extends Controller
         if (! $event->isManageableBy($user)) {
             abort(403, 'You do not have permission to upload images for this event.');
         }
+
+        $this->ensureEventCanBeEdited($event, 'Past events can no longer have photos changed. Duplicate the event to create a new edition.');
 
         $request->validate([
             'cover' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
@@ -191,7 +226,7 @@ class EventController extends Controller
 
         return response()->json([
             'message' => 'Event images uploaded successfully.',
-            'event' => new EventResource($event->fresh()->load(Event::DETAIL_RELATIONS)),
+            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])),
         ]);
     }
 
@@ -206,6 +241,8 @@ class EventController extends Controller
         if (! $event->isManageableBy($user)) {
             abort(403, 'You do not have permission to delete images for this event.');
         }
+
+        $this->ensureEventCanBeEdited($event, 'Past events can no longer have photos changed. Duplicate the event to create a new edition.');
 
         $wasCover = (bool) $image->is_cover;
 
@@ -226,7 +263,7 @@ class EventController extends Controller
 
         return response()->json([
             'message' => 'Event image deleted successfully.',
-            'event' => new EventResource($event->fresh()->load(Event::DETAIL_RELATIONS)),
+            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])),
         ]);
     }
 
@@ -242,6 +279,8 @@ class EventController extends Controller
             abort(403, 'You do not have permission to manage images for this event.');
         }
 
+        $this->ensureEventCanBeEdited($event, 'Past events can no longer have photos changed. Duplicate the event to create a new edition.');
+
         $event->images()->update(['is_cover' => false, 'type' => 'gallery']);
         $image->update(['is_cover' => true, 'type' => 'cover']);
 
@@ -251,7 +290,7 @@ class EventController extends Controller
 
         return response()->json([
             'message' => 'Cover image updated successfully.',
-            'event' => new EventResource($event->fresh()->load(Event::DETAIL_RELATIONS)),
+            'event' => new EventResource($event->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])),
         ]);
     }
 
@@ -261,15 +300,39 @@ class EventController extends Controller
             abort(403, 'You do not have permission to duplicate this event.');
         }
 
-        $event->loadMissing(['images', 'categories']);
+        $event->loadMissing(['images', 'categories', 'ticketTypes']);
+        $sourceHasEnded = $this->eventHasEnded($event);
 
         $copy = $event->replicate(['slug', 'views']);
         $copy->title = $event->title.' (Copy)';
         $copy->slug = Event::generateUniqueSlug($copy->title);
         $copy->status = 'draft';
         $copy->views = 0;
+
+        if ($sourceHasEnded) {
+            $newStartDate = now()->addWeek()->startOfHour();
+            $durationInMinutes = ($event->end_date && $event->start_date && $event->end_date->greaterThan($event->start_date))
+                ? $event->start_date->diffInMinutes($event->end_date)
+                : 120;
+
+            $copy->start_date = $newStartDate;
+            $copy->end_date = $newStartDate->copy()->addMinutes($durationInMinutes);
+            $copy->registration_deadline = $newStartDate->copy()->subDay();
+        }
+
         $copy->push();
         $copy->categories()->sync($event->categories()->pluck('categories.id')->all());
+
+        foreach ($event->ticketTypes as $ticketType) {
+            $copy->ticketTypes()->create($ticketType->only([
+                'name',
+                'description',
+                'price',
+                'quantity',
+                'is_active',
+                'sort_order',
+            ]));
+        }
 
         foreach ($event->images as $image) {
             $newPath = 'events/'.$copy->id.'/'.basename($image->path);
@@ -288,8 +351,10 @@ class EventController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Event duplicated as draft.',
-            'event' => new EventResource($copy->fresh()->load(Event::DETAIL_RELATIONS)),
+            'message' => $sourceHasEnded
+                ? 'Past event duplicated as draft. Update the new dates before publishing.'
+                : 'Event duplicated as draft.',
+            'event' => new EventResource($copy->fresh()->load(['organizer.role', 'organizer.profile', 'category', 'categories', 'region', 'division', 'city', 'images', 'ticketTypes'])),
         ], 201);
     }
 
@@ -333,7 +398,7 @@ class EventController extends Controller
     {
         $events = Event::query()
             ->where('organizer_id', $request->user()->id)
-            ->with(['category', 'region', 'division', 'city', 'images'])
+            ->with(['category', 'region', 'division', 'city', 'images', 'ticketTypes'])
             ->withCount(['registrations', 'bookmarks', 'reports'])
             ->latest()
             ->paginate(min((int) $request->input('per_page', 12), 50));
@@ -472,6 +537,24 @@ class EventController extends Controller
         }
     }
 
+    private function eventHasEnded(?Event $event): bool
+    {
+        if (! $event) {
+            return true;
+        }
+
+        $effectiveEndDate = $event->end_date ?: $event->start_date;
+
+        return $effectiveEndDate ? now()->greaterThan($effectiveEndDate) : false;
+    }
+
+    private function ensureEventCanBeEdited(Event $event, string $message = 'Past events can no longer be edited. Duplicate the event to create a new edition.'): void
+    {
+        if ($this->eventHasEnded($event)) {
+            abort(422, $message);
+        }
+    }
+
     private function applyFilters($query, Request $request): void
     {
         if ($request->filled('keyword')) {
@@ -517,6 +600,42 @@ class EventController extends Controller
         $categoryIds = $validated['category_ids'] ?? [];
         $categoryIds[] = $validated['category_id'];
         $event->categories()->sync(array_unique($categoryIds));
+    }
+
+    private function syncTicketTypes(Event $event, array $ticketTypes): void
+    {
+        if (empty($ticketTypes)) {
+            return;
+        }
+
+        $keptIds = [];
+
+        foreach (array_values($ticketTypes) as $index => $ticketType) {
+            $payload = [
+                'name' => $ticketType['name'],
+                'description' => $ticketType['description'] ?? null,
+                'price' => $ticketType['price'] ?? 0,
+                'quantity' => $ticketType['quantity'] ?? null,
+                'is_active' => $ticketType['is_active'] ?? true,
+                'sort_order' => $index,
+            ];
+
+            if (! empty($ticketType['id'])) {
+                $model = $event->ticketTypes()->whereKey($ticketType['id'])->first();
+                if ($model) {
+                    $model->update($payload);
+                    $keptIds[] = $model->id;
+                    continue;
+                }
+            }
+
+            $model = $event->ticketTypes()->create($payload);
+            $keptIds[] = $model->id;
+        }
+
+        if (! empty($keptIds)) {
+            $event->ticketTypes()->whereNotIn('id', $keptIds)->update(['is_active' => false]);
+        }
     }
 
     private function syncImages(Event $event, array $images): void

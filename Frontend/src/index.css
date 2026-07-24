@@ -1,1 +1,224 @@
 @import "tailwindcss";
+@import "./shared/styles/global.css";
+
+/* ────────────────────────────────────────────────────────────────────────
+   mboa-translation-darkmode — class-based dark mode for Tailwind v4
+   ────────────────────────────────────────────────────────────────────────
+   Tailwind v4 generates every colour utility as `var(--color-*)`, so flipping
+   the underlying tokens under `.dark` cascades across the whole app without
+   touching each component. The ThemeProvider already toggles `.dark` on <html>.
+
+   Strategy
+   • Light SURFACE tokens (white, slate-50/100) → dark surfaces.
+   • Accent soft tints (-50/-100/-200) → dark tints, so pills/badges stay subtle.
+   • Dark slate shades are KEPT dark (dark banners & gradients keep working);
+     instead the `text-slate-*` utilities are overridden to light values.
+   • `text-white` is restored to white so labels on teal/red buttons stay legible.
+   • `border-slate-*` utilities become dark hairlines.
+   ──────────────────────────────────────────────────────────────────────── */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+  --mboa-page: #f8fafc;
+  --mboa-surface: #ffffff;
+  --mboa-text: #172033;
+}
+
+.dark {
+  color-scheme: dark;
+
+  /* canvas (html + body, so overscroll never flashes light) */
+  background-color: var(--mboa-page);
+
+  /* canvas */
+  --mboa-page: #070b14;
+  --mboa-surface: #0f172a;
+  --mboa-text: #e6edf6;
+
+  /* surfaces: cards, navbar, modals, inputs, secondary buttons */
+  --color-white: #0f172a;     /* card / panel / modal surface */
+  --color-slate-50: #0b1220;  /* page & section backgrounds */
+  --color-slate-100: #16223a; /* inputs, secondary buttons, hovers */
+
+  /* accent soft tints → dark tints (keeps pills / badges / icon chips subtle) */
+  --color-teal-50: #0c2a28;
+  --color-teal-100: #103a36;
+  --color-teal-200: #15504a;
+  --color-red-50: #2a1414;
+  --color-red-100: #341a1a;
+  --color-green-50: #0c2417;
+  --color-green-100: #0f2e1d;
+  --color-blue-50: #0d1d33;
+  --color-blue-100: #102441;
+  --color-amber-50: #2a200c;
+  --color-amber-100: #34280f;
+  --color-yellow-50: #2a260c;
+  --color-yellow-100: #342e0f;
+  --color-purple-50: #1f1430;
+  --color-purple-100: #261a3d;
+  --color-pink-50: #2a1322;
+  --color-pink-100: #34192b;
+  --color-indigo-50: #161433;
+  --color-rose-50: #2a1218;
+  --color-emerald-50: #0c2417;
+  --color-orange-50: #2a1b0c;
+}
+
+/* ── Base canvas ───────────────────────────────────────────────────────── */
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  color: #172033;
+}
+.dark body {
+  background-color: var(--mboa-page);
+  color: var(--mboa-text);
+}
+
+/* ── Text overrides: dark slate shades become light (headings/body stay legible) ── */
+.dark .text-slate-950 { color: #f6f8fb; }
+.dark .text-slate-900 { color: #eef2f8; }
+.dark .text-slate-800 { color: #e2e8f0; }
+.dark .text-slate-700 { color: #d3dbe8; }
+.dark .text-slate-600 { color: #c2cde0; }
+.dark .text-slate-500 { color: #a6b1c4; }
+.dark .text-slate-400 { color: #8b97ab; }
+.dark .text-slate-300 { color: #cbd5e1; }
+.dark .text-slate-200 { color: #cdd8e6; }
+.dark .text-slate-100 { color: #d7deea; }
+.dark .text-slate-50  { color: #f8fafc; }
+
+/* Light-tint accent TEXT must stay light in dark mode (it sits on dark/image
+   backgrounds). The token remap above darkens bg-* usages of these tints; these
+   rules keep the text-* versions light so labels stay legible. (Teal tints are
+   already handled by the .dark .text-teal-* block below.) */
+.dark .text-red-50    { color: #fecaca; }
+.dark .text-red-100   { color: #fecaca; }
+.dark .text-green-50  { color: #bbf7d0; }
+.dark .text-green-100 { color: #bbf7d0; }
+.dark .text-blue-50   { color: #bfdbfe; }
+.dark .text-blue-100  { color: #bfdbfe; }
+.dark .text-amber-50  { color: #fde68a; }
+.dark .text-amber-100 { color: #fde68a; }
+.dark .text-yellow-50 { color: #fef08a; }
+.dark .text-yellow-100{ color: #fef08a; }
+.dark .text-purple-50 { color: #e9d5ff; }
+.dark .text-purple-100{ color: #e9d5ff; }
+.dark .text-pink-50   { color: #fbcfe8; }
+.dark .text-pink-100  { color: #fbcfe8; }
+.dark .text-indigo-50 { color: #c7d2fe; }
+.dark .text-rose-50   { color: #ffcdd2; }
+.dark .text-emerald-50{ color: #a7f3d0; }
+.dark .text-orange-50 { color: #fed7aa; }
+.dark .\!text-slate-950 { color: #f6f8fb !important; }
+
+/* keep labels on coloured buttons / badges / hero text white */
+.dark .text-white { color: #ffffff; }
+.dark .text-white\/95 { color: rgba(255, 255, 255, 0.95); }
+.dark .text-white\/90 { color: rgba(255, 255, 255, 0.90); }
+.dark .text-white\/85 { color: rgba(255, 255, 255, 0.85); }
+.dark .text-white\/80 { color: rgba(255, 255, 255, 0.80); }
+.dark .text-white\/75 { color: rgba(255, 255, 255, 0.75); }
+
+/* teal colors for better dark mode visibility */
+.dark .text-teal-50 { color: #f0fdfa; }
+.dark .text-teal-100 { color: #ccfbf1; }
+.dark .text-teal-200 { color: #99f6e4; }
+.dark .text-teal-300 { color: #5eead4; }
+.dark .text-teal-400 { color: #2dd4bf; }
+.dark .text-teal-500 { color: #14b8a6; }
+.dark .text-teal-600 { color: #0d9488; }
+.dark .text-teal-700 { color: #0f766e; }
+.dark .text-teal-800 { color: #115e59; }
+.dark .text-teal-900 { color: #134e4a; }
+
+/* other accent colors for better dark mode visibility */
+.dark .text-red-700 { color: #fca5a5; }
+.dark .text-red-600 { color: #f87171; }
+.dark .text-red-500 { color: #ef4444; }
+.dark .text-blue-700 { color: #93c5fd; }
+.dark .text-blue-600 { color: #60a5fa; }
+.dark .text-blue-500 { color: #3b82f6; }
+.dark .text-purple-700 { color: #c4b5fd; }
+.dark .text-purple-600 { color: #a78bfa; }
+.dark .text-purple-500 { color: #8b5cf6; }
+.dark .text-pink-700 { color: #f9a8d4; }
+.dark .text-pink-600 { color: #f472b6; }
+.dark .text-pink-500 { color: #ec4899; }
+.dark .text-indigo-700 { color: #a5b4fc; }
+.dark .text-indigo-600 { color: #818cf8; }
+.dark .text-indigo-500 { color: #6366f1; }
+
+/* theme toggle button dark mode fixes */
+.dark .bg-slate-100 { background-color: #1e293b !important; }
+.dark .hover\:bg-teal-50:hover { background-color: #0f766e !important; }
+
+/* notification icon dark mode fixes */
+.dark .bg-slate-100 { background-color: #1e293b !important; }
+.dark .hover\:bg-teal-50:hover { background-color: #0f766e !important; }
+
+/* menu button dark mode fixes */
+.dark .border-slate-200 { border-color: #26324a !important; }
+.dark .text-slate-700 { color: #d3dbe8 !important; }
+
+/* ── Border / ring hairlines ───────────────────────────────────────────── */
+.dark .border-slate-200,
+.dark .border-slate-100 { border-color: #26324a; }
+.dark .border-slate-300 { border-color: #33415a; }
+.dark .ring-slate-200 { --tw-ring-color: #33415a; }
+
+/* ── Inputs autofill (otherwise stays white) ───────────────────────────── */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #e6edf6;
+  -webkit-box-shadow: 0 0 0 1000px #16223a inset;
+  caret-color: #e6edf6;
+}
+
+/* ── Thin, theme-aware scrollbars ──────────────────────────────────────── */
+.dark * {
+  scrollbar-color: #2a3650 transparent;
+}
+
+/* ── react-datepicker dark overrides ───────────────────────────────────── */
+.dark .react-datepicker {
+  background-color: #0f172a !important;
+  border: 1px solid #26324a !important;
+  color: #e6edf6 !important;
+}
+.dark .react-datepicker__header {
+  background-color: #0b1220 !important;
+  border-bottom: 1px solid #26324a !important;
+}
+.dark .react-datepicker__current-month,
+.dark .react-datepicker-time__header,
+.dark .react-datepicker-year-header {
+  color: #f6f8fb !important;
+}
+.dark .react-datepicker__day-name,
+.dark .react-datepicker__day,
+.dark .react-datepicker__time-name {
+  color: #c2cde0 !important;
+}
+.dark .react-datepicker__day:hover,
+.dark .react-datepicker__time-list-item:hover {
+  background-color: #1e293b !important;
+}
+.dark .react-datepicker__day--outside-month {
+  opacity: 0.4;
+}
+.dark .react-datepicker__time-container {
+  background-color: #0f172a !important;
+  border-left-color: #26324a !important;
+}
+.dark .react-datepicker__time-container
+  .react-datepicker__time
+  .react-datepicker__time-box
+  ul.react-datepicker__time-list
+  li.react-datepicker__time-list-item--selected {
+  background-color: #0f766e !important;
+  color: #ffffff !important;
+}

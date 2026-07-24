@@ -17,10 +17,10 @@ import {
   Send,
   Settings,
   ShieldCheck,
-  Star,
   Ticket,
   User,
   Users,
+  Wallet,
 } from 'lucide-react'
 
 const iconMap = {
@@ -42,10 +42,10 @@ const iconMap = {
   send: Send,
   settings: Settings,
   shield: ShieldCheck,
-  star: Star,
   ticket: Ticket,
   user: User,
   users: Users,
+  wallet: Wallet,
 }
 
 export default function NavIcon({ name, className = '' }) {

@@ -27,6 +27,7 @@ class PaymentResource extends JsonResource
             'metadata' => $this->metadata,
             'initiated_at' => $this->initiated_at,
             'paid_at' => $this->paid_at,
+            'user' => new UserResource($this->whenLoaded('user')),
             'event' => new EventResource($this->whenLoaded('event')),
             'registration' => new RegistrationResource($this->whenLoaded('registration')),
             'created_at' => $this->created_at,

@@ -1,0 +1,46 @@
+From 9875e9bf981adf654dfae4327e036444de232c21 Mon Sep 17 00:00:00 2001
+From: ekane bryan <ekanebryan5@gmail.com>
+Date: Thu, 23 Jul 2026 08:09:10 +0000
+Subject: [PATCH] =?UTF-8?q?fix(navbar):=20app=20name=20truncation=20('Mboa?=
+ =?UTF-8?q?=20Events...'=20=E2=86=92=20full=20name)?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Remove the restrictive max-w + truncate on the app-name span in both
+Navbar and AppShell. Add shrink-0 so the name is never squeezed or
+clipped. The name only shows on sm+ screens where there's ample room.
+---
+ Frontend/src/shared/components/layout/AppShell.jsx | 2 +-
+ Frontend/src/shared/components/layout/Navbar.jsx   | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Frontend/src/shared/components/layout/AppShell.jsx b/Frontend/src/shared/components/layout/AppShell.jsx
+index 8cf87d8..99bcf8e 100644
+--- a/Frontend/src/shared/components/layout/AppShell.jsx
++++ b/Frontend/src/shared/components/layout/AppShell.jsx
+@@ -49,7 +49,7 @@ export default function AppShell({ section = 'user' }) {
+               <button type="button" onClick={() => setMobileMenuOpen((current) => !current)} className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 xl:hidden" aria-label={t('appshell.toggleNav', 'Toggle navigation menu')}><Menu className="h-5 w-5" /></button>
+               <Link to="/" className="flex min-w-0 items-center gap-2 font-black text-slate-950 xl:hidden">
+                 <img src="/applogo.png" alt={APP_NAME} className="h-10 w-10 shrink-0 rounded-2xl object-cover shadow-md shadow-teal-100" />
+-                <span className="hidden max-w-[150px] truncate sm:inline">{APP_NAME}</span>
++                <span className="hidden shrink-0 sm:inline">{APP_NAME}</span>
+               </Link>
+               <button type="button" onClick={() => setSidebarCollapsed((current) => !current)} className="hidden h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 transition hover:bg-teal-50 hover:text-teal-700 xl:inline-flex" aria-label={sidebarCollapsed ? t('appshell.expandSidebar', 'Expand sidebar') : t('appshell.collapseSidebar', 'Collapse sidebar')}>{sidebarCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}</button>
+               <div className="hidden min-w-0 xl:block"><p className="truncate text-sm font-semibold capitalize text-slate-500">{t('appshell.area', { section, defaultValue: '{{section}} area' })}</p><h1 className="truncate text-lg font-bold text-slate-950">{t('appshell.welcomeBack', { name: user?.name, defaultValue: 'Welcome back, {{name}}' })}</h1></div>
+diff --git a/Frontend/src/shared/components/layout/Navbar.jsx b/Frontend/src/shared/components/layout/Navbar.jsx
+index dd53c9f..8f8befe 100644
+--- a/Frontend/src/shared/components/layout/Navbar.jsx
++++ b/Frontend/src/shared/components/layout/Navbar.jsx
+@@ -42,7 +42,7 @@ export default function Navbar() {
+         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+           <Link to="/" className="flex min-w-0 items-center gap-3 font-black text-slate-950">
+             <img src="/applogo.png" alt={APP_NAME} className="h-12 w-12 shrink-0 rounded-2xl object-cover shadow-lg shadow-teal-100" />
+-            <span className="hidden max-w-[300px] truncate sm:inline">{APP_NAME}</span>
++            <span className="hidden shrink-0 sm:inline">{APP_NAME}</span>
+           </Link>
+           
+           <nav className="hidden items-center gap-1 lg:flex">
+-- 
+2.47.3
+

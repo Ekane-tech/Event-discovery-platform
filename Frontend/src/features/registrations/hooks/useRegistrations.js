@@ -19,6 +19,7 @@ function normalizeRegistration(apiRegistration) {
     checkedInBy: apiRegistration.checked_in_by_user?.name || apiRegistration.checked_in_by || '',
     event: apiRegistration.event ? normalizeEvent(apiRegistration.event) : null,
     payment: apiRegistration.payment || null,
+    ticketType: apiRegistration.ticket_type || null,
     raw: apiRegistration,
   }
 }
@@ -66,8 +67,8 @@ export function useRegistrations() {
     return getRegistration(eventId)?.status === 'confirmed'
   }
 
-  async function registerForEvent(event) {
-    const response = await registrationService.registerForEvent(event.id)
+  async function registerForEvent(event, payload = {}) {
+    const response = await registrationService.registerForEvent(event.id, payload)
     const registration = normalizeRegistration(response.data.registration)
     emitResourceEvent(REGISTRATIONS_UPDATED_EVENT)
     await fetchRegistrations()

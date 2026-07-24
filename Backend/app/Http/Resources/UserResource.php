@@ -14,6 +14,7 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'status' => $this->status ?? 'active',
+            'published_events_count' => $this->published_events_count ?? $this->whenCounted('organizedEvents'),
             'email_verified_at' => $this->email_verified_at,
             'role' => $this->whenLoaded('role', fn () => [
                 'id' => $this->role?->id,
@@ -22,6 +23,7 @@ class UserResource extends JsonResource
             ]),
             'profile' => $this->whenLoaded('profile', fn () => [
                 'organization_name' => $this->profile?->organization_name,
+                'is_verified_organizer' => (bool) $this->profile?->is_verified_organizer,
                 'phone' => $this->profile?->phone,
                 'city' => $this->profile?->city,
                 'region' => $this->profile?->region,

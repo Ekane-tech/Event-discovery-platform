@@ -1,10 +1,12 @@
-import { CalendarDays, ChevronLeft, ChevronRight, Images, MapPin, Share2, Users } from 'lucide-react'
+import { CalendarDays, ChevronLeft, ChevronRight, Images, MapPin, Navigation, Share2, Users } from 'lucide-react'
+import { FaWhatsapp } from 'react-icons/fa6'
 import { toast } from 'sonner'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import Button from '../../../shared/components/ui/Button.jsx'
 import Badge from '../../../shared/components/ui/Badge.jsx'
 import Card from '../../../shared/components/ui/Card.jsx'
+import LocationMap from '../../../shared/components/map/LocationMap.jsx'
 import PageContainer from '../../../shared/components/layout/PageContainer.jsx'
 import EmptyState from '../../../shared/components/feedback/EmptyState.jsx'
 import ErrorState from '../../../shared/components/feedback/ErrorState.jsx'
@@ -13,10 +15,12 @@ import { formatDate } from '../../../shared/utils/formatDate.js'
 import { formatPrice } from '../../../shared/utils/currency.js'
 import EventActionPanel from '../components/EventActionPanel.jsx'
 import EventStatsPanel from '../components/EventStatsPanel.jsx'
+import EventReviewsSection from '../../reviews/components/EventReviewsSection.jsx'
 import { eventService } from '../services/eventService.js'
 import { normalizeEvent } from '../utils/normalizeEvent.js'
 import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
 import { useTranslation } from '../../../shared/i18n/useTranslation.js'
+import { variantSrcSet } from '../../../shared/utils/imageVariants.js'
 
 function getVisibleImages(images, start, count) {
   if (!images.length) return []
@@ -34,6 +38,8 @@ export default function EventDetailsPage() {
   const [galleryIndex, setGalleryIndex] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [touchStart, setTouchStart] = useState(null)
+  const [touchEnd, setTouchEnd] = useState(null)
 
   useEffect(() => {
     async function fetchEvent() {
@@ -81,6 +87,29 @@ export default function EventDetailsPage() {
     setGalleryIndex((current) => (current + direction + galleryImages.length) % galleryImages.length)
   }
 
+  function handleTouchStart(e) {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  function handleTouchMove(e) {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  function handleTouchEnd() {
+    if (!touchStart || !touchEnd) return
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > 50
+    const isRightSwipe = distance < -50
+
+    if (isLeftSwipe) {
+      moveHero(1)
+    }
+    if (isRightSwipe) {
+      moveHero(-1)
+    }
+  }
+
   async function shareEvent() {
     const shareUrl = `${window.location.origin}/events/${event.id}`
     const shareData = {
@@ -111,12 +140,17 @@ export default function EventDetailsPage() {
 
   return (
     <div>
-      <section className="relative min-h-135 overflow-hidden bg-slate-950 text-white">
+      <section 
+        className="relative min-h-135 overflow-hidden bg-slate-950 text-white"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         <div key={activeHero?.id || activeHero?.url} className="absolute inset-0 animate-[fadeIn_.7s_ease-out]">
           <img src={activeHero?.url} alt={event.title} className="h-full w-full object-cover" />
         </div>
-        <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/65 to-slate-950/10" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(20,184,166,.25),transparent_34%)]" />
+        <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/40 to-slate-950/5" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(20,184,166,.15),transparent_34%)]" />
 
         {heroImages.length > 1 && (
           <div className="absolute inset-x-4 top-1/2 z-10 hidden -translate-y-1/2 justify-between md:flex">
@@ -160,8 +194,27 @@ export default function EventDetailsPage() {
                 <p className="flex gap-3 text-slate-700"><MapPin className="h-5 w-5 text-teal-700" /><span><strong>{t('events.details.locationLabel')}:</strong><br />{event.city}, {event.region}</span></p>
                 <p className="flex gap-3 text-slate-700"><CalendarDays className="h-5 w-5 text-teal-700" /><span><strong>{t('events.details.dateLabel')}:</strong><br />{formatDate(event.startDate)}</span></p>
                 <p className="flex gap-3 text-slate-700"><Users className="h-5 w-5 text-teal-700" /><span><strong>{t('events.details.capacityLabel')}:</strong><br />{event.maximumParticipants || t('events.details.notLimited')}</span></p>
+                <p className="flex gap-3 text-slate-700"><CalendarDays className="h-5 w-5 text-teal-700" /><span><strong>{t('events.details.deadlineLabel', 'Registration deadline')}:</strong><br />{event.registrationDeadline ? formatDate(event.registrationDeadline) : t('events.details.notSpecified')}</span></p>
               </div>
-              <div className="mt-6 flex flex-wrap gap-2"><Button type="button" variant="secondary" onClick={shareEvent}><Share2 className="mr-2 h-4 w-4" />{t('events.details.shareEvent')}</Button></div>
+              <div className="mt-6 flex flex-wrap gap-2"><Button type="button" variant="secondary" onClick={shareEvent}><Share2 className="mr-2 h-4 w-4" />{t('events.details.shareEvent')}</Button><a href={`https://wa.me/?text=${encodeURIComponent(`${event.title} — ${window.location.origin}/events/${event.id}`)}`} target="_blank" rel="noreferrer" className="inline-flex"><Button type="button" variant="secondary"><FaWhatsapp className="mr-2 h-4 w-4 text-green-600" />{t('events.details.shareWhatsApp', 'WhatsApp')}</Button></a></div>
+              {event.latitude && event.longitude && (
+                <div className="mt-6">
+                  <h3 className="mb-2 text-sm font-bold text-slate-950">{t('events.details.mapHeading', 'Location map')}</h3>
+                  <LocationMap latitude={event.latitude} longitude={event.longitude} height={300} />
+                </div>
+              )}
+              <a
+                href={
+                  event.latitude && event.longitude
+                    ? `https://www.google.com/maps/dir/?api=1&destination=${event.latitude},${event.longitude}`
+                    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${event.venue || ''} ${event.city || ''} ${event.region || ''}`.trim())}`
+                }
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 inline-flex"
+              >
+                <Button type="button" variant="secondary"><Navigation className="mr-2 h-4 w-4" />{t('events.details.getDirections', 'Get directions')}</Button>
+              </a>
             </Card>
 
             {galleryImages.length > 0 && (
@@ -181,16 +234,16 @@ export default function EventDetailsPage() {
 
                 <div className="grid gap-4 sm:grid-cols-2 lg:hidden">
                   {visibleGalleryMobile.map((image, index) => (
-                    <a key={`${image.id}-mobile-${index}`} href={image.url} target="_blank" rel="noreferrer" className="group block overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-xl">
-                      <img src={image.url} alt={event.title} className="h-56 w-full object-cover transition duration-500 group-hover:scale-105" />
+                    <a key={`${image.id}-mobile-${index}`} href={image.url} target="_blank" rel="noreferrer" className="group block overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-lg">
+                      <img src={image.url} alt={event.title} loading="lazy" decoding="async" srcSet={variantSrcSet(image.path)} sizes="(max-width: 768px) 50vw, 33vw" className="h-56 w-full object-cover transition duration-500 group-hover:scale-102" />
                     </a>
                   ))}
                 </div>
 
                 <div className="hidden gap-5 lg:grid lg:grid-cols-3">
                   {visibleGalleryDesktop.map((image, index) => (
-                    <a key={`${image.id}-desktop-${index}`} href={image.url} target="_blank" rel="noreferrer" className="group block overflow-hidden rounded-4xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-xl">
-                      <img src={image.url} alt={event.title} className="h-72 w-full object-cover transition duration-500 group-hover:scale-105" />
+                    <a key={`${image.id}-desktop-${index}`} href={image.url} target="_blank" rel="noreferrer" className="group block overflow-hidden rounded-4xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-lg">
+                      <img src={image.url} alt={event.title} loading="lazy" decoding="async" srcSet={variantSrcSet(image.path)} sizes="(max-width: 768px) 50vw, 33vw" className="h-72 w-full object-cover transition duration-500 group-hover:scale-102" />
                     </a>
                   ))}
                 </div>

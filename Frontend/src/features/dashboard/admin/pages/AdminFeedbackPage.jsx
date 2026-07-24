@@ -73,9 +73,9 @@ export default function AdminFeedbackPage() {
   return (
     <PageContainer>
       <AdminHero title="User feedback" description="Review ratings, suggestions and experience feedback from your community." />
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <Card><p className="text-sm text-slate-600">Total feedback</p><p className="mt-1 text-3xl font-black">{metrics.total}</p></Card>
-        <Card><p className="text-sm text-slate-600">Positive ratings</p><p className="mt-1 text-3xl font-black">{metrics.high}</p></Card>
+      <div className="mt-6 grid grid-cols-2 gap-4">
+        <Card><p className="text-sm text-slate-600">Total feedback</p><p className="mt-1 text-2xl font-black md:text-3xl">{metrics.total}</p></Card>
+        <Card><p className="text-sm text-slate-600">Positive ratings</p><p className="mt-1 text-2xl font-black md:text-3xl">{metrics.high}</p></Card>
       </div>
       <Card className="my-6"><div className="grid gap-3 md:grid-cols-[1fr_170px_140px_auto_auto]"><div className="relative"><Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"/><Input name="keyword" value={filters.keyword} onChange={updateFilter} placeholder="Search feedback" className="pl-10"/></div><Select name="category" value={filters.category} onChange={updateFilter}><option value="all">All categories</option><option value="general">General</option><option value="bug">Bug</option><option value="feature">Feature</option><option value="design">Design/UI</option><option value="performance">Performance</option></Select><Select name="rating" value={filters.rating} onChange={updateFilter}><option value="all">All ratings</option>{[5,4,3,2,1].map(r=><option key={r} value={r}>{r} stars</option>)}</Select><Button onClick={fetchFeedbacks}>Search</Button><Button variant="secondary" onClick={resetFilters}>Reset</Button></div></Card>
       {loading && <Loader message="Loading feedback..." />}{error && <ErrorState title="Unable to load feedback" message={error}/>} {!loading&&!error&&<Table columns={[{key:'name',label:'Name'},{key:'email',label:'Email'},{key:'rating',label:'Rating'},{key:'category',label:'Category'},{key:'message',label:'Message'},{key:'createdAt',label:'Date'},{key:'actions',label:'Actions'}]} rows={rows}/>} 

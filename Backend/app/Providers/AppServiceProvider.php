@@ -28,6 +28,9 @@ class AppServiceProvider extends ServiceProvider
             if ($event->channel !== 'mail') {
                 return;
             }
+            if (app()->environment('production')) {
+                \Illuminate\Support\Facades\URL::forceScheme('https');
+            }
 
             $notifiable = $event->notifiable;
             EmailLog::create([
