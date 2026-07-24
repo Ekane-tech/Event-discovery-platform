@@ -195,11 +195,11 @@ export default function AdminEventsPage() {
     <PageContainer>
       <AdminHero title="Moderate events" description="Review submitted events, publish valid listings, and block problematic content." />
 
-      <div className="mt-6 grid gap-4 md:grid-cols-4">
-        <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-blue-700 p-5 text-white"><p className="text-sm text-white/80">Total events</p><p className="mt-2 text-3xl font-black">{metrics.total}</p></div>
-        <div className="rounded-3xl bg-gradient-to-br from-amber-500 to-orange-700 p-5 text-white"><p className="text-sm text-white/80">Pending</p><p className="mt-2 text-3xl font-black">{metrics.pending}</p></div>
-        <div className="rounded-3xl bg-gradient-to-br from-green-600 to-teal-700 p-5 text-white"><p className="text-sm text-white/80">Published</p><p className="mt-2 text-3xl font-black">{metrics.published}</p></div>
-        <div className="rounded-3xl bg-gradient-to-br from-rose-600 to-pink-700 p-5 text-white"><p className="text-sm text-white/80">Reported</p><p className="mt-2 text-3xl font-black">{metrics.flagged}</p></div>
+      <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-blue-700 p-5 text-white"><p className="text-sm text-white/80">Total events</p><p className="mt-2 text-2xl font-black md:text-3xl">{metrics.total}</p></div>
+        <div className="rounded-3xl bg-gradient-to-br from-amber-500 to-orange-700 p-5 text-white"><p className="text-sm text-white/80">Pending</p><p className="mt-2 text-2xl font-black md:text-3xl">{metrics.pending}</p></div>
+        <div className="rounded-3xl bg-gradient-to-br from-green-600 to-teal-700 p-5 text-white"><p className="text-sm text-white/80">Published</p><p className="mt-2 text-2xl font-black md:text-3xl">{metrics.published}</p></div>
+        <div className="rounded-3xl bg-gradient-to-br from-rose-600 to-pink-700 p-5 text-white"><p className="text-sm text-white/80">Reported</p><p className="mt-2 text-2xl font-black md:text-3xl">{metrics.flagged}</p></div>
       </div>
 
       <div className="my-6 grid gap-3 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_180px_auto]">

@@ -1,0 +1,356 @@
+diff --git a/Backend/app/Http/Controllers/Api/PaymentController.php b/Backend/app/Http/Controllers/Api/PaymentController.php
+index a7c7edf..b288553 100644
+--- a/Backend/app/Http/Controllers/Api/PaymentController.php
++++ b/Backend/app/Http/Controllers/Api/PaymentController.php
+@@ -6,6 +6,7 @@
+ use App\Http\Resources\PaymentResource;
+ use App\Models\AuditLog;
+ use App\Models\Payment;
++use App\Models\Registration;
+ use App\Services\Payments\MobileMoneyPaymentService;
+ use Illuminate\Http\JsonResponse;
+ use Illuminate\Http\Request;
+@@ -66,9 +67,10 @@ public function initiate(Request $request, Payment $payment, MobileMoneyPaymentS
+                 ],
+             ]);
+ 
+-            if ($payment->registration && $payment->registration->status === 'payment_failed') {
+-                $payment->registration->update(['status' => 'pending_payment']);
+-            }
++            $registrationIds = $payment->metadata['registration_ids'] ?? [$payment->registration_id];
++            Registration::whereIn('id', array_filter($registrationIds))
++                ->where('status', 'payment_failed')
++                ->update(['status' => 'pending_payment']);
+ 
+             $payment->refresh();
+         }
+@@ -124,9 +126,8 @@ public function confirm(Request $request, Payment $payment, MobileMoneyPaymentSe
+             ],
+         ]);
+ 
+-        if ($payment->registration) {
+-            $payment->registration->update(['status' => 'confirmed']);
+-        }
++        $registrationIds = $payment->metadata['registration_ids'] ?? [$payment->registration_id];
++        Registration::whereIn('id', array_filter($registrationIds))->update(['status' => 'confirmed']);
+ 
+         AuditLog::record($request->user(), 'payment.confirmed', $payment, 'Payment confirmed.', [
+             'provider' => $payment->provider,
+diff --git a/Backend/app/Http/Controllers/Api/RegistrationController.php b/Backend/app/Http/Controllers/Api/RegistrationController.php
+index 5cf995b..034f9b5 100644
+--- a/Backend/app/Http/Controllers/Api/RegistrationController.php
++++ b/Backend/app/Http/Controllers/Api/RegistrationController.php
+@@ -11,6 +11,7 @@
+ use App\Models\AuditLog;
+ use Illuminate\Http\JsonResponse;
+ use Illuminate\Http\Request;
++use Illuminate\Support\Facades\DB;
+ use Illuminate\Support\Str;
+ 
+ class RegistrationController extends Controller
+@@ -44,76 +45,91 @@ public function show(Request $request, Registration $registration): JsonResponse
+     public function store(Request $request, Event $event): JsonResponse
+     {
+         $this->ensureEventCanBeRegistered($event);
+-        $this->ensureCapacityIsAvailable($event);
+ 
+         $validated = $request->validate([
+             'ticket_type_id' => ['nullable', 'integer', 'exists:event_ticket_types,id'],
++            'quantity' => ['nullable', 'integer', 'min:1', 'max:10'],
+         ]);
+ 
++        $quantity = (int) ($validated['quantity'] ?? 1);
+         $ticketType = $this->resolveTicketType($event, $validated['ticket_type_id'] ?? null);
+         $ticketPrice = $ticketType ? (float) $ticketType->price : (float) $event->price;
+-        $this->ensureTicketTypeCapacityIsAvailable($ticketType);
++        $totalPrice = $ticketPrice * $quantity;
+ 
+-        $activeRegistration = Registration::query()
++        $this->ensureCapacityIsAvailable($event, $quantity);
++        $this->ensureTicketTypeCapacityIsAvailable($ticketType, $quantity);
++
++        $pendingRegistration = Registration::query()
+             ->where('user_id', $request->user()->id)
+             ->where('event_id', $event->id)
+-            ->whereIn('status', ['confirmed', 'pending_payment'])
++            ->where('status', 'pending_payment')
+             ->latest()
+             ->first();
+ 
+-        if ($activeRegistration) {
++        if ($pendingRegistration) {
+             return response()->json([
+-                'message' => $activeRegistration->status === 'confirmed'
+-                    ? 'You are already registered for this event.'
+-                    : 'You already have a pending payment for this event.',
++                'message' => 'You already have a pending payment for this event.',
+                 'registration' => new RegistrationResource(
+-                    $activeRegistration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
++                    $pendingRegistration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
+                 ),
+-            ], $activeRegistration->status === 'pending_payment' ? 202 : 200);
++            ], 202);
+         }
+ 
+-        $isPaidEvent = $ticketPrice > 0;
++        $isPaidEvent = $totalPrice > 0;
++        $payment = null;
+ 
+-        $registration = Registration::create([
+-            'user_id' => $request->user()->id,
+-            'event_id' => $event->id,
+-            'ticket_type_id' => $ticketType?->id,
+-            'status' => $isPaidEvent ? 'pending_payment' : 'confirmed',
+-            'ticket_number' => $this->generateTicketNumber($event),
+-            'registered_at' => now(),
+-        ]);
++        [$primaryRegistration, $registrations] = DB::transaction(function () use ($request, $event, $ticketType, $quantity, $isPaidEvent, $totalPrice, &$payment) {
++            $registrations = collect();
+ 
+-        $payment = null;
++            for ($index = 0; $index < $quantity; $index++) {
++                $registrations->push(Registration::create([
++                    'user_id' => $request->user()->id,
++                    'event_id' => $event->id,
++                    'ticket_type_id' => $ticketType?->id,
++                    'status' => $isPaidEvent ? 'pending_payment' : 'confirmed',
++                    'ticket_number' => $this->generateTicketNumber($event),
++                    'registered_at' => now(),
++                ]));
++            }
++
++            $primaryRegistration = $registrations->first();
+ 
+-        if ($isPaidEvent) {
+-            $payment = Payment::updateOrCreate(
+-                [
++            if ($isPaidEvent) {
++                $payment = Payment::create([
+                     'user_id' => $request->user()->id,
+                     'event_id' => $event->id,
+-                    'registration_id' => $registration->id,
+-                    'status' => 'pending',
+-                ],
+-                [
+-                    'amount' => $ticketPrice,
++                    'registration_id' => $primaryRegistration->id,
++                    'amount' => $totalPrice,
+                     'currency' => 'XAF',
++                    'status' => 'pending',
+                     'provider' => env('PAYMENT_PROVIDER', 'mock'),
+                     'reference' => $this->generatePaymentReference($event),
+-                    'metadata' => ['registration_attempt_id' => $registration->id, 'ticket_type_name' => $ticketType?->name],
+-                ]
+-            );
+-        }
++                    'metadata' => [
++                        'registration_attempt_id' => $primaryRegistration->id,
++                        'registration_ids' => $registrations->pluck('id')->values()->all(),
++                        'quantity' => $quantity,
++                        'unit_price' => $totalPrice / $quantity,
++                        'ticket_type_id' => $ticketType?->id,
++                        'ticket_type_name' => $ticketType?->name,
++                    ],
++                ]);
++            }
++
++            return [$primaryRegistration, $registrations];
++        });
+ 
+         return response()->json([
+             'message' => $isPaidEvent ? 'Payment is required to complete this registration.' : 'Registered for event successfully.',
+             'payment_required' => $isPaidEvent,
++            'quantity' => $quantity,
+             'registration' => new RegistrationResource(
+-                $registration->fresh()->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
++                $primaryRegistration->fresh()->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
+             ),
++            'registrations' => RegistrationResource::collection($registrations->load(['ticketType'])),
+             'payment' => $payment ? new \App\Http\Resources\PaymentResource($payment->load(['event', 'registration'])) : null,
+         ], $isPaidEvent ? 202 : 201);
+     }
+ 
+-
+     public function verifyTicket(string $ticketNumber): JsonResponse
+     {
+         $registration = Registration::query()
+@@ -263,7 +279,7 @@ private function resolveTicketType(Event $event, ?int $ticketTypeId): ?EventTick
+         return $query->orderBy('sort_order')->orderBy('price')->first();
+     }
+ 
+-    private function ensureTicketTypeCapacityIsAvailable(?EventTicketType $ticketType): void
++    private function ensureTicketTypeCapacityIsAvailable(?EventTicketType $ticketType, int $requestedQuantity = 1): void
+     {
+         if (! $ticketType || ! $ticketType->quantity) {
+             return;
+@@ -273,8 +289,8 @@ private function ensureTicketTypeCapacityIsAvailable(?EventTicketType $ticketTyp
+             ->whereIn('status', ['confirmed', 'pending_payment'])
+             ->count();
+ 
+-        if ($reservedRegistrations >= $ticketType->quantity) {
+-            abort(422, 'This ticket type is sold out.');
++        if ($reservedRegistrations + $requestedQuantity > $ticketType->quantity) {
++            abort(422, 'This ticket type does not have enough remaining tickets.');
+         }
+     }
+ 
+@@ -293,16 +309,16 @@ private function ensureEventCanBeRegistered(Event $event): void
+         }
+     }
+ 
+-    private function ensureCapacityIsAvailable(Event $event): void
++    private function ensureCapacityIsAvailable(Event $event, int $requestedQuantity = 1): void
+     {
+         if (! $event->maximum_participants) {
+             return;
+         }
+ 
+-        $confirmedRegistrations = $event->registrations()->where('status', 'confirmed')->count();
++        $confirmedRegistrations = $event->registrations()->whereIn('status', ['confirmed', 'pending_payment'])->count();
+ 
+-        if ($confirmedRegistrations >= $event->maximum_participants) {
+-            abort(422, 'This event is already full.');
++        if ($confirmedRegistrations + $requestedQuantity > $event->maximum_participants) {
++            abort(422, 'This event does not have enough remaining places.');
+         }
+     }
+ 
+diff --git a/Backend/app/Services/Payments/MobileMoneyPaymentService.php b/Backend/app/Services/Payments/MobileMoneyPaymentService.php
+index ff4f019..a563d3e 100644
+--- a/Backend/app/Services/Payments/MobileMoneyPaymentService.php
++++ b/Backend/app/Services/Payments/MobileMoneyPaymentService.php
+@@ -4,6 +4,7 @@
+ 
+ use App\Models\AuditLog;
+ use App\Models\Payment;
++use App\Models\Registration;
+ use Illuminate\Http\Client\ConnectionException;
+ use Illuminate\Support\Facades\Cache;
+ use Illuminate\Support\Facades\Http;
+@@ -48,12 +49,16 @@ public function applyProviderStatus(Payment $payment, array $payload, string $so
+             'metadata' => $metadata,
+         ]);
+ 
+-        if ($mappedStatus === 'paid' && $payment->registration) {
+-            $payment->registration->update(['status' => 'confirmed']);
++        $registrationIds = $payment->metadata['registration_ids'] ?? [$payment->registration_id];
++
++        if ($mappedStatus === 'paid') {
++            Registration::whereIn('id', array_filter($registrationIds))->update(['status' => 'confirmed']);
+         }
+ 
+-        if ($mappedStatus === 'failed' && $payment->registration && $payment->registration->status === 'pending_payment') {
+-            $payment->registration->update(['status' => 'payment_failed']);
++        if ($mappedStatus === 'failed') {
++            Registration::whereIn('id', array_filter($registrationIds))
++                ->where('status', 'pending_payment')
++                ->update(['status' => 'payment_failed']);
+         }
+ 
+         AuditLog::record(null, 'payment.status.updated', $payment, 'Payment status updated by provider.', [
+@@ -136,8 +141,9 @@ private function initiateCampay(Payment $payment, string $operator, string $phon
+                 'status' => $mappedStatus,
+             ]);
+ 
+-            if ($mappedStatus === 'paid' && $payment->registration) {
+-                $payment->registration->update(['status' => 'confirmed']);
++            if ($mappedStatus === 'paid') {
++                $registrationIds = $payment->metadata['registration_ids'] ?? [$payment->registration_id];
++                Registration::whereIn('id', array_filter($registrationIds))->update(['status' => 'confirmed']);
+             }
+ 
+             return $payment->fresh();
+@@ -203,6 +209,11 @@ private function failPayment(Payment $payment, string $message, \Throwable $exce
+             ],
+         ]);
+ 
++        $registrationIds = $payment->metadata['registration_ids'] ?? [$payment->registration_id];
++        Registration::whereIn('id', array_filter($registrationIds))
++            ->where('status', 'pending_payment')
++            ->update(['status' => 'payment_failed']);
++
+         AuditLog::record($payment->user, 'payment.failed', $payment, 'Payment initiation failed.', [
+             'provider' => $payment->provider,
+             'error' => $exception->getMessage(),
+diff --git a/Frontend/src/features/events/components/EventActionPanel.jsx b/Frontend/src/features/events/components/EventActionPanel.jsx
+index bb46cb7..170093b 100644
+--- a/Frontend/src/features/events/components/EventActionPanel.jsx
++++ b/Frontend/src/features/events/components/EventActionPanel.jsx
+@@ -31,6 +31,8 @@ export default function EventActionPanel({ event }) {
+     return [{ id: null, name: Number(event.price || 0) > 0 ? 'Classic' : 'Free', description: 'Standard access', price: Number(event.price || 0) }]
+   }, [event])
+   const [selectedTicketTypeId, setSelectedTicketTypeId] = useState(ticketOptions[0]?.id ? String(ticketOptions[0].id) : '')
++  const [quantity, setQuantity] = useState(1)
++  const [buyingMore, setBuyingMore] = useState(false)
+   const [message, setMessage] = useState('')
+   const [error, setError] = useState('')
+   const [busy, setBusy] = useState(false)
+@@ -41,6 +43,9 @@ export default function EventActionPanel({ event }) {
+   const registered = isRegistered(event.id)
+   const cancellationAllowed = canCancelRegistration(event, registration)
+   const selectedTicket = ticketOptions.find((ticket) => String(ticket.id || '') === String(selectedTicketTypeId)) || ticketOptions[0]
++  const showPurchaseForm = !registered || buyingMore
++  const selectedQuantity = Math.max(1, Number(quantity || 1))
++  const totalAmount = Number(selectedTicket?.price || 0) * selectedQuantity
+ 
+   async function handleBookmark() {
+     setBusy(true)
+@@ -64,14 +69,15 @@ export default function EventActionPanel({ event }) {
+     setError('')
+     setMessage('')
+     try {
+-      const nextRegistration = await registerForEvent(event, selectedTicket?.id ? { ticket_type_id: selectedTicket.id } : {})
++      const nextRegistration = await registerForEvent(event, { ...(selectedTicket?.id ? { ticket_type_id: selectedTicket.id } : {}), quantity: selectedQuantity })
+       if (nextRegistration.payment) {
+         toast.info(t('eventAction.paymentRequired'))
+         navigate(`/payments/${nextRegistration.payment.id}`)
+         return
+       }
+       toast.success(t('eventAction.registrationSuccess'))
+-      setMessage(t('eventAction.registrationSuccessTicket', { ticketNumber: nextRegistration.ticketNumber }))
++      setBuyingMore(false)
++      setMessage(selectedQuantity > 1 ? `${selectedQuantity} tickets registered successfully.` : t('eventAction.registrationSuccessTicket', { ticketNumber: nextRegistration.ticketNumber }))
+     } catch (registrationError) {
+       const message = getApiErrorMessage(registrationError, t('eventAction.registrationFailed'))
+       toast.error(message)
+@@ -148,9 +154,12 @@ export default function EventActionPanel({ event }) {
+         <div className="mt-4"><Alert type="info">{t('eventAction.registrationCancelled')}</Alert></div>
+       )}
+ 
+-      {!registered && (
++      {showPurchaseForm && (
+         <div className="mt-5">
+-          <p className="mb-2 text-sm font-bold text-slate-800">Choose ticket type</p>
++          <div className="mb-2 flex items-center justify-between gap-3">
++            <p className="text-sm font-bold text-slate-800">Choose ticket type</p>
++            {registered && <button type="button" onClick={() => setBuyingMore(false)} className="text-xs font-bold text-slate-500 hover:text-slate-800">Cancel</button>}
++          </div>
+           <div className="grid gap-3">
+             {ticketOptions.map((ticket) => {
+               const active = String(ticket.id || '') === String(selectedTicketTypeId)
+@@ -164,17 +173,23 @@ export default function EventActionPanel({ event }) {
+               )
+             })}
+           </div>
++          <label className="mt-4 block">
++            <span className="mb-1 block text-sm font-bold text-slate-800">Number of tickets</span>
++            <input type="number" min="1" max="10" value={quantity} onChange={(event) => setQuantity(event.target.value)} className="h-12 w-32 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100" />
++            <p className="mt-2 text-sm text-slate-600">Total: <strong>{formatPrice(totalAmount)}</strong></p>
++          </label>
+         </div>
+       )}
+ 
+       <div className="mt-5 flex flex-wrap gap-3">
+-        {registered ? (
++        {registered && !buyingMore ? (
+           <>
+             <Link to={`/tickets/${event.id}`}><Button disabled={busy}>{t('eventAction.viewTicket')}</Button></Link>
++            <Button type="button" variant="secondary" disabled={busy} onClick={() => setBuyingMore(true)}>Buy more tickets</Button>
+             {cancellationAllowed && <Button type="button" variant="danger" disabled={busy} onClick={handleCancelRegistration}>{t('eventAction.cancelRegistration')}</Button>}
+           </>
+         ) : (
+-          <Button type="button" disabled={busy} onClick={handleRegister}>{busy ? t('eventAction.processing') : `Register - ${formatPrice(selectedTicket?.price || 0)}`}</Button>
++          <Button type="button" disabled={busy} onClick={handleRegister}>{busy ? t('eventAction.processing') : `${selectedQuantity > 1 ? 'Buy tickets' : 'Register'} - ${formatPrice(totalAmount)}`}</Button>
+         )}
+ 
+         <Button type="button" disabled={busy} variant={bookmarked ? 'outline' : 'secondary'} onClick={handleBookmark}>

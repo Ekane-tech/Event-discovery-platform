@@ -57,3 +57,14 @@ export function getApiErrorMessage(error, fallback = 'Something went wrong. Plea
 
   return error?.message || fallback
 }
+
+export function isEmailVerificationError(error) {
+  const message = getApiErrorMessage(error, '').toLowerCase()
+  const data = error?.response?.data
+
+  return message.includes('verify') && message.includes('email') ||
+         message.includes('verification') && message.includes('required') ||
+         message.includes('email not verified') ||
+         data?.error === 'email_not_verified' ||
+         data?.code === 'email_not_verified'
+}

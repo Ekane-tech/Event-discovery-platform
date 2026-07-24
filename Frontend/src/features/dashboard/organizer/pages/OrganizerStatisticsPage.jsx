@@ -35,10 +35,10 @@ function MetricCard({ label, value, icon: Icon, gradient, description }) {
         <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20">
           <Icon className="h-5 w-5" />
         </span>
-        <span className="text-3xl font-black">{value}</span>
+        <span className="text-xl font-black sm:text-2xl md:text-3xl">{value}</span>
       </div>
 
-      <p className="relative mt-5 text-sm font-bold text-white/90">{label}</p>
+      <p className="relative mt-5 text-sm font-bold text-white/90 sm:text-base">{label}</p>
       {description && (
         <p className="relative mt-1 text-xs text-white/75">{description}</p>
       )}
@@ -214,14 +214,14 @@ export default function OrganizerStatisticsPage() {
       value: Number(stats.revenue || 0) === 0 ? '0' : formatPrice(stats.revenue),
       icon: Wallet,
       gradient: 'from-amber-500 to-orange-700',
-      description: 'Estimated paid registrations',
+      description: 'Paid confirmed registrations',
     },
     {
       label: 'Attendance rate',
       value: `${stats.attendance_rate || 0}%`,
       icon: Activity,
       gradient: 'from-pink-600 to-rose-700',
-      description: 'Confirmed registrations vs capacity',
+      description: 'Checked-in vs confirmed',
     },
   ]
 
@@ -255,13 +255,13 @@ export default function OrganizerStatisticsPage() {
 
       <section className="mt-6">
         {loading ? (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
             {Array.from({ length: 6 }).map((_, index) => (
               <StatCardSkeleton key={index} />
             ))}
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
             {metrics.map((metric) => (
               <MetricCard key={metric.label} {...metric} />
             ))}

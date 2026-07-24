@@ -9,6 +9,7 @@ import PageContainer from '../../../shared/components/layout/PageContainer.jsx'
 import EventForm from '../components/EventForm.jsx'
 import { eventService } from '../services/eventService.js'
 import { buildEventImagesFormData, eventToFormValues, extractEventFiles, formValuesToApiPayload, hasEventFiles, normalizeEvent } from '../utils/normalizeEvent.js'
+import { hasEventEnded } from '../utils/eventLifecycle.js'
 import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
 import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
@@ -43,7 +44,7 @@ export default function EditEventPage() {
       await eventService.updateEvent(id, formValuesToApiPayload(payload, status))
       const files = extractEventFiles(payload)
       if (hasEventFiles(files)) await eventService.uploadImages(id, buildEventImagesFormData(files))
-      toast.success(status === 'draft' ? t('events.edit.draftSaved') : t('events.edit.successMessage'))
+      toast.success(status === 'draft' ? t('events.edit.draftSaved') : 'Event published successfully.')
       navigate('/organizer/events')
     } catch (updateError) {
       const message = getApiErrorMessage(updateError, t('events.edit.errorMessage'))
@@ -81,6 +82,21 @@ export default function EditEventPage() {
     )
   }
 
+  if (hasEventEnded(event)) {
+    return (
+      <PageContainer>
+        <ErrorState
+          title="Past event cannot be edited"
+          message="This event has already ended, so its details and photos are locked. Duplicate it from My Events to create a new edition with new dates."
+        />
+        <div className="mt-6 flex flex-wrap gap-2">
+          <Link to={`/organizer/events/${event.id}/details`}><Button variant="secondary">View details</Button></Link>
+          <Link to="/organizer/events"><Button>Back to My Events</Button></Link>
+        </div>
+      </PageContainer>
+    )
+  }
+
   return (
     <PageContainer>
       <section className="mb-6 rounded-3xl bg-linear-to-r from-teal-700 to-slate-950 p-8 text-white">
@@ -89,8 +105,8 @@ export default function EditEventPage() {
       </section>
       <EventForm
         initialValues={eventToFormValues(event)}
-        submitLabel={t('events.edit.submitButton')}
-        onSubmit={(payload) => handleUpdateEvent(payload, 'pending')}
+        submitLabel="Publish Event"
+        onSubmit={(payload) => handleUpdateEvent(payload, 'published')}
         onDraft={(payload) => handleUpdateEvent(payload, 'draft')}
         submitting={submitting}
         serverError={submitError}

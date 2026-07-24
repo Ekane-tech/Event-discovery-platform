@@ -40,7 +40,7 @@ return [
 
         'public' => [
             'driver' => 'local',
-            'root' => storage_path('app/public'),
+            'root' => env('RAILWAY_VOLUME_MOUNT_PATH', storage_path('app/public')),
             'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
             'visibility' => 'public',
             'throw' => false,
@@ -57,6 +57,15 @@ return [
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
+            'report' => false,
+        ],
+
+        // Private, volume-backed disk for database backups. Point BACKUP_DISK_PATH
+        // at a persistent Railway volume mount (on the scheduler service). Never public.
+        'backups' => [
+            'driver' => 'local',
+            'root' => env('BACKUP_DISK_PATH', storage_path('app/backups')),
+            'throw' => true,
             'report' => false,
         ],
 

@@ -12,6 +12,7 @@ use App\Models\Category;
 use App\Models\City;
 use App\Models\Event;
 use App\Models\Interest;
+use App\Models\Payment;
 use App\Models\Region;
 use App\Models\Registration;
 use App\Models\Report;
@@ -101,16 +102,13 @@ class DashboardController extends Controller
 
         $totalRegistrations = Registration::query()->whereIn('event_id', $eventIds)->count();
         $confirmedRegistrations = Registration::query()->whereIn('event_id', $eventIds)->where('status', 'confirmed')->count();
-        $totalCapacity = (clone $eventsQuery)->sum('maximum_participants');
+        $checkedInRegistrations = Registration::query()->whereIn('event_id', $eventIds)->whereNotNull('checked_in_at')->count();
 
-        $revenue = Event::query()
-            ->where('organizer_id', $organizer->id)
-            ->leftJoin('registrations', 'events.id', '=', 'registrations.event_id')
-            ->where(function ($query) {
-                $query->whereNull('registrations.status')->orWhere('registrations.status', 'confirmed');
-            })
-            ->selectRaw('COALESCE(SUM(events.price), 0) as revenue')
-            ->value('revenue');
+        $revenue = Payment::query()
+            ->whereIn('event_id', $eventIds)
+            ->where('status', 'paid')
+            ->whereHas('registration', fn ($query) => $query->where('status', 'confirmed'))
+            ->sum('amount');
 
         return response()->json([
             'summary' => [
@@ -120,9 +118,10 @@ class DashboardController extends Controller
                 'draft_events_count' => (clone $eventsQuery)->where('status', 'draft')->count(),
                 'total_registrations' => $totalRegistrations,
                 'confirmed_registrations' => $confirmedRegistrations,
+                'checked_in_registrations' => $checkedInRegistrations,
                 'total_views' => (clone $eventsQuery)->sum('views'),
                 'revenue' => (float) $revenue,
-                'attendance_rate' => $totalCapacity > 0 ? round(($confirmedRegistrations / $totalCapacity) * 100, 2) : 0,
+                'attendance_rate' => $confirmedRegistrations > 0 ? round(($checkedInRegistrations / $confirmedRegistrations) * 100, 2) : 0,
             ],
             'recent_events' => EventResource::collection($recentEvents),
             'upcoming_events' => EventResource::collection($upcomingEvents),

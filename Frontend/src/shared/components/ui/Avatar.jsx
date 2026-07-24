@@ -34,6 +34,8 @@ export default function Avatar({ name = 'User', src, className = '' }) {
       <img
         src={src}
         alt={name || 'User avatar'}
+        loading="lazy"
+        decoding="async"
         onError={() => setImageFailed(true)}
         className={`flex h-10 w-10 shrink-0 rounded-full object-cover ring-2 ring-white ${className}`}
       />

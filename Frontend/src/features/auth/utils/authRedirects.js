@@ -8,6 +8,6 @@ export function getDashboardPathByRole(role) {
       return '/organizer/dashboard'
     case ROLES.USER:
     default:
-      return '/dashboard'
+      return '/'
   }
 }

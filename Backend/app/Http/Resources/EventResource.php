@@ -33,6 +33,8 @@ class EventResource extends JsonResource
             'registrations_count' => $this->whenCounted('registrations'),
             'bookmarks_count' => $this->whenCounted('bookmarks'),
             'reports_count' => $this->whenCounted('reports'),
+            'reviews_count' => $this->whenCounted('reviews'),
+            'average_rating' => $this->whenAggregated('reviews', 'rating', 'avg', fn ($value) => $value !== null ? round((float) $value, 2) : null),
             'organizer' => new UserResource($this->whenLoaded('organizer')),
             'category' => new CategoryResource($this->whenLoaded('category')),
             'categories' => CategoryResource::collection($this->whenLoaded('categories')),
@@ -40,6 +42,7 @@ class EventResource extends JsonResource
             'division' => new DivisionResource($this->whenLoaded('division')),
             'city' => new CityResource($this->whenLoaded('city')),
             'images' => EventImageResource::collection($this->whenLoaded('images')),
+            'ticket_types' => EventTicketTypeResource::collection($this->whenLoaded('ticketTypes')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

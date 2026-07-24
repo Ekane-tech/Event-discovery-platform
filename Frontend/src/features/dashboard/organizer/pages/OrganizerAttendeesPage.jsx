@@ -119,7 +119,7 @@ export default function OrganizerAttendeesPage() {
         action={<div className="flex flex-wrap gap-2"><Link to={scannerPath}><Button><QrCode className="mr-2 h-4 w-4" />Open scanner</Button></Link><Link to={backPath}><Button variant="secondary">Back to Events</Button></Link></div>}
       />
 
-      <div className="mb-6 grid gap-4 md:grid-cols-5">
+      <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
         {[
           ['Total registrations', summary.registrations_count || 0, 'from-teal-600 to-emerald-700'],
           ['Confirmed', summary.confirmed_count || 0, 'from-blue-600 to-indigo-700'],
@@ -128,7 +128,7 @@ export default function OrganizerAttendeesPage() {
           ['Available places', summary.available_places ?? 'Unlimited', 'from-amber-500 to-orange-700'],
         ].map(([label, value, gradient]) => (
           <div key={label} className={`rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm`}>
-            <p className="text-sm text-white/80">{label}</p><p className="mt-2 text-2xl font-black">{value}</p>
+            <p className="text-sm text-white/80">{label}</p><p className="mt-2 text-xl font-black sm:text-2xl">{value}</p>
           </div>
         ))}
       </div>

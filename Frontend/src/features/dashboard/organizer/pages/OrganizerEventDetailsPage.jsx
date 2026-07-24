@@ -11,6 +11,7 @@ import { formatDate } from '../../../../shared/utils/formatDate.js'
 import { formatPrice } from '../../../../shared/utils/currency.js'
 import { eventService } from '../../../events/services/eventService.js'
 import { normalizeEvent } from '../../../events/utils/normalizeEvent.js'
+import { hasEventEnded } from '../../../events/utils/eventLifecycle.js'
 import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
 
 export default function OrganizerEventDetailsPage() {
@@ -39,6 +40,8 @@ export default function OrganizerEventDetailsPage() {
   if (error) return <PageContainer><ErrorState title="Unable to load event" message={error} /></PageContainer>
   if (!event) return <PageContainer><EmptyState title="Event not found" message="This organizer event could not be found." /></PageContainer>
 
+  const isPast = hasEventEnded(event)
+
   const stats = [
     ['Views', event.views || 0],
     ['Registrations', event.registrations || 0],
@@ -52,7 +55,7 @@ export default function OrganizerEventDetailsPage() {
     <PageContainer>
       <SectionHeader title={event.title} description="Organizer event details and performance overview." action={<Link to={isAdminView ? "/admin/events" : "/organizer/events"}><Button variant="secondary">{isAdminView ? "Back to Admin Events" : "Back to My Events"}</Button></Link>} />
       {event.coverImage && <img src={event.coverImage.url} alt={event.title} className="mb-6 h-72 w-full rounded-2xl object-cover" />}
-      <div className="grid grid-cols-3 gap-4 md:grid-cols-6">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
         {stats.map(([label, value], index) => <div key={label} className={`rounded-3xl bg-gradient-to-br ${['from-teal-600 to-emerald-700','from-blue-600 to-indigo-700','from-yellow-500 to-orange-600','from-rose-600 to-pink-700','from-slate-600 to-slate-800','from-purple-600 to-violet-800'][index]} p-5 text-white shadow-sm`}><p className="text-sm text-white/80">{label}</p><p className="mt-2 text-lg font-black">{value}</p></div>)}
       </div>
       <Card className="mt-6">
@@ -64,7 +67,7 @@ export default function OrganizerEventDetailsPage() {
           <p><strong>Price:</strong> {formatPrice(event.price)}</p><p><strong>Registration deadline:</strong> {formatDate(event.registrationDeadline)}</p>
         </div>
         <p className="mt-4 text-sm leading-6 text-slate-600">{event.description}</p>
-        <div className="mt-6 flex flex-wrap gap-2">{!isAdminView && <Link to={`/organizer/events/${event.id}/edit`}><Button>Edit Event</Button></Link>}<Link to={isAdminView ? `/admin/events/${event.id}/attendees` : `/organizer/events/${event.id}/attendees`}><Button variant="secondary">View Attendees</Button></Link></div>
+        <div className="mt-6 flex flex-wrap gap-2">{!isAdminView && !isPast && <Link to={`/organizer/events/${event.id}/edit`}><Button>Edit Event</Button></Link>}{isPast && <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700">Past event locked</span>}<Link to={isAdminView ? `/admin/events/${event.id}/attendees` : `/organizer/events/${event.id}/attendees`}><Button variant="secondary">View Attendees</Button></Link></div>
       </Card>
     </PageContainer>
   )

@@ -20,6 +20,7 @@ export default function FeedbackPage() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [hoverRating, setHoverRating] = useState(0)
 
   function updateField(event) {
     setForm((current) => ({ ...current, [event.target.name]: event.target.value }))
@@ -98,23 +99,32 @@ export default function FeedbackPage() {
                 <Input name="email" type="email" value={form.email} onChange={updateField} placeholder={t('feedbackPage.emailPlaceholder')} />
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <Select name="rating" value={form.rating} onChange={updateField}>
-                  {[5, 4, 3, 2, 1].map((rating) => (
-                    <option key={rating} value={rating}>
-                      {t('feedbackPage.ratingOption', { count: rating })}
-                    </option>
+              <div>
+                <span className="mb-2 block text-sm font-medium text-slate-700">{t('feedbackPage.ratingLabel', 'Your rating')}</span>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setForm((current) => ({ ...current, rating: star }))}
+                      onMouseEnter={() => setHoverRating(star)}
+                      onMouseLeave={() => setHoverRating(0)}
+                      className="transition hover:scale-110"
+                      aria-label={`${star} star${star > 1 ? 's' : ''}`}
+                    >
+                      <Star className={`h-8 w-8 transition ${(hoverRating || form.rating) >= star ? 'fill-amber-400 text-amber-400' : 'fill-transparent text-slate-300'}`} />
+                    </button>
                   ))}
-                </Select>
-
-                <Select name="category" value={form.category} onChange={updateField}>
-                  <option value="general">{t('feedbackPage.category.general')}</option>
-                  <option value="bug">{t('feedbackPage.category.bug')}</option>
-                  <option value="feature">{t('feedbackPage.category.feature')}</option>
-                  <option value="design">{t('feedbackPage.category.design')}</option>
-                  <option value="performance">{t('feedbackPage.category.performance')}</option>
-                </Select>
+                </div>
               </div>
+
+              <Select name="category" value={form.category} onChange={updateField}>
+                <option value="general">{t('feedbackPage.category.general')}</option>
+                <option value="bug">{t('feedbackPage.category.bug')}</option>
+                <option value="feature">{t('feedbackPage.category.feature')}</option>
+                <option value="design">{t('feedbackPage.category.design')}</option>
+                <option value="performance">{t('feedbackPage.category.performance')}</option>
+              </Select>
 
               <Textarea name="message" value={form.message} onChange={updateField} rows="6" placeholder={t('feedbackPage.messagePlaceholder')} />
 

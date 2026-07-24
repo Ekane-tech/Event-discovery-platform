@@ -1,0 +1,46 @@
+diff --git a/Frontend/src/shared/components/layout/Navbar.jsx b/Frontend/src/shared/components/layout/Navbar.jsx
+index 7764a07..493d96e 100644
+--- a/Frontend/src/shared/components/layout/Navbar.jsx
++++ b/Frontend/src/shared/components/layout/Navbar.jsx
+@@ -30,6 +30,7 @@ export default function Navbar() {
+     return link.badge === 'notifications' ? unreadCount : 0
+   }
+   return (
++  <>
+     <header className="sticky top-0 z-[9999] border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur">
+       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+         <Link to="/" className="flex min-w-0 items-center gap-3 font-black text-slate-950">
+@@ -67,8 +68,22 @@ export default function Navbar() {
+           {isAuthenticated && <NavigationBadge count={unreadCount} />}
+         </button>
+       </div>
++      {!isAuthenticated && (
++        <MobileNavigation
++          variant="dropdown"
++          open={mobileMenuOpen}
++          groups={mobileGroups}
++          unreadCount={unreadCount}
++          isAuthenticated={isAuthenticated}
++          user={user}
++          onLogout={handleLogout}
++          onClose={() => setMobileMenuOpen(false)}
++        />
++      )}
++    </header>
++    {isAuthenticated && (
+       <MobileNavigation
+-        variant={isAuthenticated ? 'drawer' : 'dropdown'}
++        variant="drawer"
+         open={mobileMenuOpen}
+         groups={mobileGroups}
+         unreadCount={unreadCount}
+@@ -77,6 +92,7 @@ export default function Navbar() {
+         onLogout={handleLogout}
+         onClose={() => setMobileMenuOpen(false)}
+       />
+-    </header>
++    )}
++  </>
+   )
+ }
+\ No newline at end of file

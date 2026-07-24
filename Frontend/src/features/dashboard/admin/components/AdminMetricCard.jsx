@@ -4,7 +4,7 @@ export default function AdminMetricCard({ label, value, icon: Icon, gradient = '
       <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/15" />
       <div className="relative flex items-center justify-between">
         {Icon && <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20"><Icon className="h-5 w-5" /></span>}
-        <span className="text-3xl font-black">{value}</span>
+        <span className="text-2xl font-black md:text-3xl">{value}</span>
       </div>
       <p className="relative mt-5 text-sm font-bold text-white/90">{label}</p>
       {description && <p className="relative mt-1 text-xs text-white/75">{description}</p>}
