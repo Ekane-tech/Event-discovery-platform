@@ -1,6 +1,6 @@
 import { MailCheck, RefreshCw, ShieldCheck } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Alert from '../../../shared/components/feedback/Alert.jsx'
 import Button from '../../../shared/components/ui/Button.jsx'
 import AuthCard from '../components/AuthCard.jsx'
@@ -27,11 +27,16 @@ export default function EmailVerificationPage() {
   const maskedEmail = useMemo(() => maskEmail(user?.email), [user?.email])
   const { t } = useTranslation()
 
+  const navigate = useNavigate()
+
   useEffect(() => {
     if (status === 'verified') {
       setMessage(t('auth.emailVerifiedSuccess'))
       if (isAuthenticated) refreshUser().catch(() => {})
-      return
+      const timer = setTimeout(() => {
+        navigate('/', { replace: true })
+      }, 2000)
+      return () => clearTimeout(timer)
     }
 
     if (status === 'required') {
@@ -45,7 +50,7 @@ export default function EmailVerificationPage() {
     if (status === 'resent') {
       setMessage(t('auth.verificationEmailResent'))
     }
-  }, [status, isAuthenticated, refreshUser, t])
+  }, [status, isAuthenticated, refreshUser, t, navigate])
 
   async function resendEmail() {
     setSending(true)
@@ -53,7 +58,8 @@ export default function EmailVerificationPage() {
     setMessage('')
     try {
       const response = await authService.resendVerificationEmail()
-      setMessage(response.data.message || 'Verification email sent successfully.')
+      setMessage(response.data.message || t('auth.verificationEmailResent'))
+      navigate('/verify-email?status=resent', { replace: true })
     } catch (resendError) {
       setError(getApiErrorMessage(resendError, 'Unable to resend verification email.'))
     } finally {
