@@ -31,6 +31,6 @@ trait UsesNotificationPreferences
 
     protected function frontendUrl(string $path = ''): string
     {
-        return rtrim((string) env('FRONTEND_URL', config('app.url')), '/').'/'.ltrim($path, '/');
+        return rtrim((string) env('FRONTEND_URL', 'https://mboaevents237.vercel.app'), '/').'/'.ltrim($path, '/');
     }
 }

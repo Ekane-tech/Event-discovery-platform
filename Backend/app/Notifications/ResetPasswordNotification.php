@@ -24,7 +24,7 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $frontendUrl = rtrim((string) env('FRONTEND_URL', config('app.url')), '/');
+        $frontendUrl = rtrim((string) env('FRONTEND_URL', 'https://mboaevents237.vercel.app'), '/');
         $resetUrl = $frontendUrl.'/reset-password?'.http_build_query([
             'token' => $this->token,
             'email' => $notifiable->getEmailForPasswordReset(),
