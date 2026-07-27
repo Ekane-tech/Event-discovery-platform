@@ -1,6 +1,6 @@
 import { ArrowLeft, CheckCircle2, KeyRound, LockKeyhole, ShieldCheck } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Alert from '../../../shared/components/feedback/Alert.jsx'
 import Button from '../../../shared/components/ui/Button.jsx'
 import FormInput from '../../../shared/components/forms/FormInput.jsx'
@@ -19,18 +19,36 @@ function maskEmail(email) {
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [token, setToken] = useState('')
   const [form, setForm] = useState({ password: '', passwordConfirmation: '' })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [progress, setProgress] = useState(0)
   const { t } = useTranslation()
 
   useEffect(() => {
     setEmail(searchParams.get('email') || '')
     setToken(searchParams.get('token') || '')
   }, [searchParams])
+
+  useEffect(() => {
+    if (success) {
+      const interval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval)
+            navigate('/login', { replace: true })
+            return 100
+          }
+          return prev + 2
+        })
+      }, 40)
+      return () => clearInterval(interval)
+    }
+  }, [success, navigate])
 
   const linkIsValid = useMemo(() => Boolean(email && token), [email, token])
 
@@ -96,8 +114,14 @@ export default function ResetPasswordPage() {
               <div className="mb-5 rounded-2xl border border-green-100 bg-green-50 p-4 text-green-800">
                 <div className="flex gap-3">
                   <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
-                  <div>
+                  <div className="flex-1">
                     <p className="font-bold">{t('auth.resetPasswordSuccess')}</p>
+                    <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-green-200">
+                      <div 
+                        className="h-full bg-green-600 transition-all duration-40 ease-linear"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
