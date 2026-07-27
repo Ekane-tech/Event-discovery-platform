@@ -13,11 +13,7 @@ return [
     'allowed_methods' => ['*'],
 
     // SÉCURITÉ : Gardez vos localhost ET votre domaine Vercel en dur si la variable env a un raté
-    'allowed_origins' => [
-        'http://localhost:5173',
-        'http://localhost:5174',
-        'https://mboaevents237.vercel.app'
-    ],
+        'allowed_origins' => array_filter(array_map('trim', explode(',', env('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:5174,https://mboaevents237.vercel.app')))),
 
     'allowed_origins_patterns' => [],
 
