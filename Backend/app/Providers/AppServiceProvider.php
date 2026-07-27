@@ -7,6 +7,7 @@ use App\Models\EmailLog;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\Events\NotificationFailed;
+use Illuminate\Notifications\Events\NotificationSent;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
@@ -42,6 +43,24 @@ class AppServiceProvider extends ServiceProvider
                 'type' => class_basename($event->notification),
                 'status' => 'failed',
                 'error_message' => $event->data['message'] ?? 'Email notification failed.',
+                'metadata' => ['notification' => get_class($event->notification)],
+            ]);
+        });
+
+        Event::listen(NotificationSent::class, function (NotificationSent $event) {
+            if ($event->channel !== 'mail') {
+                return;
+            }
+
+            $notifiable = $event->notifiable;
+            EmailLog::create([
+                'user_id' => $notifiable->id ?? null,
+                'recipient' => method_exists($notifiable, 'routeNotificationForMail')
+                    ? (string) $notifiable->routeNotificationForMail()
+                    : (string) ($notifiable->email ?? 'unknown'),
+                'subject' => class_basename($event->notification),
+                'type' => class_basename($event->notification),
+                'status' => 'sent',
                 'metadata' => ['notification' => get_class($event->notification)],
             ]);
         });
