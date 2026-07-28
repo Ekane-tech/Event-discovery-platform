@@ -4,11 +4,13 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class UserResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $avatar = $this->profile?->avatar;
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -27,7 +29,7 @@ class UserResource extends JsonResource
                 'phone' => $this->profile?->phone,
                 'city' => $this->profile?->city,
                 'region' => $this->profile?->region,
-                'avatar' => $this->profile?->avatar,
+                'avatar' => $avatar && !str_starts_with($avatar, 'http') ? Storage::disk('public')->temporaryUrl($avatar, now()->addHours(2)) : $avatar,
                 'bio' => $this->profile?->bio,
                 'preferred_language' => $this->profile?->preferred_language,
             ]),
