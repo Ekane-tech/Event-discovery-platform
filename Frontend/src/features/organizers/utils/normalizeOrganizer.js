@@ -1,10 +1,10 @@
-import { API_BASE_URL } from '../../../shared/constants/app.js'
+import { API_BASE_URL, STORAGE_URL } from '../../../shared/constants/app.js'
 import { normalizeEvents, extractCollection } from '../../events/utils/normalizeEvent.js'
 
 function storageUrl(path) {
   if (!path) return ''
   if (String(path).startsWith('http') || String(path).startsWith('data:') || String(path).startsWith('blob:')) return path
-  return `${API_BASE_URL.replace('/api', '')}/storage/${path}`
+  return `${STORAGE_URL}/${path}`
 }
 
 export function normalizeOrganizer(apiOrganizer) {

@@ -1,9 +1,8 @@
-import { API_BASE_URL } from '../../../shared/constants/app.js'
+import { API_BASE_URL, STORAGE_URL } from '../../../shared/constants/app.js'
 function getStorageUrl(path) {
   if (!path) return ''
   if (String(path).startsWith('http')) return path
-  const baseUrl = API_BASE_URL.replace('/api', '')
-  return `${baseUrl}/storage/${path}`
+  return `${STORAGE_URL}/${path}`
 }
 
 function normalizeTicketType(ticketType) {
