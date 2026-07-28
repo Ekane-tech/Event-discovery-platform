@@ -25,7 +25,7 @@ function normalizeImage(image) {
     path: image.path,
     type: image.type,
     isCover: image.is_cover ?? image.isCover ?? false,
-    url: getStorageUrl(image.path),
+    url: image.url || getStorageUrl(image.path),
     raw: image,
   }
 }
