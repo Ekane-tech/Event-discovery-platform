@@ -11,9 +11,9 @@ use Intervention\Image\ImageManager;
 /**
  * On-demand, cached image variants (thumbnails). Given a stored image path and
  * a target width, serve a resized JPEG. Variants are cached on the public disk
- * and served with immutable cache headers. On ANY failure (no GD, bad image,
- * etc.) it falls back to the original bytes — so it can never break the app or
- * the upload flow (uploads are untouched).
+ * (S3) and served with immutable cache headers. On ANY failure (no GD, bad
+ * image, etc.) it falls back to the original bytes — so it can never break the
+ * app or the upload flow (uploads are untouched).
  */
 class ImageVariantController extends Controller
 {
@@ -23,7 +23,7 @@ class ImageVariantController extends Controller
         $width = (int) $request->query('w', 800);
 
         // Validate path: no traversal, allowed image extensions only.
-        if ($path === '' || str_contains($path, '..') || ! preg_match('#^[A-Za-z0-9_\-/]+\.(jpe?g|png|webp)$#i', $path)) {
+        if ($path === '' || str_contains($path, '..') || ! preg_match('#^[A-Za-z0-9_\-]+\.(jpe?g|png|webp)$#i', $path)) {
             abort(404);
         }
 
@@ -41,7 +41,8 @@ class ImageVariantController extends Controller
             return $this->jpegResponse((string) $disk->get($cacheRel));
         }
 
-        $bytes = $this->resize((string) $disk->path($path), $width);
+        // Read the source bytes from the public disk (S3) and resize.
+        $bytes = $this->resize((string) $disk->get($path), $width);
 
         if ($bytes !== null) {
             try {
@@ -60,7 +61,7 @@ class ImageVariantController extends Controller
         ]);
     }
 
-    protected function resize(string $absolutePath, int $maxWidth): ?string
+    protected function resize(string $imageBytes, int $maxWidth): ?string
     {
         try {
             if (! class_exists(ImageManager::class) || ! extension_loaded('gd')) {
@@ -68,7 +69,7 @@ class ImageVariantController extends Controller
             }
 
             $manager = new ImageManager(new Driver());
-            $image = $manager->read($absolutePath);
+            $image = $manager->read($imageBytes);
 
             try {
                 $image->orientate(); // apply EXIF orientation (phone photos)

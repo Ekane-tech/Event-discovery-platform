@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '../../../shared/constants/app.js'
+import { API_BASE_URL, STORAGE_URL } from '../../../shared/constants/app.js'
 import { ROLES } from '../../../shared/constants/roles.js'
 
 function normalizeLanguage(language) {
@@ -15,8 +15,7 @@ function normalizeAvatarUrl(avatar) {
   const value = String(avatar).trim()
   if (!value || value === 'null' || value === 'undefined') return ''
   if (value.startsWith('http') || value.startsWith('blob:') || value.startsWith('data:')) return value
-  const baseUrl = API_BASE_URL.replace('/api', '')
-  return `${baseUrl}/storage/${value}`
+  return `${STORAGE_URL}/${value}`
 }
 
 export function normalizeAuthUser(apiUser) {
