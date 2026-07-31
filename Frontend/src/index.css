@@ -7,7 +7,7 @@
   --color-teal-300: #e8b9a1;
   --color-teal-400: #d9916e;
   --color-teal-500: #b0551c;
-  --color-teal-600: #9e4a18;
+  --color-teal-600: #b0551c;
   --color-teal-700: #833d14;
   --color-teal-800: #6b3313;
   --color-teal-900: #582c12;
@@ -19,7 +19,7 @@
   --color-pink-300: #e8b9a1;
   --color-pink-400: #d9916e;
   --color-pink-500: #b0551c;
-  --color-pink-600: #9e4a18;
+  --color-pink-600: #b0551c;
   --color-pink-700: #833d14;
   --color-pink-800: #6b3313;
   --color-pink-900: #582c12;
@@ -31,7 +31,7 @@
   --color-amber-300: #e8b9a1;
   --color-amber-400: #d9916e;
   --color-amber-500: #b0551c;
-  --color-amber-600: #9e4a18;
+  --color-amber-600: #b0551c;
   --color-amber-700: #833d14;
   --color-amber-800: #6b3313;
   --color-amber-900: #582c12;
@@ -473,22 +473,15 @@ body {
 }
 
 /* ── Global Button Text Override for Dark Mode ────────────────────────── */
-.dark button:not(.mboa-no-white-text),
-.dark .btn:not(.mboa-no-white-text) {
+.dark button,
+.dark button *,
+.dark .btn,
+.dark .btn * {
   color: #ffffff !important;
 }
 /* Ensure icons inside buttons are also white if they don't have their own color */
-.dark button:not(.mboa-no-white-text) svg:not([class*='text-']),
-.dark .btn:not(.mboa-no-white-text) svg:not([class*='text-']) {
+.dark button svg,
+.dark .btn svg {
   color: #ffffff !important;
-}
-
-/* Specific button text color overrides for white buttons in light mode that might have explicit dark text classes */
-.dark button:not(.mboa-no-white-text) .text-slate-950,
-.dark button:not(.mboa-no-white-text) .text-slate-900,
-.dark button:not(.mboa-no-white-text) .text-slate-800,
-.dark .btn:not(.mboa-no-white-text) .text-slate-950,
-.dark .btn:not(.mboa-no-white-text) .text-slate-900,
-.dark .btn:not(.mboa-no-white-text) .text-slate-800 {
-  color: #ffffff !important;
+  fill: currentColor;
 }
