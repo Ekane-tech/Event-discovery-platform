@@ -310,3 +310,19 @@ body {
   color: #ffffff !important;
   fill: currentColor;
 }
+
+/* Homepage Header Brand Background */
+header.homepage-header {
+  background-color: #b0551c !important;
+  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+header.homepage-header a,
+header.homepage-header span,
+header.homepage-header button:not(.btn) {
+  color: #ffffff !important;
+}
+
+header.homepage-header .shadow-teal-100 {
+  shadow-color: rgba(0, 0, 0, 0.2) !important;
+}

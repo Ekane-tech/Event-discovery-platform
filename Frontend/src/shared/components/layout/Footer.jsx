@@ -15,19 +15,18 @@ export default function Footer() {
     { title: t('footer.supportTitle', 'Support'), links: [[t('footer.terms', 'Terms of Service'), '/terms-of-service'], [t('footer.privacy', 'Privacy Policy'), '/privacy-policy']] },
   ]
 
-  return (
-    <footer className="border-t border-teal-500 bg-teal-600 text-white">
+    <footer className="border-t border-teal-600/20 bg-teal-900 text-white">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-[1.2fr_2fr_1fr]">
           <div>
             <Link to="/" className="flex items-center gap-3 text-xl font-black text-white">
-              <img src="/applogo.png" alt={APP_NAME} className="h-14 w-14 rounded-2xl object-cover shadow-lg shadow-teal-950/40" />
+              <img src="/applogo.png" alt={APP_NAME} className="h-14 w-14 rounded-2xl object-cover shadow-lg shadow-teal-950/60" />
               <span>{APP_NAME}</span>
             </Link>
-            <p className="mt-3 text-sm font-semibold text-teal-100">{APP_TAGLINE}</p>
-            <p className="mt-4 max-w-sm text-sm leading-6 text-teal-50">{t('footer.description', 'Discover Mboa experiences, receive smart notifications, register with digital tickets, and manage event activity across Cameroon.')}</p>
+            <p className="mt-3 text-sm font-semibold text-teal-200">{APP_TAGLINE}</p>
+            <p className="mt-4 max-w-sm text-sm leading-6 text-teal-100/80">{t('footer.description', 'Discover Mboa experiences, receive smart notifications, register with digital tickets, and manage event activity across Cameroon.')}</p>
             <div className="mt-5 flex gap-2">
-              {socials.map((Icon, index) => <span key={index} className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-teal-700"><Icon className="h-4 w-4" /></span>)}
+              {socials.map((Icon, index) => <span key={index} className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-teal-600"><Icon className="h-4 w-4" /></span>)}
             </div>
           </div>
 
@@ -37,8 +36,8 @@ export default function Footer() {
                 <h3 className="font-bold text-white">{section.title}</h3>
                 <div className="mt-4 grid gap-3">
                   {section.links.map(([label, to]) => to.startsWith('http')
-                    ? <a key={label} href={to} target="_blank" rel="noreferrer" className="text-sm text-teal-50 hover:text-white transition">{label}</a>
-                    : <Link key={label} to={to} className="text-sm text-teal-50 hover:text-white transition">{label}</Link>)}
+                    ? <a key={label} href={to} target="_blank" rel="noreferrer" className="text-sm text-teal-100/70 hover:text-white transition">{label}</a>
+                    : <Link key={label} to={to} className="text-sm text-teal-100/70 hover:text-white transition">{label}</a>)}
                 </div>
               </div>
             ))}
@@ -46,15 +45,15 @@ export default function Footer() {
 
           <div>
             <h3 className="font-bold text-white">{t('footer.contactTitle', 'Contact us')}</h3>
-            <div className="mt-4 grid gap-3 text-sm text-teal-50">
-              <p className="flex gap-2"><MapPin className="h-4 w-4 text-teal-100" /> {t('footer.country', 'Cameroon')}</p>
-              <p className="flex gap-2"><Mail className="h-4 w-4 text-teal-100" /> support@mboaevents237.cm</p>
-              <p className="flex gap-2"><Phone className="h-4 w-4 text-teal-100" /> +237 6XX XXX XXX</p>
+            <div className="mt-4 grid gap-3 text-sm text-teal-100/70">
+              <p className="flex gap-2"><MapPin className="h-4 w-4 text-teal-400" /> {t('footer.country', 'Cameroon')}</p>
+              <p className="flex gap-2"><Mail className="h-4 w-4 text-teal-400" /> support@mboaevents237.cm</p>
+              <p className="flex gap-2"><Phone className="h-4 w-4 text-teal-400" /> +237 6XX XXX XXX</p>
             </div>
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-teal-100 md:flex-row md:items-center md:justify-between">
+        <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-teal-200/50 md:flex-row md:items-center md:justify-between">
           <p>© {new Date().getFullYear()} {APP_NAME}. {t('footer.rightsReserved', 'All rights reserved.')}</p>
           <div className="flex items-center gap-4">
             <div className="flex gap-4"><Link to="/terms-of-service" className="hover:text-white transition">{t('footer.termsShort', 'Terms')}</Link><Link to="/privacy-policy" className="hover:text-white transition">{t('footer.privacyShort', 'Privacy')}</Link><span>{t('footer.cookies', 'Cookies')}</span></div>
