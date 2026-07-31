@@ -38,9 +38,9 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-[9999] border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur">
+      <header className="sticky top-0 z-[9999] border-b border-teal-500/20 bg-white/95 shadow-sm backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-          <Link to="/" className="flex min-w-0 items-center gap-3 font-black text-slate-950">
+          <Link to="/" className="flex min-w-0 items-center gap-3 font-black text-teal-600">
             <img src="/applogo.png" alt={APP_NAME} className="h-12 w-12 shrink-0 rounded-2xl object-cover shadow-lg shadow-teal-100" />
             <span className="hidden shrink-0 sm:inline">{APP_NAME}</span>
           </Link>

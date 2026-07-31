@@ -36,18 +36,18 @@ export default function AppShell({ section = 'user' }) {
   }
 
   if (loggingOut) {
-    return <div className="flex min-h-screen items-center justify-center bg-slate-50 text-sm font-medium text-slate-600">{t('appshell.signingOut', 'Signing you out...')}</div>
+    return <div className="flex min-h-screen items-center justify-center bg-white text-sm font-medium text-teal-600">{t('appshell.signingOut', 'Signing you out...')}</div>
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 xl:flex">
+    <div className="min-h-screen bg-white xl:flex">
       <RoleSidebar section={section} collapsed={sidebarCollapsed} />
       <div className="min-w-0 flex-1">
-        <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+        <header className="sticky top-0 z-30 border-b border-teal-500/20 bg-white/95 backdrop-blur">
           <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
             <div className="flex min-w-0 items-center gap-3">
               <button type="button" onClick={() => setMobileMenuOpen((current) => !current)} className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 xl:hidden" aria-label={t('appshell.toggleNav', 'Toggle navigation menu')}><Menu className="h-5 w-5" /></button>
-              <Link to="/" className="flex min-w-0 items-center gap-2 font-black text-slate-950 xl:hidden">
+              <Link to="/" className="flex min-w-0 items-center gap-2 font-black text-teal-600 xl:hidden">
                 <img src="/applogo.png" alt={APP_NAME} className="h-10 w-10 shrink-0 rounded-2xl object-cover shadow-md shadow-teal-100" />
                 <span className="hidden shrink-0 sm:inline">{APP_NAME}</span>
               </Link>
