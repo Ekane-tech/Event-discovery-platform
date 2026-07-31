@@ -9,6 +9,7 @@ import PasswordChecklist from '../components/PasswordChecklist.jsx'
 import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 import { useAuth } from '../hooks/useAuth.js'
 import { getDashboardPathByRole } from '../utils/authRedirects.js'
+import Etech2 from '../../../assets/E-tech2.png'
 
 const TERMS_URL = '/terms-of-service'
 const PRIVACY_URL = '/privacy-policy'
@@ -79,7 +80,7 @@ export default function RegisterPage() {
     <main className="mx-auto grid max-w-7xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_560px] lg:px-8 lg:py-14">
       <section className="hidden lg:block">
         <div className="sticky top-28 overflow-hidden rounded-4xl bg-slate-950 shadow-2xl">
-          <img src="/hero-events.svg" alt="Event crowd" className="h-162.5 w-full object-cover opacity-80" />
+          <img src={Etech2} alt="Event crowd" className="h-162.5 w-full object-cover opacity-80" />
           <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/50 to-transparent" />
           <div className="absolute bottom-0 p-10 text-white">
             <Users className="mb-4 h-10 w-10 text-teal-300" />

@@ -15,6 +15,7 @@ export default function Footer() {
     { title: t('footer.supportTitle', 'Support'), links: [[t('footer.terms', 'Terms of Service'), '/terms-of-service'], [t('footer.privacy', 'Privacy Policy'), '/privacy-policy']] },
   ]
 
+  return (
     <footer className="border-t border-teal-600/20 bg-teal-900 text-white">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-[1.2fr_2fr_1fr]">
@@ -37,7 +38,7 @@ export default function Footer() {
                 <div className="mt-4 grid gap-3">
                   {section.links.map(([label, to]) => to.startsWith('http')
                     ? <a key={label} href={to} target="_blank" rel="noreferrer" className="text-sm text-teal-100/70 hover:text-white transition">{label}</a>
-                    : <Link key={label} to={to} className="text-sm text-teal-100/70 hover:text-white transition">{label}</a>)}
+                    : <Link key={label} to={to} className="text-sm text-teal-100/70 hover:text-white transition">{label}</Link>)}
                 </div>
               </div>
             ))}

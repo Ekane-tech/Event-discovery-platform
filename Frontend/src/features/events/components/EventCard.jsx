@@ -1,6 +1,6 @@
 import { BadgeCheck, Bookmark, CalendarDays, Clock, MapPin, Star } from 'lucide-react'
 import { toast } from 'sonner'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Badge from '../../../shared/components/ui/Badge.jsx'
 import Avatar from '../../../shared/components/ui/Avatar.jsx'
 import Button from '../../../shared/components/ui/Button.jsx'
@@ -16,6 +16,7 @@ import { variantSrcSet } from '../../../shared/utils/imageVariants.js'
 
 export default function EventCard({ event }) {
   const location = useLocation()
+  const navigate = useNavigate()
   const { t } = useTranslation()
   const { isAuthenticated, role } = useAuth()
   const { isBookmarked, toggleBookmark } = useBookmarks()
@@ -23,6 +24,14 @@ export default function EventCard({ event }) {
   const bookmarked = isBookmarked(event.id)
   const canBookmark = isAuthenticated && role === ROLES.USER
   const lifecycle = getEventLifecycle(event)
+
+  function handleOrganizerClick(clickEvent) {
+    clickEvent.preventDefault()
+    clickEvent.stopPropagation()
+    if (event.organizerId) {
+      navigate(`/organizers/${event.organizerId}`)
+    }
+  }
 
   async function handleBookmark(clickEvent) {
     clickEvent.preventDefault()
@@ -77,19 +86,19 @@ export default function EventCard({ event }) {
         </div>
         <div className="mt-auto flex flex-col gap-3 pt-4">
           <div className="flex items-center gap-2">
-            <Link to={event.organizerId ? `/organizers/${event.organizerId}` : '#'} onClick={(clickEvent) => clickEvent.stopPropagation()} className="relative shrink-0">
+            <div onClick={handleOrganizerClick} className="relative shrink-0 cursor-pointer">
               <Avatar name={event.organizerName || event.organizer} src={event.organizerAvatar} className="h-9 w-9 text-xs" />
               {event.organizerVerified && (
                 <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-teal-500 text-white shadow-md">
                   <BadgeCheck className="h-2.5 w-2.5" />
                 </div>
               )}
-            </Link>
+            </div>
             <div className="min-w-0 flex-1">
               <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-200">{t('events.card.organizedBy', 'Organized by')}</p>
-              <Link to={event.organizerId ? `/organizers/${event.organizerId}` : '#'} onClick={(clickEvent) => clickEvent.stopPropagation()} className="truncate text-sm font-black text-white">
+              <div onClick={handleOrganizerClick} className="truncate text-sm font-black text-white cursor-pointer hover:underline">
                 {event.organizerName || event.organizer || t('events.card.organizerFallback', 'Organizer')}
-              </Link>
+              </div>
             </div>
           </div>
           <Button className="w-auto rounded-full bg-teal-600 px-5 text-white hover:bg-teal-700">{t('viewDetails', 'View Details')}</Button>

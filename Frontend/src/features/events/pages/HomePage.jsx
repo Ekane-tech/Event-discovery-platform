@@ -8,7 +8,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 import Button from '../../../shared/components/ui/Button.jsx'
 
-import Select from '../../../shared/components/ui/Select.jsx'
+import CustomSelect from '../../../shared/components/ui/CustomSelect.jsx'
 
 import PageContainer from '../../../shared/components/layout/PageContainer.jsx'
 
@@ -32,6 +32,10 @@ import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
 import { Stagger, StaggerItem } from '../../../shared/components/motion/Stagger.jsx'
 
+import { useAuth } from '../../auth/hooks/useAuth.js'
+
+import { getDashboardPathByRole } from '../../auth/utils/authRedirects.js'
+
 
 
 export default function HomePage()  {
@@ -39,6 +43,8 @@ export default function HomePage()  {
   const navigate = useNavigate()
 
   const { t } = useTranslation()
+
+  const { isAuthenticated, role } = useAuth()
 
   const [events, setEvents] = useState([])
 
@@ -67,19 +73,6 @@ export default function HomePage()  {
     { value: 'upcoming', label: t('home.upcoming') },
 
   ]
-
-  useEffect(() => {
-    // Add custom header background for homepage
-    const header = document.querySelector('header');
-    if (header) {
-      header.classList.add('homepage-header');
-    }
-    return () => {
-      if (header) {
-        header.classList.remove('homepage-header');
-      }
-    };
-  }, []);
 
   useEffect(() => {
 
@@ -199,17 +192,17 @@ export default function HomePage()  {
         <div className="absolute inset-0 bg-slate-950/40" />
         <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-8">
           <p className="inline-flex items-center gap-2 rounded-full bg-teal-600 px-4 py-2 text-sm font-bold text-white shadow-lg animate-fade-in-up"> {t('home.badge')}</p>
-          <h1 className="mt-4 max-w-4xl text-3xl font-black leading-tight md:text-4xl animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+          <h1 className="mt-4 max-w-4xl text-3xl font-black text-teal-600 leading-tight md:text-4xl animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
             {t('home.title')}
           </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-100 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>{t('home.subtitle')}</p>
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-white animate-fade-in-up" style={{ animationDelay: '0.2s' }}>{t('home.subtitle')}</p>
 
           <form onSubmit={handleSearch} className="mt-10 grid max-w-6xl gap-4 rounded-3xl bg-white p-5 text-slate-950 shadow-2xl ring-4 ring-teal-500/10 lg:grid-cols-[1fr_1fr_220px_auto] lg:items-end animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
             <SearchSuggestInput label={t('home.lookingFor')} placeholder={t('home.lookingForPlaceholder')} value={searchForm.what} onChange={(value) => updateSearchField('what', value)} suggestions={whatSuggestions} />
 
             <SearchSuggestInput label={t('home.where')} placeholder={t('home.wherePlaceholder')} value={searchForm.where} onChange={(value) => updateSearchField('where', value)} suggestions={whereSuggestions} />
 
-            <label className="block"><span className="mb-2 block text-sm font-bold text-slate-800">{t('home.when')}</span><Select value={searchForm.when} onChange={(event) => updateSearchField('when', event.target.value)} className="h-12">{whenOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</Select></label>
+            <CustomSelect label={t('home.when')} value={searchForm.when} onChange={(value) => updateSearchField('when', value)} options={whenOptions} />
             <Button type="submit" variant="primary" className="h-12 px-8"><Search className="mr-2 h-4 w-4" /> {t('search')}</Button>
           </form>
 
@@ -219,8 +212,14 @@ export default function HomePage()  {
 
             <Link to="/events"><Button variant="light"><CalendarSearch className="mr-2 h-4 w-4" /> {t('browseEvents')}</Button></Link>
 
-            <Link to="/register"><Button variant="secondary">{t('createAccount')}</Button></Link>
-            <Link to="/organizer/events/create"><Button variant="primary">{t('becomeProvider')}</Button></Link>
+            {!isAuthenticated ? (
+              <>
+                <Link to="/register"><Button variant="secondary">{t('createAccount')}</Button></Link>
+                <Link to="/organizer/register"><Button variant="primary">{t('becomeProvider')}</Button></Link>
+              </>
+            ) : (
+              <Link to={getDashboardPathByRole(role)}><Button variant="primary">{t('goToDashboard', 'Go to Dashboard')}</Button></Link>
+            )}
           </div>
 
         </div>

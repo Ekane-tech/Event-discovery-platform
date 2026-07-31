@@ -227,33 +227,12 @@ export default function OrganizerStatisticsPage() {
 
   return (
     <PageContainer>
-      <section
-        className="overflow-hidden rounded-3xl bg-slate-950 bg-cover bg-center p-8 text-white"
-        style={{
-          backgroundImage:
-            'linear-gradient(90deg, rgba(2,6,23,.9), rgba(15,118,110,.68)), url(/hero-events.svg)',
-        }}
-      >
-        <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100">
-          <TrendingUp className="h-4 w-4" />
-          Organizer insights
-        </span>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-2xl font-black text-slate-950">Event statistics</h1>
+        <Link to="/organizer/events"><Button variant="light">Manage Events</Button></Link>
+      </div>
 
-        <div className="mt-5 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <h1 className="text-4xl font-black md:text-5xl">Event statistics</h1>
-            <p className="mt-3 max-w-2xl text-slate-200">
-              Track visibility, registrations, revenue potential, moderation status and your best-performing events.
-            </p>
-          </div>
-
-          <Link to="/organizer/events">
-            <Button variant="light">Manage Events</Button>
-          </Link>
-        </div>
-      </section>
-
-      <section className="mt-6">
+      <section>
         {loading ? (
           <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
             {Array.from({ length: 6 }).map((_, index) => (

@@ -1,6 +1,7 @@
 import { ROLES } from './roles.js'
 
 export const PUBLIC_NAV_LINKS = [
+  { label: 'Home', labelKey: 'nav.home', to: '/', icon: 'home' },
   { label: 'Browse Events', labelKey: 'nav.browseEvents', to: '/events', icon: 'calendarSearch' },
   { label: 'Organizers', labelKey: 'nav.organizers', to: '/organizers', icon: 'users' },
   { label: 'About', labelKey: 'nav.about', to: '/about', icon: 'calendarSearch' },

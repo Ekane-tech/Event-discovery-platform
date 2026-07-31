@@ -43,20 +43,14 @@ export default function OrganizersPage() {
   const stats = useMemo(() => ({ total: organizers.length, verified: organizers.filter((item) => item.isVerified).length }), [organizers])
 
   return (
-    <div>
-      <div className="mx-auto w-full max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
-        <section className="relative overflow-hidden rounded-3xl bg-slate-950 text-white shadow-xl">
-          <div className="absolute inset-0 bg-cover bg-center opacity-50" style={{ backgroundImage: 'url(/hero-events.svg)' }} />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-teal-900/70" />
-          <div className="relative px-5 py-12 sm:px-8 lg:px-10 lg:py-16">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100"><Users className="h-4 w-4" />{t('organizers.badge', 'Organizers')}</span>
-          <h1 className="mt-5 max-w-4xl text-4xl font-black md:text-6xl">{t('organizers.title', 'Find trusted event organizers.')}</h1>
-          <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-200">{t('organizers.subtitle', 'Search organizer profiles, discover verified organizers and browse their public events on Mboa Events 237.')}</p>
-          </div>
-        </section>
+    <PageContainer>
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <span className="inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700"><Users className="h-4 w-4" />{t('organizers.badge', 'Organizers')}</span>
+          <h1 className="mt-2 text-2xl font-black text-slate-950">{t('organizers.title', 'Find trusted event organizers.')}</h1>
+          <p className="mt-1 text-sm text-slate-600">{t('organizers.subtitle', 'Search organizer profiles, discover verified organizers and browse their public events on Mboa Events 237.')}</p>
+        </div>
       </div>
-
-      <PageContainer>
         <div className="mb-6 grid grid-cols-2 gap-4">
           <div className="rounded-3xl bg-gradient-to-br from-teal-600 to-emerald-700 p-5 text-white"><p className="text-sm text-white/80">{t('organizers.badge', 'Organizers')}</p><p className="mt-2 text-3xl font-black">{stats.total}</p></div>
           <div className="rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 p-5 text-white"><p className="text-sm text-white/80">{t('organizers.verified', 'Verified')}</p><p className="mt-2 text-3xl font-black">{stats.verified}</p></div>
@@ -75,6 +69,5 @@ export default function OrganizersPage() {
         {!loading && !error && organizers.length === 0 && <EmptyState title={t('organizers.emptyTitle', 'No organizers found')} message={t('organizers.emptyMessage', 'Try another search term or disable verified-only filtering.')} />}
         {!loading && !error && organizers.length > 0 && <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">{organizers.map((organizer) => <OrganizerCard key={organizer.id} organizer={organizer} />)}</div>}
       </PageContainer>
-    </div>
   )
 }

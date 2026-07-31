@@ -130,13 +130,15 @@ export default function AdminPayoutsPage() {
 
   return (
     <PageContainer>
-      <section className="rounded-3xl bg-gradient-to-r from-slate-900 to-teal-800 p-8 text-white">
-        <Banknote className="h-10 w-10 text-teal-200" />
-        <h1 className="mt-5 text-4xl font-black">{t('payouts.title', 'Payouts')}</h1>
-        <p className="mt-3 max-w-2xl text-white/90">{t('payouts.subtitle', 'Review organizer withdrawal requests, approve them, and record manual payments.')}</p>
-      </section>
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <span className="inline-flex rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700">{t('payouts.badge', 'Finance')}</span>
+          <h1 className="mt-2 text-2xl font-black text-slate-950">{t('payouts.title', 'Payouts')}</h1>
+          <p className="mt-1 text-sm text-slate-600">{t('payouts.subtitle', 'Review organizer withdrawal requests, approve them, and record manual payments.')}</p>
+        </div>
+      </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-4 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
         <Card><Clock className="h-6 w-6 text-amber-600" /><p className="mt-3 text-2xl font-black text-slate-950">{fmt(sum('requested'))}</p><p className="text-sm text-slate-500">{t('payouts.requested', 'Requested')}</p></Card>
         <Card><CheckCircle2 className="h-6 w-6 text-blue-600" /><p className="mt-3 text-2xl font-black text-slate-950">{fmt(sum('approved'))}</p><p className="text-sm text-slate-500">{t('payouts.approved', 'Approved')}</p></Card>
         <Card><Banknote className="h-6 w-6 text-green-600" /><p className="mt-3 text-2xl font-black text-slate-950">{fmt(sum('paid'))}</p><p className="text-sm text-slate-500">{t('payouts.paid', 'Paid out')}</p></Card>
