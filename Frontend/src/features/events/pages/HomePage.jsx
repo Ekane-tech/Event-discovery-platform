@@ -68,7 +68,18 @@ export default function HomePage()  {
 
   ]
 
-
+  useEffect(() => {
+    // Add custom header background for homepage
+    const header = document.querySelector('header');
+    if (header) {
+      header.classList.add('homepage-header');
+    }
+    return () => {
+      if (header) {
+        header.classList.remove('homepage-header');
+      }
+    };
+  }, []);
 
   useEffect(() => {
 
