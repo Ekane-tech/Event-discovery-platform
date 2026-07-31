@@ -1,4 +1,31 @@
 @import "tailwindcss";
+
+@theme {
+  --color-teal-50: #fcf6f2;
+  --color-teal-100: #f8ece5;
+  --color-teal-200: #f2d8ca;
+  --color-teal-300: #e8b9a1;
+  --color-teal-400: #d9916e;
+  --color-teal-500: #b0551c;
+  --color-teal-600: #9e4a18;
+  --color-teal-700: #833d14;
+  --color-teal-800: #6b3313;
+  --color-teal-900: #582c12;
+  --color-teal-950: #2f1508;
+
+  --color-pink-50: #fcf6f2;
+  --color-pink-100: #f8ece5;
+  --color-pink-200: #f2d8ca;
+  --color-pink-300: #e8b9a1;
+  --color-pink-400: #d9916e;
+  --color-pink-500: #b0551c;
+  --color-pink-600: #9e4a18;
+  --color-pink-700: #833d14;
+  --color-pink-800: #6b3313;
+  --color-pink-900: #582c12;
+  --color-pink-950: #2f1508;
+}
+
 @import "./shared/styles/global.css";
 
 /* ────────────────────────────────────────────────────────────────────────
@@ -20,7 +47,7 @@
 
 :root {
   color-scheme: light;
-  --mboa-page: #f8fafc;
+  --mboa-page: #ffffff;
   --mboa-surface: #ffffff;
   --mboa-text: #172033;
 }
@@ -42,9 +69,9 @@
   --color-slate-100: #16223a; /* inputs, secondary buttons, hovers */
 
   /* accent soft tints → dark tints (keeps pills / badges / icon chips subtle) */
-  --color-teal-50: #0c2a28;
-  --color-teal-100: #103a36;
-  --color-teal-200: #15504a;
+  --color-teal-50: #2a1b0c;
+  --color-teal-100: #34210f;
+  --color-teal-200: #503115;
   --color-red-50: #2a1414;
   --color-red-100: #341a1a;
   --color-green-50: #0c2417;
@@ -57,8 +84,8 @@
   --color-yellow-100: #342e0f;
   --color-purple-50: #1f1430;
   --color-purple-100: #261a3d;
-  --color-pink-50: #2a1322;
-  --color-pink-100: #34192b;
+  --color-pink-50: #2a1b0c;
+  --color-pink-100: #34210f;
   --color-indigo-50: #161433;
   --color-rose-50: #2a1218;
   --color-emerald-50: #0c2417;
@@ -69,7 +96,7 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: #f8fafc;
+  background-color: #ffffff;
   color: #172033;
 }
 .dark body {
@@ -106,8 +133,8 @@ body {
 .dark .text-yellow-100{ color: #fef08a; }
 .dark .text-purple-50 { color: #e9d5ff; }
 .dark .text-purple-100{ color: #e9d5ff; }
-.dark .text-pink-50   { color: #fbcfe8; }
-.dark .text-pink-100  { color: #fbcfe8; }
+.dark .text-pink-50   { color: #fdf6f2; }
+.dark .text-pink-100  { color: #fbece5; }
 .dark .text-indigo-50 { color: #c7d2fe; }
 .dark .text-rose-50   { color: #ffcdd2; }
 .dark .text-emerald-50{ color: #a7f3d0; }
@@ -123,16 +150,16 @@ body {
 .dark .text-white\/75 { color: rgba(255, 255, 255, 0.75); }
 
 /* teal colors for better dark mode visibility */
-.dark .text-teal-50 { color: #f0fdfa; }
-.dark .text-teal-100 { color: #ccfbf1; }
-.dark .text-teal-200 { color: #99f6e4; }
-.dark .text-teal-300 { color: #5eead4; }
-.dark .text-teal-400 { color: #2dd4bf; }
-.dark .text-teal-500 { color: #14b8a6; }
-.dark .text-teal-600 { color: #0d9488; }
-.dark .text-teal-700 { color: #0f766e; }
-.dark .text-teal-800 { color: #115e59; }
-.dark .text-teal-900 { color: #134e4a; }
+.dark .text-teal-50 { color: #fdf6f2; }
+.dark .text-teal-100 { color: #fbece5; }
+.dark .text-teal-200 { color: #f7d5c9; }
+.dark .text-teal-300 { color: #f1b6a1; }
+.dark .text-teal-400 { color: #e88d6d; }
+.dark .text-teal-500 { color: #b0551c; }
+.dark .text-teal-600 { color: #9e4a18; }
+.dark .text-teal-700 { color: #833d14; }
+.dark .text-teal-800 { color: #6b3313; }
+.dark .text-teal-900 { color: #582c12; }
 
 /* other accent colors for better dark mode visibility */
 .dark .text-red-700 { color: #fca5a5; }
@@ -144,20 +171,20 @@ body {
 .dark .text-purple-700 { color: #c4b5fd; }
 .dark .text-purple-600 { color: #a78bfa; }
 .dark .text-purple-500 { color: #8b5cf6; }
-.dark .text-pink-700 { color: #f9a8d4; }
-.dark .text-pink-600 { color: #f472b6; }
-.dark .text-pink-500 { color: #ec4899; }
+.dark .text-pink-700 { color: #833d14; }
+.dark .text-pink-600 { color: #9e4a18; }
+.dark .text-pink-500 { color: #b0551c; }
 .dark .text-indigo-700 { color: #a5b4fc; }
 .dark .text-indigo-600 { color: #818cf8; }
 .dark .text-indigo-500 { color: #6366f1; }
 
 /* theme toggle button dark mode fixes */
 .dark .bg-slate-100 { background-color: #1e293b !important; }
-.dark .hover\:bg-teal-50:hover { background-color: #0f766e !important; }
+.dark .hover\:bg-teal-50:hover { background-color: #833d14 !important; }
 
 /* notification icon dark mode fixes */
 .dark .bg-slate-100 { background-color: #1e293b !important; }
-.dark .hover\:bg-teal-50:hover { background-color: #0f766e !important; }
+.dark .hover\:bg-teal-50:hover { background-color: #833d14 !important; }
 
 /* menu button dark mode fixes */
 .dark .border-slate-200 { border-color: #26324a !important; }
@@ -219,6 +246,17 @@ body {
   .react-datepicker__time-box
   ul.react-datepicker__time-list
   li.react-datepicker__time-list-item--selected {
-  background-color: #0f766e !important;
+  background-color: #b0551c !important;
+  color: #ffffff !important;
+}
+
+/* ── Global Button Text Override for Dark Mode ────────────────────────── */
+.dark button,
+.dark .btn {
+  color: #ffffff !important;
+}
+/* Ensure icons inside buttons are also white if they don't have their own color */
+.dark button svg:not([class*='text-']),
+.dark .btn svg:not([class*='text-']) {
   color: #ffffff !important;
 }
