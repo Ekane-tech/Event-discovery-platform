@@ -1120,5 +1120,622 @@
     "notYetEnded": "Reviews open once the event has ended.",
     "anonymous": "Attendee",
     "verifiedAttendee": "Verified attendee"
+  },
+  "admin": {
+    "common": {
+      "actions": "Actions",
+      "active": "Active",
+      "all": "All",
+      "allRoles": "All roles",
+      "allStatuses": "All statuses",
+      "cancel": "Cancel",
+      "chooseReason": "Choose a reason",
+      "close": "Close",
+      "confirm": "Confirm",
+      "create": "Create",
+      "created": "Created",
+      "delete": "Delete",
+      "description": "Description",
+      "disable": "Disable",
+      "disabled": "Disabled",
+      "draft": "Draft",
+      "edit": "Edit",
+      "enable": "Enable",
+      "errorLoading": "Unable to load {{type}}",
+      "errorTitle": "Error",
+      "filter": "Filter",
+      "filterAll": "All",
+      "find": "Find",
+      "first": "First",
+      "for": "for",
+      "from": "From",
+      "goBack": "Go back",
+      "inactive": "Inactive",
+      "loading": "Loading {{type}}...",
+      "manage": "Manage",
+      "name": "Name",
+      "new": "New",
+      "no": "No",
+      "noDescription": "No description",
+      "noItems": "No {{type}} found",
+      "noItemsMessage": "There are no {{type}} to display",
+      "notAvailable": "Not available",
+      "notSpecified": "Not specified",
+      "of": "of",
+      "on": "on",
+      "or": "or",
+      "other": "Other",
+      "pending": "Pending",
+      "pendingApproval": "Pending approval",
+      "publish": "Publish",
+      "published": "Published",
+      "reject": "Reject",
+      "rejected": "Rejected",
+      "remove": "Remove",
+      "reset": "Reset",
+      "resolve": "Resolve",
+      "resolved": "Resolved",
+      "review": "Review",
+      "reviewing": "Reviewing",
+      "save": "Save",
+      "saving": "Saving...",
+      "search": "Search {{type}}",
+      "searchPlaceholder": "Search by {{field}}",
+      "select": "Select",
+      "send": "Send",
+      "sending": "Sending...",
+      "status": "Status",
+      "suspend": "Suspend",
+      "suspended": "Suspended",
+      "the": "the",
+      "to": "to",
+      "toggle": "Toggle",
+      "total": "Total",
+      "type": "Type",
+      "unverify": "Unverify",
+      "update": "Update",
+      "updated": "Updated",
+      "verify": "Verify",
+      "verified": "Verified",
+      "view": "View",
+      "yes": "Yes"
+    },
+    "users": {
+      "title": "Manage users",
+      "description": "Review accounts, roles and access status across the platform.",
+      "totalUsers": "Total users",
+      "activeUsers": "Active",
+      "suspendedUsers": "Suspended",
+      "organizersCount": "Organizers",
+      "searchPlaceholder": "Search by name or email",
+      "roleFilter": {
+        "all": "All roles",
+        "user": "Users",
+        "organizer": "Organizers",
+        "admin": "Admins"
+      },
+      "statusFilter": {
+        "all": "All statuses",
+        "active": "Active",
+        "pending_approval": "Pending approval",
+        "suspended": "Suspended"
+      },
+      "table": {
+        "user": "User",
+        "email": "Email",
+        "role": "Role",
+        "location": "Location",
+        "joined": "Joined",
+        "ownStatusProtected": "Own status protected"
+      },
+      "actions": {
+        "activate": "Activate",
+        "suspend": "Suspend",
+        "makeUser": "Make User",
+        "makeOrganizer": "Make Organizer",
+        "verifyOrganizer": "Verify Organizer",
+        "unverifyOrganizer": "Unverify Organizer"
+      },
+      "modals": {
+        "suspendAccount": "Suspend account",
+        "activateAccount": "Activate account",
+        "suspendMessage": "This will disable {{name}}'s access and send an email notification with the reason.",
+        "activateMessage": "This will reactivate {{name}}'s access and send an email notification.",
+        "reasonLabel": "Reason sent by email",
+        "detailsLabel": "Additional details",
+        "detailsRequired": "(required)",
+        "detailsOptional": "(optional)",
+        "suspensionHelper": "Add details that will help the user understand the suspension.",
+        "activationHelper": "Add a short note for the user if needed.",
+        "suspendButton": "Suspend account",
+        "activateButton": "Activate account"
+      },
+      "toasts": {
+        "suspended": "User suspended successfully.",
+        "activated": "User activated successfully.",
+        "roleUpdated": "User role updated successfully.",
+        "organizerVerified": "Organizer verified successfully.",
+        "organizerUnverified": "Organizer verification removed.",
+        "error": {
+          "load": "Unable to load users.",
+          "statusUpdate": "Unable to update user status.",
+          "roleUpdate": "Unable to update user role.",
+          "verification": "Unable to update organizer verification.",
+          "chooseReason": "Please choose a reason.",
+          "describeReason": "Please describe the reason."
+        }
+      }
+    },
+    "events": {
+      "title": "Moderate events",
+      "description": "Review submitted events, publish valid listings, and block problematic content.",
+      "totalEvents": "Total events",
+      "pendingEvents": "Pending",
+      "publishedEvents": "Published",
+      "reportedEvents": "Reported",
+      "searchPlaceholder": "Search events",
+      "statusFilter": {
+        "all": "All statuses",
+        "pending": "Pending",
+        "published": "Published",
+        "rejected": "Rejected",
+        "cancelled": "Cancelled",
+        "draft": "Draft"
+      },
+      "table": {
+        "title": "Event",
+        "category": "Category",
+        "city": "City",
+        "date": "Date",
+        "reports": "Reports"
+      },
+      "actions": {
+        "details": "Details",
+        "publish": "Publish",
+        "reject": "Reject",
+        "cancel": "Cancel"
+      },
+      "moderation": {
+        "publishTitle": "Publish event",
+        "publishNote": "This event will become visible in public search and attendees will be able to register.",
+        "publishButton": "Confirm publishing",
+        "rejectTitle": "Reject event",
+        "rejectNote": "This event will not be visible publicly. The organizer will receive your reason.",
+        "rejectButton": "Confirm rejection",
+        "cancelTitle": "Cancel event",
+        "cancelNote": "This removes the event from public access, clears bookmarks, updates registrations, and notifies affected users.",
+        "cancelButton": "Confirm cancellation",
+        "moderationAction": "Moderation action",
+        "reasonSentToOrganizer": "Reason sent to organizer",
+        "reasonHelper": "Explain clearly why this moderation action is being applied. This message helps the organizer correct the event and avoid confusion.",
+        "publishingNote": "Publishing does not require a reason. The organizer will be notified that the event is live."
+      },
+      "toasts": {
+        "published": "Event published successfully.",
+        "rejected": "Event rejected successfully.",
+        "cancelled": "Event cancelled successfully.",
+        "error": {
+          "load": "Unable to load events.",
+          "statusUpdate": "Unable to update event status."
+        }
+      }
+    },
+    "categories": {
+      "title": "Manage categories",
+      "description": "Create clear event categories so attendees can discover the right experiences faster.",
+      "newCategory": "New Category",
+      "totalCategories": "Total categories",
+      "activeCategories": "Active",
+      "disabledCategories": "Disabled",
+      "usedByEvents": "Used by events",
+      "searchPlaceholder": "Search categories",
+      "statusFilter": {
+        "all": "All statuses",
+        "active": "Active",
+        "disabled": "Disabled"
+      },
+      "table": {
+        "category": "Category",
+        "description": "Description",
+        "eventCount": "Events",
+        "status": "Status"
+      },
+      "actions": {
+        "edit": "Edit",
+        "disable": "Disable",
+        "enable": "Enable",
+        "delete": "Delete"
+      },
+      "form": {
+        "createTitle": "Create category",
+        "editTitle": "Edit category",
+        "setupBadge": "Category setup",
+        "updateCategory": "Update category",
+        "newCategory": "New category",
+        "setupDescription": "Use short, recognizable names that help attendees filter events quickly.",
+        "nameLabel": "Category name",
+        "namePlaceholder": "Technology",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Describe the kind of events included in this category.",
+        "imageTitle": "Category image",
+        "imageDescription": "JPG, PNG or WebP. Maximum 4MB. This image appears on public category cards and as an event fallback image.",
+        "chooseImage": "Choose image",
+        "removeImage": "Remove",
+        "imageHint": "Use a clear photo or logo for a stronger Mboa profile presence."
+      },
+      "toasts": {
+        "created": "Category created successfully.",
+        "updated": "Category updated successfully.",
+        "deleted": "Category deleted successfully.",
+        "disabled": "Category disabled.",
+        "enabled": "Category enabled.",
+        "error": {
+          "load": "Unable to load categories.",
+          "save": "Unable to save category.",
+          "statusUpdate": "Unable to update category status.",
+          "delete": "Unable to delete category."
+        }
+      }
+    },
+    "locations": {
+      "title": "Manage locations",
+      "description": "Maintain regions, divisions and cities used by event publishing and search filters.",
+      "tabs": {
+        "regions": "Regions",
+        "divisions": "Divisions",
+        "cities": "Cities"
+      },
+      "regions": {
+        "addButton": "Add Region",
+        "namePlaceholder": "Region name",
+        "table": {
+          "region": "Region"
+        }
+      },
+      "divisions": {
+        "addButton": "Add Division",
+        "regionLabel": "Select region",
+        "namePlaceholder": "Division name",
+        "table": {
+          "division": "Division",
+          "regionName": "Region"
+        }
+      },
+      "cities": {
+        "addButton": "Add City",
+        "regionLabel": "Select region",
+        "divisionLabel": "Select division",
+        "noDivision": "No division",
+        "namePlaceholder": "City name",
+        "table": {
+          "city": "City",
+          "divisionName": "Division",
+          "regionName": "Region"
+        }
+      },
+      "actions": {
+        "disable": "Disable",
+        "enable": "Enable"
+      },
+      "toasts": {
+        "regionCreated": "Region created.",
+        "divisionCreated": "Division created.",
+        "cityCreated": "City created.",
+        "error": {
+          "load": "Unable to load locations.",
+          "createRegion": "Unable to create region.",
+          "createDivision": "Unable to create division.",
+          "createCity": "Unable to create city.",
+          "updateRegion": "Unable to update region.",
+          "updateDivision": "Unable to update division.",
+          "updateCity": "Unable to update city."
+        }
+      },
+      "recordsCount": "{{count}} records"
+    },
+    "reports": {
+      "title": "Reports",
+      "description": "Review user reports and resolve trust or quality issues.",
+      "totalReports": "Total reports",
+      "openReports": "Open",
+      "reviewingReports": "Reviewing",
+      "resolvedReports": "Resolved",
+      "searchPlaceholder": "Search reports",
+      "typeFilter": {
+        "all": "All types",
+        "fake_event": "Fake event",
+        "wrong_information": "Wrong information",
+        "wrong_location": "Wrong location",
+        "inappropriate_content": "Inappropriate content",
+        "duplicate_event": "Duplicate event",
+        "scam_or_fraud": "Scam or fraud",
+        "other": "Other"
+      },
+      "statusFilter": {
+        "all": "All statuses",
+        "open": "Open",
+        "reviewing": "Reviewing",
+        "resolved": "Resolved",
+        "rejected": "Rejected"
+      },
+      "table": {
+        "type": "Type",
+        "target": "Target",
+        "reportedBy": "Reported By",
+        "date": "Date"
+      },
+      "actions": {
+        "details": "Details",
+        "review": "Review",
+        "resolve": "Resolve",
+        "reject": "Reject"
+      },
+      "modal": {
+        "title": "Report details",
+        "badge": "Report",
+        "statusLabel": "Status",
+        "eventLabel": "Event",
+        "reporterLabel": "Reporter",
+        "dateLabel": "Date",
+        "messageLabel": "Message",
+        "noMessage": "No message provided.",
+        "markReviewing": "Mark reviewing",
+        "close": "Close"
+      },
+      "toasts": {
+        "statusUpdated": "Report status updated.",
+        "error": {
+          "load": "Unable to load reports.",
+          "statusUpdate": "Unable to update report."
+        }
+      }
+    },
+    "feedback": {
+      "title": "User feedback",
+      "description": "Review ratings, suggestions and experience feedback from your community.",
+      "totalFeedback": "Total feedback",
+      "positiveRatings": "Positive ratings",
+      "searchPlaceholder": "Search feedback",
+      "categoryFilter": {
+        "all": "All categories",
+        "general": "General",
+        "bug": "Bug",
+        "feature": "Feature",
+        "design": "Design/UI",
+        "performance": "Performance"
+      },
+      "ratingFilter": {
+        "all": "All ratings",
+        "5stars": "5 stars",
+        "4stars": "4 stars",
+        "3stars": "3 stars",
+        "2stars": "2 stars",
+        "1star": "1 star"
+      },
+      "table": {
+        "name": "Name",
+        "email": "Email",
+        "rating": "Rating",
+        "category": "Category",
+        "message": "Message",
+        "date": "Date"
+      },
+      "actions": {
+        "read": "Read"
+      },
+      "modal": {
+        "title": "Feedback details",
+        "categoryLabel": "Category",
+        "nameLabel": "Name:",
+        "emailLabel": "Email:",
+        "dateLabel": "Date:"
+      },
+      "toasts": {
+        "error": {
+          "load": "Unable to load feedback."
+        }
+      }
+    },
+    "announcements": {
+      "title": "Announcements",
+      "description": "Create announcements and send system notifications to selected audiences.",
+      "totalAnnouncements": "Total announcements",
+      "drafts": "Drafts",
+      "sent": "Sent",
+      "form": {
+        "titleLabel": "Title",
+        "titlePlaceholder": "Announcement title",
+        "messageLabel": "Message",
+        "messagePlaceholder": "Notification message",
+        "audienceLabel": "Audience",
+        "audienceOptions": {
+          "users": "Registered users",
+          "organizers": "Organizers",
+          "admins": "Administrators",
+          "all": "Everyone"
+        },
+        "actionLabel": "Action",
+        "actionOptions": {
+          "draft": "Save as draft",
+          "sent": "Send immediately"
+        },
+        "saveButton": "Save Announcement",
+        "saving": "Saving..."
+      },
+      "audienceBadge": {
+        "users": "Users",
+        "organizers": "Organizers",
+        "admins": "Admins",
+        "all": "All"
+      },
+      "statusBadge": {
+        "draft": "Draft",
+        "sent": "Sent"
+      },
+      "actions": {
+        "send": "Send"
+      },
+      "toasts": {
+        "saved": "Announcement saved successfully.",
+        "sent": "Announcement sent successfully.",
+        "error": {
+          "load": "Unable to load announcements.",
+          "save": "Unable to save announcement.",
+          "send": "Unable to send announcement."
+        }
+      }
+    },
+    "auditLogs": {
+      "title": "Audit Logs",
+      "description": "Review important administrative and organizer actions across the platform.",
+      "activityTrail": "Activity trail",
+      "activityTrailDescription": "Search action names, actors, descriptions and targets.",
+      "searchPlaceholder": "Search audit logs",
+      "table": {
+        "action": "Action",
+        "actor": "Actor",
+        "target": "Target",
+        "description": "Description",
+        "ip": "IP",
+        "date": "Date"
+      },
+      "toasts": {
+        "error": {
+          "load": "Unable to load audit logs."
+        }
+      }
+    },
+    "payments": {
+      "title": "Payment Tracking",
+      "description": "Monitor event payments, pending revenue and completed mobile money transactions.",
+      "totalRevenue": "Total revenue",
+      "pendingRevenue": "Pending revenue",
+      "paidPayments": "Paid payments",
+      "pendingPayments": "Pending payments",
+      "transactionsTitle": "Transactions",
+      "transactionsDescription": "Search by attendee, event, phone or reference.",
+      "searchPlaceholder": "Search payments",
+      "statusFilter": {
+        "all": "All statuses",
+        "pending": "Pending",
+        "paid": "Paid",
+        "failed": "Failed"
+      },
+      "table": {
+        "reference": "Reference",
+        "event": "Event",
+        "attendee": "Attendee",
+        "amount": "Amount",
+        "status": "Status",
+        "operator": "Operator",
+        "phone": "Phone",
+        "paid": "Paid",
+        "created": "Created"
+      },
+      "toasts": {
+        "error": {
+          "load": "Unable to load payment tracking."
+        }
+      }
+    },
+    "email": {
+      "title": "Email Delivery",
+      "description": "Test production email delivery and monitor outgoing mail results.",
+      "sendTestEmail": "Send test email",
+      "sendTestDescription": "Use this to verify Brevo delivery after deployment changes.",
+      "totalLogs": "Total logs",
+      "sent": "Sent",
+      "failed": "Failed",
+      "emailLogs": "Email logs",
+      "emailLogsDescription": "Search delivery attempts, failures and recipient addresses.",
+      "searchPlaceholder": "Search logs",
+      "refreshButton": "Refresh",
+      "form": {
+        "recipientLabel": "Recipient email",
+        "recipientPlaceholder": "admin@example.com",
+        "subjectLabel": "Subject",
+        "messageLabel": "Message",
+        "sendButton": "Send test email",
+        "sending": "Sending..."
+      },
+      "table": {
+        "recipient": "Recipient",
+        "subject": "Subject",
+        "type": "Type",
+        "status": "Status",
+        "error": "Error",
+        "date": "Date"
+      },
+      "statusBadge": {
+        "sent": "Sent",
+        "failed": "Failed"
+      },
+      "toasts": {
+        "sent": "Test email sent successfully.",
+        "error": {
+          "load": "Unable to load email logs.",
+          "send": "Unable to send test email."
+        }
+      }
+    },
+    "payouts": {
+      "badge": "Finance",
+      "title": "Payouts",
+      "subtitle": "Review organizer withdrawal requests, approve them, and record manual payments.",
+      "requested": "Requested",
+      "approved": "Approved",
+      "paid": "Paid out",
+      "inView": "In current view",
+      "settingsTitle": "Platform settings",
+      "feePercent": "Platform fee (%)",
+      "graceHours": "Grace period (hours)",
+      "minPayout": "Minimum payout",
+      "filter": {
+        "all": "All",
+        "requested": "Requested",
+        "approved": "Approved",
+        "paid": "Paid",
+        "rejected": "Rejected"
+      },
+      "table": {
+        "organizer": "Organizer",
+        "amount": "Amount",
+        "method": "Method",
+        "status": "Status",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "actions": {
+        "approve": "Approve",
+        "reject": "Reject",
+        "markPaid": "Mark paid"
+      },
+      "statusStyles": {
+        "requested": "Requested",
+        "approved": "Approved",
+        "paid": "Paid",
+        "rejected": "Rejected",
+        "cancelled": "Cancelled"
+      },
+      "method": {
+        "bank": "Bank",
+        "mobileMoney": "Mobile Money"
+      },
+      "toasts": {
+        "approveDone": "Payout approved.",
+        "rejectDone": "Payout rejected.",
+        "markPaidDone": "Marked as paid.",
+        "settingsSaved": "Settings saved.",
+        "error": {
+          "load": "Unable to load payouts.",
+          "actionFailed": "Action failed.",
+          "settingsSaveFailed": "Unable to save settings."
+        }
+      }
+    },
+    "dashboard": {
+      "title": "Admin Dashboard",
+      "description": "Overview of platform activity, user growth, and key metrics."
+    }
   }
 }
