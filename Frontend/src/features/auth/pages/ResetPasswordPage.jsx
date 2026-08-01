@@ -10,8 +10,8 @@ import { authService } from '../services/authService.js'
 import { getApiErrorMessage } from '../utils/normalizeAuthUser.js'
 import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
-function maskEmail(email) {
-  if (!email || !email.includes('@')) return email || 'your account'
+function maskEmail(email, t) {
+  if (!email || !email.includes('@')) return email || t('auth.yourAccount')
   const [name, domain] = email.split('@')
   const visible = name.slice(0, 2)
   return `${visible}${'•'.repeat(Math.max(3, name.length - 2))}@${domain}`
@@ -63,11 +63,11 @@ export default function ResetPasswordPage() {
     setError('')
     setSuccess(false)
 
-    if (!email || !token) return setError('This reset link is incomplete or invalid. Please request a new password reset link.')
-    if (form.password.length < 8) return setError('Password must be at least 8 characters.')
-    if (!/[a-zA-Z]/.test(form.password)) return setError('Password must contain at least one letter.')
-    if (!/\d/.test(form.password)) return setError('Password must contain at least one number.')
-    if (form.password !== form.passwordConfirmation) return setError('Passwords do not match.')
+    if (!email || !token) return setError(t('auth.resetTokenRequired'))
+    if (form.password.length < 8) return setError(t('auth.passwordMinLength'))
+    if (!/[a-zA-Z]/.test(form.password)) return setError(t('auth.passwordLetter'))
+    if (!/\d/.test(form.password)) return setError(t('auth.passwordNumber'))
+    if (form.password !== form.passwordConfirmation) return setError(t('auth.passwordsNotMatch'))
 
     setSubmitting(true)
 
@@ -81,7 +81,7 @@ export default function ResetPasswordPage() {
       setSuccess(true)
       setForm({ password: '', passwordConfirmation: '' })
     } catch (resetError) {
-      setError(getApiErrorMessage(resetError, 'Unable to reset password. The link may have expired.'))
+      setError(getApiErrorMessage(resetError, t('auth.resetFailure')))
     } finally {
       setSubmitting(false)
     }
@@ -98,8 +98,8 @@ export default function ResetPasswordPage() {
           <h2 className="mt-6 text-3xl font-black leading-tight">{t('auth.passwordResetTitle')}</h2>
           <p className="mt-3 text-sm leading-7 text-slate-200">{t('auth.passwordResetDescription')}</p>
           <div className="mt-6 rounded-3xl bg-white/10 p-5 backdrop-blur">
-            <p className="text-xs font-bold uppercase tracking-wide text-teal-100">Resetting account</p>
-            <p className="mt-2 text-lg font-black">{maskEmail(email)}</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-teal-100">{t('auth.resettingAccount')}</p>
+            <p className="mt-2 text-lg font-black">{maskEmail(email, t)}</p>
           </div>
         </section>
 
@@ -142,8 +142,8 @@ export default function ResetPasswordPage() {
                 <div className="flex items-center gap-3">
                   <ShieldCheck className="h-5 w-5 text-teal-700" />
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{t('auth.account', 'Account')}</p>
-                    <p className="text-sm font-bold text-slate-900">{maskEmail(email)}</p>
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{t('auth.account')}</p>
+                    <p className="text-sm font-bold text-slate-900">{maskEmail(email, t)}</p>
                   </div>
                 </div>
               </div>
@@ -151,7 +151,7 @@ export default function ResetPasswordPage() {
               <FormInput label={t('auth.newPassword')} name="password" type="password" value={form.password} onChange={updateField} required autoComplete="new-password" />
               <FormInput label={t('auth.confirmPassword')} name="passwordConfirmation" type="password" value={form.passwordConfirmation} onChange={updateField} required autoComplete="new-password" />
               <PasswordChecklist password={form.password} confirmation={form.passwordConfirmation} />
-              <Button type="submit" disabled={submitting || !linkIsValid || success} className="h-12 gap-2 bg-teal-700 hover:bg-teal-800">
+              <Button type="submit" disabled={submitting || !linkIsValid || success} variant="primary" className="h-12 gap-2">
                 <KeyRound className="h-4 w-4" />
                 {submitting ? t('auth.resetting') : t('auth.passwordResetTitle')}
               </Button>

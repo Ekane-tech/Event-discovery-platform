@@ -1,4 +1,7 @@
+import { useTranslation } from '../../../shared/i18n/useTranslation.js'
+
 export default function RecommendationScoreBadge({ score = 0 }) {
+  const { t } = useTranslation()
   const color = score >= 80
     ? 'bg-green-100 text-green-800'
     : score >= 50
@@ -7,7 +10,7 @@ export default function RecommendationScoreBadge({ score = 0 }) {
 
   return (
     <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${color}`}>
-      {score}% match
+      {score}% {t('recommendations.match')}
     </span>
   )
 }

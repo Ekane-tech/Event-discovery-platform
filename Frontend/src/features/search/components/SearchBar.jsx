@@ -21,9 +21,9 @@ export default function SearchBar({ value = '', onSearch }) {
       <Input
         value={keyword}
         onChange={(event) => setKeyword(event.target.value)}
-        placeholder={t('searchPage.placeholder', 'Search by event name, category, city, venue, or organizer...')}
+        placeholder={t('searchPage.placeholder')}
       />
-      <Button type="submit" className="sm:w-36">{t('search', 'Search')}</Button>
+      <Button type="submit" className="sm:w-36">{t('search')}</Button>
     </form>
   )
 }

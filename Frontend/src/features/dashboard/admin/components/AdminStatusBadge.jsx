@@ -1,4 +1,7 @@
+import { useTranslation } from '../../../shared/i18n/useTranslation.js'
+
 export default function AdminStatusBadge({ status }) {
+  const { t } = useTranslation()
   const styles = {
     active: 'bg-green-100 text-green-800',
     published: 'bg-green-100 text-green-800',
@@ -15,9 +18,10 @@ export default function AdminStatusBadge({ status }) {
     draft: 'bg-slate-100 text-slate-700',
   }
 
+  const statusKey = status?.replace('_', '') || 'draft'
   return (
     <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold capitalize ${styles[status] || styles.draft}`}>
-      {String(status || 'draft').replace('_', ' ')}
+      {t(`admin.common.${statusKey}`, String(status || 'draft').replace('_', ' '))}
     </span>
   )
 }

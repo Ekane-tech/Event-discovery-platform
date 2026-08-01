@@ -15,6 +15,7 @@ import Table from '../../../../shared/components/ui/Table.jsx'
 import Textarea from '../../../../shared/components/ui/Textarea.jsx'
 import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
 import { extractCollection } from '../../../events/utils/normalizeEvent.js'
+import { useTranslation } from '../../../../shared/i18n/useTranslation.js'
 import AdminPageActions, { AdminActionButton } from '../components/AdminPageActions.jsx'
 import AdminStatusBadge from '../components/AdminStatusBadge.jsx'
 import { adminService } from '../services/adminService.js'
@@ -22,6 +23,7 @@ import { adminService } from '../services/adminService.js'
 const emptyForm = { name: '', description: '', image: null, removeImage: false }
 
 export default function AdminCategoriesPage() {
+  const { t } = useTranslation()
   const [categories, setCategories] = useState([])
   const [filters, setFilters] = useState({ keyword: '', status: 'all' })
   const [form, setForm] = useState(emptyForm)
@@ -39,7 +41,7 @@ export default function AdminCategoriesPage() {
       const response = await adminService.getCategories({ include_inactive: true })
       setCategories(extractCollection(response.data, 'categories'))
     } catch (fetchError) {
-      setError(getApiErrorMessage(fetchError, 'Unable to load categories.'))
+      setError(getApiErrorMessage(fetchError, t('admin.categories.toasts.error.load')))
     } finally {
       setLoading(false)
     }
@@ -86,7 +88,6 @@ export default function AdminCategoriesPage() {
     setForm(emptyForm)
   }
 
-
   function buildCategoryPayload(isActive = true) {
     const payload = new FormData()
     payload.append('name', form.name)
@@ -106,18 +107,18 @@ export default function AdminCategoriesPage() {
     try {
       if (modal.category) {
         await adminService.updateCategory(modal.category.id, buildCategoryPayload(modal.category.is_active ?? true))
-        setSuccess('Category updated successfully.')
-        toast.success('Category updated successfully.')
+        setSuccess(t('admin.categories.toasts.updated'))
+        toast.success(t('admin.categories.toasts.updated'))
       } else {
         await adminService.createCategory(buildCategoryPayload(true))
-        setSuccess('Category created successfully.')
-        toast.success('Category created successfully.')
+        setSuccess(t('admin.categories.toasts.created'))
+        toast.success(t('admin.categories.toasts.created'))
       }
 
       closeModal()
       await fetchCategories()
     } catch (saveError) {
-      const message = getApiErrorMessage(saveError, 'Unable to save category.')
+      const message = getApiErrorMessage(saveError, t('admin.categories.toasts.error.save'))
       setError(message)
       toast.error(message)
     } finally {
@@ -134,10 +135,10 @@ export default function AdminCategoriesPage() {
       payload.append('description', category.description || '')
       payload.append('is_active', !category.is_active ? '1' : '0')
       await adminService.updateCategory(category.id, payload)
-      toast.success(category.is_active ? 'Category disabled.' : 'Category enabled.')
+      toast.success(category.is_active ? t('admin.categories.toasts.disabled') : t('admin.categories.toasts.enabled'))
       await fetchCategories()
     } catch (toggleError) {
-      const message = getApiErrorMessage(toggleError, 'Unable to update category status.')
+      const message = getApiErrorMessage(toggleError, t('admin.categories.toasts.error.statusUpdate'))
       setError(message)
       toast.error(message)
     }
@@ -150,11 +151,11 @@ export default function AdminCategoriesPage() {
     setSuccess('')
     try {
       await adminService.deleteCategory(deleteTarget.id)
-      toast.success('Category deleted successfully.')
+      toast.success(t('admin.categories.toasts.deleted'))
       setDeleteTarget(null)
       await fetchCategories()
     } catch (deleteError) {
-      const message = getApiErrorMessage(deleteError, 'Unable to delete category.')
+      const message = getApiErrorMessage(deleteError, t('admin.categories.toasts.error.delete'))
       setError(message)
       toast.error(message)
     } finally {
@@ -165,14 +166,14 @@ export default function AdminCategoriesPage() {
   const rows = filteredCategories.map((category) => ({
     ...category,
     name: <div className="flex items-center gap-3"><div className="h-12 w-16 overflow-hidden rounded-2xl bg-slate-100">{category.image_url ? <img src={category.image_url} alt={category.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-slate-400"><ImagePlus className="h-5 w-5" /></div>}</div><div><p className="font-bold text-slate-950">{category.name}</p><p className="text-xs text-slate-500">/{category.slug}</p></div></div>,
-    description: <span className="line-clamp-2 text-slate-600">{category.description || 'No description'}</span>,
+    description: <span className="line-clamp-2 text-slate-600">{category.description || t('admin.common.noDescription')}</span>,
     eventCount: category.events_count ?? 0,
     status: <AdminStatusBadge status={category.is_active ? 'active' : 'disabled'} />,
     actions: (
-      <AdminPageActions>
-        <AdminActionButton onClick={() => openEditModal(category)}>Edit</AdminActionButton>
-        <AdminActionButton onClick={() => toggleCategory(category)}>{category.is_active ? 'Disable' : 'Enable'}</AdminActionButton>
-        <AdminActionButton onClick={() => setDeleteTarget(category)}>Delete</AdminActionButton>
+        <AdminPageActions>
+        <AdminActionButton onClick={() => openEditModal(category)}>{t('admin.categories.actions.edit')}</AdminActionButton>
+        <AdminActionButton onClick={() => toggleCategory(category)}>{category.is_active ? t('admin.categories.actions.disable') : t('admin.categories.actions.enable')}</AdminActionButton>
+        <AdminActionButton onClick={() => setDeleteTarget(category)}>{t('admin.categories.actions.delete')}</AdminActionButton>
       </AdminPageActions>
     ),
   }))
@@ -180,16 +181,16 @@ export default function AdminCategoriesPage() {
   return (
     <PageContainer>
       <AdminHero
-        title="Manage categories"
-        description="Create clear event categories so attendees can discover the right experiences faster."
-        action={<Button variant="light" onClick={openCreateModal}><Plus className="mr-2 h-4 w-4" /> New Category</Button>}
+        title={t('admin.categories.title', 'Manage categories')}
+        description={t('admin.categories.description', 'Create clear event categories so attendees can discover the right experiences faster.')}
+        action={<Button variant="light" onClick={openCreateModal}><Plus className="mr-2 h-4 w-4" /> {t('admin.categories.newCategory')}</Button>}
       />
 
       <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <AdminMetricCard label="Total categories" value={metrics.total} icon={FolderTree} gradient="from-indigo-600 to-blue-700" />
-        <AdminMetricCard label="Active" value={metrics.active} icon={Tags} gradient="from-teal-600 to-emerald-700" />
-        <AdminMetricCard label="Disabled" value={metrics.disabled} icon={Tags} gradient="from-slate-600 to-slate-800" />
-        <AdminMetricCard label="Used by events" value={metrics.used} icon={Tags} gradient="from-amber-500 to-orange-700" />
+        <AdminMetricCard label={t('admin.categories.totalCategories')} value={metrics.total} icon={FolderTree} gradient="from-indigo-600 to-blue-700" />
+        <AdminMetricCard label={t('admin.categories.activeCategories')} value={metrics.active} icon={Tags} gradient="from-slate-600 to-slate-800" />
+        <AdminMetricCard label={t('admin.categories.disabledCategories')} value={metrics.disabled} icon={Tags} gradient="from-slate-600 to-slate-800" />
+        <AdminMetricCard label={t('admin.categories.usedByEvents')} value={metrics.used} icon={Tags} gradient="from-amber-500 to-orange-700" />
       </div>
 
       {error && <div className="mt-6"><Alert type="error">{error}</Alert></div>}
@@ -201,7 +202,7 @@ export default function AdminCategoriesPage() {
           <Input
             value={filters.keyword}
             onChange={(event) => setFilters((current) => ({ ...current, keyword: event.target.value }))}
-            placeholder="Search categories"
+            placeholder={t('admin.categories.searchPlaceholder', 'Search categories')}
             className="pl-10"
           />
         </div>
@@ -210,44 +211,44 @@ export default function AdminCategoriesPage() {
           onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}
           className="h-12 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-800 outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
         >
-          <option value="all">All statuses</option>
-          <option value="active">Active</option>
-          <option value="disabled">Disabled</option>
+          <option value="all">{t('admin.categories.statusFilter.all', 'All statuses')}</option>
+          <option value="active">{t('admin.categories.statusFilter.active', 'Active')}</option>
+          <option value="disabled">{t('admin.categories.statusFilter.disabled', 'Disabled')}</option>
         </select>
-        <Button type="button" variant="secondary" onClick={() => setFilters({ keyword: '', status: 'all' })}>Reset</Button>
+        <Button type="button" variant="secondary" onClick={() => setFilters({ keyword: '', status: 'all' })}>{t('admin.common.reset', 'Reset')}</Button>
       </div>
 
-      {loading && <Loader message="Loading categories..." />}
-      {!loading && error && categories.length === 0 && <ErrorState title="Unable to load categories" message={error} />}
+      {loading && <Loader message={t('admin.common.loading', { type: t('admin.categories.title', 'categories') }, 'Loading categories...')} />}
+      {!loading && error && categories.length === 0 && <ErrorState title={t('admin.common.errorTitle', 'Error')} message={error} />}
       {!loading && (
         <Table
           columns={[
-            { key: 'name', label: 'Category' },
-            { key: 'description', label: 'Description' },
-            { key: 'eventCount', label: 'Events' },
-            { key: 'status', label: 'Status' },
-            { key: 'actions', label: 'Actions' },
+            { key: 'name', label: t('admin.categories.table.category', 'Category') },
+            { key: 'description', label: t('admin.categories.table.description', 'Description') },
+            { key: 'eventCount', label: t('admin.categories.table.eventCount', 'Events') },
+            { key: 'status', label: t('admin.categories.table.status', 'Status') },
+            { key: 'actions', label: t('admin.common.actions', 'Actions') },
           ]}
           rows={rows}
         />
       )}
 
-      <Modal open={modal.open} title={modal.category ? 'Edit category' : 'Create category'} onClose={closeModal}>
+      <Modal open={modal.open} title={modal.category ? t('admin.categories.form.editTitle', 'Edit category') : t('admin.categories.form.createTitle', 'Create category')} onClose={closeModal}>
         <form onSubmit={handleSubmit} className="grid gap-2">
           <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-teal-700 p-3 text-white sm:p-3">
-            <p className="text-xs font-bold uppercase tracking-wide text-white/80 sm:text-sm">Category setup</p>
-            <h3 className="mt-1 text-xl font-black sm:text-2xl">{modal.category ? 'Update category' : 'New category'}</h3>
-            <p className="mt-2 text-xs leading-5 text-white/90 sm:mt-2 sm:text-sm sm:leading-6">Use short, recognizable names that help attendees filter events quickly.</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-white/80 sm:text-sm">{t('admin.categories.form.setupBadge', 'Category setup')}</p>
+            <h3 className="mt-1 text-xl font-black sm:text-2xl">{modal.category ? t('admin.categories.form.updateCategory', 'Update category') : t('admin.categories.form.newCategory', 'New category')}</h3>
+            <p className="mt-2 text-xs leading-5 text-white/90 sm:mt-2 sm:text-sm sm:leading-6">{t('admin.categories.form.setupDescription', 'Use short, recognizable names that help attendees filter events quickly.')}</p>
           </div>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-semibold text-slate-700">Category name</span>
-            <Input value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} placeholder="Technology" required />
+            <span className="mb-1 block text-sm font-semibold text-slate-700">{t('admin.categories.form.nameLabel', 'Category name')}</span>
+            <Input value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} placeholder={t('admin.categories.form.namePlaceholder', 'Technology')} required />
           </label>
 
           <label className="block">
-            <span className="mb-1 block text-sm font-semibold text-slate-700">Description</span>
-            <Textarea value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} rows="3" placeholder="Describe the kind of events included in this category." />
+            <span className="mb-1 block text-sm font-semibold text-slate-700">{t('admin.categories.form.descriptionLabel', 'Description')}</span>
+            <Textarea value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} rows="3" placeholder={t('admin.categories.form.descriptionPlaceholder', 'Describe the kind of events included in this category.')} />
           </label>
 
           <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-3">
@@ -262,16 +263,16 @@ export default function AdminCategoriesPage() {
                 )}
               </div>
               <div className="flex-1">
-                <p className="text-sm font-black text-slate-950">Category image</p>
-                <p className="mt-1 text-xs text-slate-600 sm:text-sm">JPG, PNG or WebP. Maximum 4MB. This image appears on public category cards and as an event fallback image.</p>
+                <p className="text-sm font-black text-slate-950">{t('admin.categories.form.imageTitle', 'Category image')}</p>
+                <p className="mt-1 text-xs text-slate-600 sm:text-sm">{t('admin.categories.form.imageDescription', 'JPG, PNG or WebP. Maximum 4MB. This image appears on public category cards and as an event fallback image.')}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <label className="inline-flex cursor-pointer items-center rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-teal-800 sm:px-4 sm:py-2">
-                    <ImagePlus className="mr-2 h-4 w-4" /> Choose image
+                  <label className="inline-flex cursor-pointer items-center rounded-xl bg-slate-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-slate-800 sm:px-4 sm:py-2">
+                    <ImagePlus className="mr-2 h-4 w-4" /> {t('admin.categories.form.chooseImage')}
                     <input type="file" accept="image/png,image/jpeg,image/jpg,image/webp" className="hidden" onChange={(event) => setForm((current) => ({ ...current, image: event.target.files?.[0] || null, removeImage: false }))} />
                   </label>
                   {(form.image || modal.category?.image_url) && (
                     <Button type="button" variant="secondary" onClick={() => setForm((current) => ({ ...current, image: null, removeImage: true }))} className="px-4 py-2.5 sm:px-4 sm:py-2">
-                      <Trash2 className="mr-2 h-4 w-4" /> Remove
+                      <Trash2 className="mr-2 h-4 w-4" /> {t('admin.categories.form.removeImage', 'Remove')}
                     </Button>
                   )}
                 </div>
@@ -280,17 +281,17 @@ export default function AdminCategoriesPage() {
           </div>
 
           <div className="flex flex-col gap-2 sm:flex-row sm:justify-end sm:gap-2">
-            <Button type="button" variant="secondary" onClick={closeModal} disabled={saving} className="w-full sm:w-auto">Cancel</Button>
-            <Button type="submit" disabled={saving} className="w-full sm:w-auto">{saving ? 'Saving...' : modal.category ? 'Update Category' : 'Create Category'}</Button>
+            <Button type="button" variant="secondary" onClick={closeModal} disabled={saving} className="w-full sm:w-auto">{t('admin.common.cancel', 'Cancel')}</Button>
+            <Button type="submit" disabled={saving} className="w-full sm:w-auto">{saving ? t('admin.common.saving', 'Saving...') : modal.category ? t('admin.categories.form.updateCategory', 'Update Category') : t('admin.categories.form.createTitle', 'Create Category')}</Button>
           </div>
         </form>
       </Modal>
 
       <ConfirmDialog
         open={Boolean(deleteTarget)}
-        title="Delete category"
-        message={`Delete category "${deleteTarget?.name}"? This action cannot be undone.`}
-        confirmLabel="Delete category"
+        title={t('admin.categories.actions.delete', 'Delete category')}
+        message={t('admin.common.deleteConfirm', { name: deleteTarget?.name }, `Delete category "${deleteTarget?.name}"? This action cannot be undone.`)}
+        confirmLabel={t('admin.categories.actions.delete', 'Delete category')}
         loading={saving}
         onConfirm={deleteCategory}
         onClose={() => setDeleteTarget(null)}

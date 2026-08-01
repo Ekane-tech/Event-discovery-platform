@@ -218,7 +218,7 @@ export default function HomePage()  {
                 <Link to="/organizer/register"><Button variant="primary">{t('becomeProvider')}</Button></Link>
               </>
             ) : (
-              <Link to={getDashboardPathByRole(role)}><Button variant="primary">{t('goToDashboard', 'Go to Dashboard')}</Button></Link>
+              <Link to={getDashboardPathByRole(role)}><Button variant="primary">{t('goToDashboard')}</Button></Link>
             )}
           </div>
 
