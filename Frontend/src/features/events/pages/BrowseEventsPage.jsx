@@ -22,7 +22,7 @@ export default function BrowseEventsPage() {
     <PageContainer>
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <span className="inline-flex rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700">{t('appName')}</span>
+          <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">{t('appName')}</span>
           <h1 className="mt-2 text-2xl font-black text-slate-950">{t('events.browse.title')}</h1>
           <p className="mt-1 text-sm text-slate-600">{t('events.browse.description')}</p>
         </div>
@@ -36,7 +36,7 @@ export default function BrowseEventsPage() {
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
             <button type="button" onClick={() => setShowFilters((current) => !current)} className="flex w-full items-center justify-between">
               <div className="flex items-center gap-2">
-                <SlidersHorizontal className="h-5 w-5 text-teal-700" />
+                <SlidersHorizontal className="h-5 w-5 text-slate-700" />
                 <h2 className="font-bold text-slate-950">{t('events.browse.refineSearch')}</h2>
               </div>
               {showFilters ? <ChevronUp className="h-5 w-5 text-slate-500" /> : <ChevronDown className="h-5 w-5 text-slate-500" />}

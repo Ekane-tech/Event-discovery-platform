@@ -9,8 +9,8 @@ import { useAuth } from '../hooks/useAuth.js'
 import { getApiErrorMessage } from '../utils/normalizeAuthUser.js'
 import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
-function maskEmail(email) {
-  if (!email || !email.includes('@')) return email || 'your email address'
+function maskEmail(email, t) {
+  if (!email || !email.includes('@')) return email || t('auth.yourEmailAddress')
   const [name, domain] = email.split('@')
   return `${name.slice(0, 2)}${'•'.repeat(Math.max(3, name.length - 2))}@${domain}`
 }
@@ -24,8 +24,8 @@ export default function EmailVerificationPage() {
 
   const status = searchParams.get('status')
   const verified = Boolean(user?.emailVerifiedAt)
-  const maskedEmail = useMemo(() => maskEmail(user?.email), [user?.email])
   const { t } = useTranslation()
+  const maskedEmail = useMemo(() => maskEmail(user?.email, t), [user?.email, t])
 
   const navigate = useNavigate()
 
@@ -61,7 +61,7 @@ export default function EmailVerificationPage() {
       setMessage(response.data.message || t('auth.verificationEmailResent'))
       navigate('/verify-email?status=resent', { replace: true })
     } catch (resendError) {
-      setError(getApiErrorMessage(resendError, 'Unable to resend verification email.'))
+      setError(getApiErrorMessage(resendError, t('auth.unableToResendVerificationEmail')))
     } finally {
       setSending(false)
     }
@@ -78,7 +78,7 @@ export default function EmailVerificationPage() {
           <h2 className="mt-6 text-3xl font-black leading-tight">{t('auth.verifyEmailTitle')}</h2>
           <p className="mt-3 text-sm leading-7 text-slate-200">{t('auth.verifyEmailDescription')}</p>
           <div className="mt-6 rounded-3xl bg-white/10 p-5 backdrop-blur">
-            <p className="text-xs font-bold uppercase tracking-wide text-teal-100">{t('auth.verificationEmailSentTo', 'Verification email sent to')}</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-teal-100">{t('auth.verificationEmailSentTo')}</p>
             <p className="mt-2 text-lg font-black">{maskedEmail}</p>
           </div>
         </section>
@@ -88,7 +88,7 @@ export default function EmailVerificationPage() {
             eyebrow={verified ? t('auth.emailVerifiedSuccess') : t('auth.verifyEmailTitle')}
             title={verified ? t('auth.emailVerifiedSuccess') : t('auth.verifyEmailTitle')}
             description={verified ? t('auth.emailVerifiedDescription') : t('auth.verifyEmailDescription')}
-            footer={<><Link className="font-bold text-teal-700" to="/login">{t('auth.backToLogin')}</Link>{verified && <> {t('or', 'or')} <Link className="font-bold text-teal-700" to="/dashboard">{t('auth.createAccount')}</Link></>}</>}
+            footer={<><Link className="font-bold text-teal-700" to="/login">{t('auth.backToLogin')}</Link>{verified && <> {t('auth.or')} <Link className="font-bold text-teal-700" to="/dashboard">{t('nav.goToDashboard')}</Link></>}</>}
           >
             {message && <div className="mb-5"><Alert type="success">{message}</Alert></div>}
             {error && <div className="mb-5"><Alert type="error">{error}</Alert></div>}
@@ -101,19 +101,19 @@ export default function EmailVerificationPage() {
 
             {!verified && isAuthenticated && (
               <div className="mt-6 grid gap-3">
-                <Button className="h-12 w-full bg-teal-700 hover:bg-teal-800" type="button" onClick={resendEmail} disabled={sending}>
+                <Button variant="primary" className="h-12 w-full" type="button" onClick={resendEmail} disabled={sending}>
                   <RefreshCw className="mr-2 h-4 w-4" />
-                    {sending ? t('auth.sending') : t('auth.resendVerificationEmail')}
+                  {sending ? t('auth.sending') : t('auth.resendVerificationEmail')}
                 </Button>
                 <p className="rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-                  After clicking the verification button in your email, this page will show a confirmation message. You can then continue using the platform.
+                  {t('auth.afterVerification')}
                 </p>
               </div>
             )}
 
             {!isAuthenticated && !verified && (
               <div className="mt-6 rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-                Sign in to request a new verification email.
+                {t('auth.signInToRequest')}
               </div>
             )}
           </AuthCard>

@@ -38,12 +38,12 @@ export default function ActiveFilters({ filters, onReset }) {
   }, [])
 
   const labels = {
-    keyword: t('searchPage.filters.keyword', 'Keyword'),
-    category_id: t('searchPage.filters.category', 'Category'),
-    city_id: t('searchPage.filters.city', 'City'),
-    date: t('searchPage.filters.date', 'Date'),
-    price: t('searchPage.filters.price', 'Price'),
-    sort: t('searchPage.filters.sort', 'Sort'),
+    keyword: t('searchPage.filters.keyword'),
+    category_id: t('searchPage.filters.category'),
+    city_id: t('searchPage.filters.city'),
+    date: t('searchPage.filters.date'),
+    price: t('searchPage.filters.price'),
+    sort: t('searchPage.filters.sort'),
   }
   const activeFilters = getActiveFilters(filters)
 
@@ -63,11 +63,11 @@ export default function ActiveFilters({ filters, onReset }) {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="text-sm font-medium text-slate-600">{t('searchPage.activeFilters', 'Active filters:')}</span>
+      <span className="text-sm font-medium text-slate-600">{t('searchPage.activeFilters')}</span>
       {activeFilters.map(([key, value]) => (
         <Badge key={key}>{labels[key] || key}: {getDisplayValue(key, value)}</Badge>
       ))}
-      <Button type="button" variant="secondary" onClick={onReset} className="px-3 py-1 text-sm">{t('searchPage.clearAll', 'Clear all')}</Button>
+      <Button type="button" variant="secondary" onClick={onReset} className="px-3 py-1 text-sm">{t('searchPage.clearAll')}</Button>
     </div>
   )
 }

@@ -44,7 +44,7 @@ export default function EditEventPage() {
       await eventService.updateEvent(id, formValuesToApiPayload(payload, status))
       const files = extractEventFiles(payload)
       if (hasEventFiles(files)) await eventService.uploadImages(id, buildEventImagesFormData(files))
-      toast.success(status === 'draft' ? t('events.edit.draftSaved') : 'Event published successfully.')
+      toast.success(status === 'draft' ? t('events.edit.draftSaved') : t('events.edit.successMessage'))
       navigate('/organizer/events')
     } catch (updateError) {
       const message = getApiErrorMessage(updateError, t('events.edit.errorMessage'))
@@ -86,12 +86,12 @@ export default function EditEventPage() {
     return (
       <PageContainer>
         <ErrorState
-          title="Past event cannot be edited"
-          message="This event has already ended, so its details and photos are locked. Duplicate it from My Events to create a new edition with new dates."
+          title={t('events.edit.pastEventCannotBeEdited')}
+          message={t('events.edit.pastEventMessage')}
         />
         <div className="mt-6 flex flex-wrap gap-2">
-          <Link to={`/organizer/events/${event.id}/details`}><Button variant="secondary">View details</Button></Link>
-          <Link to="/organizer/events"><Button>Back to My Events</Button></Link>
+          <Link to={`/organizer/events/${event.id}/details`}><Button variant="secondary">{t('viewDetails')}</Button></Link>
+          <Link to="/organizer/events"><Button>{t('events.edit.backToMyEvents')}</Button></Link>
         </div>
       </PageContainer>
     )
@@ -105,7 +105,7 @@ export default function EditEventPage() {
       </section>
       <EventForm
         initialValues={eventToFormValues(event)}
-        submitLabel="Publish Event"
+        submitLabel={t('events.edit.submitButton')}
         onSubmit={(payload) => handleUpdateEvent(payload, 'published')}
         onDraft={(payload) => handleUpdateEvent(payload, 'draft')}
         submitting={submitting}

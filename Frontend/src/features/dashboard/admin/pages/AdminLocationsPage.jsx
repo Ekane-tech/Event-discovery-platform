@@ -159,17 +159,17 @@ export default function AdminLocationsPage(){
       description={t('admin.locations.description', 'Maintain regions, divisions and cities used by event publishing and search filters.')} 
     />
     <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3 md:gap-4">
-      {tabs.map(tab => {
-        const Icon = tab.icon
-        return <button
-          key={tab.id}
-          onClick={() => setActiveTab(tab.id)}
-          className={`rounded-3xl border p-5 text-left transition ${activeTab === tab.id ? 'border-teal-500 bg-teal-50 ring-2 ring-teal-100' : 'border-slate-200 bg-white hover:border-teal-200'}`}
+      {tabs.map(t => {
+        const Icon = t.icon
+        return <button 
+          key={t.id} 
+          onClick={() => setActiveTab(t.id)} 
+          className={`rounded-3xl border p-5 text-left transition ${activeTab === t.id ? 'border-teal-500 bg-teal-50 ring-2 ring-teal-100' : 'border-slate-200 bg-white hover:border-teal-200'}`}
         >
           <Icon className="h-6 w-6 text-teal-700" />
-          <p className="mt-3 font-black text-slate-950">{t(`admin.locations.tabs.${tab.id}`, tab.label)}</p>
+          <p className="mt-3 font-black text-slate-950">{t(`admin.locations.tabs.${t.id}`, t.label)}</p>
           <p className="text-sm text-slate-500">
-            {t('admin.locations.recordsCount', { count: tab.id === 'regions' ? regions.length : tab.id === 'divisions' ? divisions.length : cities.length }, '{{count}} records')}
+            {t('admin.locations.recordsCount', { count: t.id === 'regions' ? regions.length : t.id === 'divisions' ? divisions.length : cities.length }, '{{count}} records')}
           </p>
         </button>
       })}

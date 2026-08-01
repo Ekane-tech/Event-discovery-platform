@@ -1,4 +1,4 @@
-﻿import { ArrowLeft, MailCheck, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, MailCheck, ShieldCheck } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Alert from '../../../shared/components/feedback/Alert.jsx'
@@ -28,10 +28,10 @@ export default function ForgotPasswordPage() {
 
     try {
       const response = await authService.forgotPassword({ email })
-      setMessage(response.data.message || SAFE_RESET_MESSAGE)
+      setMessage(response.data.message || t('auth.safeResetMessage'))
       setSent(true)
     } catch (forgotError) {
-      setError(getApiErrorMessage(forgotError, 'Please enter a valid email address and try again.'))
+      setError(getApiErrorMessage(forgotError, t('auth.invalidEmailMessage')))
     } finally {
       setSubmitting(false)
     }
@@ -48,9 +48,9 @@ export default function ForgotPasswordPage() {
             <h2 className="mt-6 text-3xl font-black leading-tight">{t('auth.forgotPasswordTitle')}</h2>
             <p className="mt-3 text-sm leading-7 text-slate-300">{t('auth.forgotPasswordDescription')}</p>
           <div className="mt-6 grid gap-3 text-sm text-slate-200">
-            <p className="rounded-2xl bg-white/10 p-4">Reset links are time-limited for your safety.</p>
-            <p className="rounded-2xl bg-white/10 p-4">We never reveal whether an email is registered.</p>
-            <p className="rounded-2xl bg-white/10 p-4">After reset, old sessions are signed out.</p>
+            <p className="rounded-2xl bg-white/10 p-4">{t('auth.resetLinkTimeLimited')}</p>
+            <p className="rounded-2xl bg-white/10 p-4">{t('auth.emailNeverRevealed')}</p>
+            <p className="rounded-2xl bg-white/10 p-4">{t('auth.oldSessionsSignedOut')}</p>
           </div>
         </section>
 
@@ -59,14 +59,14 @@ export default function ForgotPasswordPage() {
             eyebrow={t('auth.forgotPasswordTitle')}
             title={t('auth.forgotPasswordTitle')}
             description={t('auth.forgotPasswordDescription')}
-            footer={<><Link className="inline-flex items-center gap-1 font-bold text-teal-700" to="/login"><ArrowLeft className="h-4 w-4" /> {t('auth.backToLogin')}</Link> <span className="text-slate-400">{t('or', 'or')}</span> <Link className="font-bold text-teal-700" to="/register">{t('auth.createAccount')}</Link></>}
+            footer={<><Link className="inline-flex items-center gap-1 font-bold text-teal-700" to="/login"><ArrowLeft className="h-4 w-4" /> {t('auth.backToLogin')}</Link> <span className="text-slate-400">{t('auth.or')}</span> <Link className="font-bold text-teal-700" to="/register">{t('auth.createAccount')}</Link></>}
           >
             {sent && <div className="mb-5"><Alert type="success">{message || t('auth.safeResetMessage')}</Alert></div>}
             {error && <div className="mb-5"><Alert type="error">{error}</Alert></div>}
 
             <form onSubmit={handleSubmit} className="grid gap-4">
-              <FormInput label={t('auth.email')} type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" required />
-              <Button type="submit" disabled={submitting} className="h-12 gap-2 bg-teal-700 hover:bg-teal-800">
+              <FormInput label={t('auth.email')} type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder={t('auth.emailPlaceholder')} required />
+              <Button type="submit" disabled={submitting} variant="primary" className="h-12 gap-2">
                 <MailCheck className="h-4 w-4" />
                 {submitting ? t('auth.sending') : t('auth.sendResetLink')}
               </Button>
@@ -74,7 +74,7 @@ export default function ForgotPasswordPage() {
 
             {sent && (
               <div className="mt-5 rounded-2xl border border-teal-100 bg-teal-50 p-4 text-sm leading-6 text-teal-900">
-                {t('auth.safeResetMessage')}
+                {message || t('auth.safeResetMessage')}
               </div>
             )}
           </AuthCard>
