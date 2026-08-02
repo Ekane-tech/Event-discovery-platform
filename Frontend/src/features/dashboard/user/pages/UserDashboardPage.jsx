@@ -10,6 +10,7 @@ import { EventGridSkeleton } from '../../../events/components/EventCardSkeleton.
 import EventGrid from '../../../events/components/EventGrid.jsx'
 import { dashboardService } from '../../services/dashboardService.js'
 import { extractCollection, normalizeEvents } from '../../../events/utils/normalizeEvent.js'
+import { hasEventEnded } from '../../../events/utils/eventLifecycle.js'
 import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
 import { useTranslation } from '../../../../shared/i18n/useTranslation.js'
 
@@ -53,7 +54,7 @@ export default function UserDashboardPage() {
   if (error) return <PageContainer><ErrorState title={t('dashboard.user.errorTitle', 'Dashboard error')} message={error} /></PageContainer>
 
   const summary = dashboard?.summary || {}
-  const recommendedEvents = normalizeEvents(extractCollection(dashboard || {}, 'recommended_events'))
+  const recommendedEvents = normalizeEvents(extractCollection(dashboard || {}, 'recommended_events')).filter(event => !hasEventEnded(event))
   const cards = [
     { title: t('dashboard.user.interests', 'Interests'), value: summary.interests_count || 0, to: '/my-interests', icon: Heart, gradient: 'bg-gradient-to-br from-pink-600 to-rose-700', iconBg: 'bg-white/20' },
     { title: t('dashboard.user.recommendations', 'Recommendations'), value: summary.recommendations_count || 0, to: '/recommendations', icon: Heart, gradient: 'bg-gradient-to-br from-teal-600 to-emerald-700', iconBg: 'bg-white/20' },

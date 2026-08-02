@@ -20,6 +20,17 @@ export default function RecommendedEventCard({ event }) {
   const bg = event.coverImage?.url || '/hero-events.svg'
   const lifecycle = getEventLifecycle(event)
 
+  // Calculate price display based on ticket types
+  const minPrice = event.ticketTypes?.reduce((min, t) => Math.min(min, t.price), Infinity) ?? event.price
+  const hasMultiplePrices = event.ticketTypes?.length > 1
+  
+  function getPriceDisplay() {
+    if (hasMultiplePrices) {
+      return `From ${formatPrice(minPrice)}`
+    }
+    return formatPrice(event.price)
+  }
+
   async function handleBookmark(clickEvent) {
     clickEvent.preventDefault()
     clickEvent.stopPropagation()
@@ -93,8 +104,7 @@ export default function RecommendedEventCard({ event }) {
             </div>
           </div>
           <div className="flex items-center justify-between gap-2">
-            <span className="font-semibold text-slate-900">{formatPrice(event.price)}</span>
-            <Button variant="primary" className="rounded-full px-5">{t('viewDetails')}</Button>
+            <span className="font-semibold text-slate-900">{getPriceDisplay()}</span>
           </div>
         </div>
       </div>

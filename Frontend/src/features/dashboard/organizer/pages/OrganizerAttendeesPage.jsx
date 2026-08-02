@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from 'react'
 import EmptyState from '../../../../shared/components/feedback/EmptyState.jsx'
 import ErrorState from '../../../../shared/components/feedback/ErrorState.jsx'
 import PageContainer from '../../../../shared/components/layout/PageContainer.jsx'
+import SectionHeader from '../../../../shared/components/layout/SectionHeader.jsx'
+import Card from '../../../../shared/components/ui/Card.jsx'
 import Table from '../../../../shared/components/ui/Table.jsx'
 import Button from '../../../../shared/components/ui/Button.jsx'
 import Loader from '../../../../shared/components/feedback/Loader.jsx'
@@ -151,7 +153,7 @@ export default function OrganizerAttendeesPage() {
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
             <input value={ticketQuery} onChange={(event) => setTicketQuery(event.target.value)} placeholder="Search ticket or attendee" className="rounded-2xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-teal-500" />
-            <Button type="button" variant="secondary" onClick={handleExport} disabled={exporting}><Download className="mr-2 h-4 w-4" />Export CSV</Button>
+            <Button type="button" variant="secondary" onClick={handleExport} disabled={exporting || attendees.length === 0}><Download className="mr-2 h-4 w-4" />Export CSV</Button>
           </div>
         </div>
       </Card>

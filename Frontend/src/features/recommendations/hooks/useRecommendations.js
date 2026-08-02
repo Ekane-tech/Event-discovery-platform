@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
 import { extractCollection, normalizeEvents } from '../../events/utils/normalizeEvent.js'
+import { hasEventEnded } from '../../events/utils/eventLifecycle.js'
 import { recommendationService } from '../services/recommendationService.js'
 
 export function useRecommendations() {
@@ -14,7 +15,9 @@ export function useRecommendations() {
     setError('')
     try {
       const response = await recommendationService.getRecommendations({ limit: 50 })
-      setRecommendations(normalizeEvents(extractCollection(response.data, 'recommendations')))
+      const allEvents = normalizeEvents(extractCollection(response.data, 'recommendations'))
+      const upcomingEvents = allEvents.filter(event => !hasEventEnded(event))
+      setRecommendations(upcomingEvents)
       setRecommendationSummary({
         total: response.data.summary?.total || 0,
         interestBased: response.data.summary?.interest_based || 0,

@@ -20,7 +20,18 @@ const OPERATOR_DEFS = [
   { value: 'orange', label: 'Orange Money', logo: '/payments/orange-money.svg', hintKey: 'payments.orangeHint', hintDefault: 'Confirm the prompt with your Orange Money PIN.' },
 ]
 
-function normalizeCameroonPhone(value) { return value.replace(/\s+/g, '') }
+function normalizeCameroonPhone(value) { 
+  const cleaned = value.replace(/\s+/g, '')
+  // Ensure +237 prefix for Cameroon numbers if not present
+  if (/^6\d{8}$/.test(cleaned)) {
+    return '+237' + cleaned
+  }
+  // For test mode, use a test number that will succeed
+  if (/^\+23767000000[0-4]$/.test(cleaned)) {
+    return cleaned
+  }
+  return cleaned
+}
 function detectOperator(phone) { const digits = phone.replace(/\D+/g, ''); const local = digits.startsWith('237') ? digits.slice(3) : digits; if (/^(67|650|651|652|653|654|680|681|682|683|684)/.test(local)) return 'mtn'; if (/^(69|655|656|657|658|659)/.test(local)) return 'orange'; return '' }
 
 function StatusPanel({ payment, checking, onCheck, pollingStopped, t }) {
@@ -182,9 +193,8 @@ export default function PaymentPage() {
 
   return (
     <PageContainer>
-      <section className="mb-6 overflow-hidden rounded-3xl bg-slate-950 bg-cover bg-center p-8 text-white" style={{ backgroundImage: 'linear-gradient(90deg, rgba(2,6,23,.9), rgba(15,118,110,.68)), url(/hero-events.svg)' }}>
-        <h1 className="text-4xl font-black">{t('payments.title', 'Complete Mobile Money Payment')}</h1>
-        <p className="mt-3 max-w-2xl text-slate-200">{t('payments.subtitle', 'Pay securely with MTN Mobile Money or Orange Money and confirm your event registration.')}</p>
+      <section className="mb-2">
+        <h1 className="text-2xl font-black text-slate-950">{t('payments.title', 'Complete Mobile Money Payment')}</h1>
       </section>
 
       <div className="mx-auto grid max-w-5xl gap-6 lg:grid-cols-[1fr_1.2fr]">

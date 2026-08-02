@@ -25,6 +25,17 @@ export default function EventCard({ event }) {
   const canBookmark = isAuthenticated && role === ROLES.USER
   const lifecycle = getEventLifecycle(event)
 
+  // Calculate price display based on ticket types
+  const minPrice = event.ticketTypes?.reduce((min, t) => Math.min(min, t.price), Infinity) ?? event.price
+  const hasMultiplePrices = event.ticketTypes?.length > 1
+  
+  function getPriceDisplay() {
+    if (hasMultiplePrices) {
+      return `From ${formatPrice(minPrice)}`
+    }
+    return formatPrice(event.price)
+  }
+
   function handleOrganizerClick(clickEvent) {
     clickEvent.preventDefault()
     clickEvent.stopPropagation()
@@ -70,7 +81,7 @@ export default function EventCard({ event }) {
       <div className="relative flex flex-1 flex-col justify-end p-5 text-white">
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <Badge className="bg-white/20 text-white backdrop-blur">{event.category || t('events.card.eventFallback')}</Badge>
-          <span className="rounded-full bg-teal-500 px-3 py-1 text-sm font-bold text-white">{formatPrice(event.price)}</span>
+          <span className="rounded-full bg-teal-500 px-3 py-1 text-sm font-bold text-white">{getPriceDisplay()}</span>
           {event.averageRating > 0 && (
             <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-sm font-bold text-slate-950 shadow-sm">
               <Star className="h-3.5 w-3.5 fill-slate-950 text-slate-950" />
@@ -101,7 +112,6 @@ export default function EventCard({ event }) {
               </div>
             </div>
           </div>
-          <Button variant="primary" className="w-auto rounded-full px-5">{t('viewDetails')}</Button>
         </div>
       </div>
     </Link>

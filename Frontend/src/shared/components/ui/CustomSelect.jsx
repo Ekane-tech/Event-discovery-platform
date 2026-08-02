@@ -1,8 +1,9 @@
 import { CalendarSearch, ChevronDown } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export default function CustomSelect({ label, value, onChange, options = [], className = '', icon: Icon = CalendarSearch }) {
   const [open, setOpen] = useState(false)
+  const selectRef = useRef(null)
 
   const selectedOption = options.find((opt) => opt.value === value)
 
@@ -11,8 +12,21 @@ export default function CustomSelect({ label, value, onChange, options = [], cla
     setOpen(false)
   }
 
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (selectRef.current && !selectRef.current.contains(event.target)) {
+        setOpen(false)
+      }
+    }
+
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [open])
+
   return (
-    <div className="relative">
+    <div className="relative" ref={selectRef}>
       {label && <label className="mb-2 block text-sm font-bold text-slate-800">{label}</label>}
       <div className="relative">
         <button

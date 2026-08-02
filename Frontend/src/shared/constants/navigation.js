@@ -4,8 +4,8 @@ export const PUBLIC_NAV_LINKS = [
   { label: 'Home', labelKey: 'nav.home', to: '/', icon: 'home' },
   { label: 'Browse Events', labelKey: 'nav.browseEvents', to: '/events', icon: 'calendarSearch' },
   { label: 'Organizers', labelKey: 'nav.organizers', to: '/organizers', icon: 'users' },
-  { label: 'About', labelKey: 'nav.about', to: '/about', icon: 'calendarSearch' },
   { label: 'Feedback', labelKey: 'nav.feedback', to: '/feedback', icon: 'heart' },
+  { label: 'About', labelKey: 'nav.about', to: '/about', icon: 'calendarSearch' },
 ]
 
 export const USER_NAV_LINKS = [
@@ -64,7 +64,7 @@ export function getDesktopNavbarLinks(role, isAuthenticated) {
   if (!isAuthenticated) return PUBLIC_NAV_LINKS
 
   const links = [
-    ...PUBLIC_NAV_LINKS,
+    ...PUBLIC_NAV_LINKS.filter(link => link.to !== '/feedback'),
     { label: 'Dashboard', labelKey: 'nav.dashboard', to: getPrimaryDashboardPath(role), icon: 'layoutDashboard' },
   ]
 
@@ -76,7 +76,7 @@ export function getDesktopNavbarLinks(role, isAuthenticated) {
 }
 
 export function getMobileNavigationGroups(role, isAuthenticated) {
-  const groups = [{ title: 'Discover', links: PUBLIC_NAV_LINKS }]
+  const groups = [{ title: 'Discover', links: isAuthenticated ? PUBLIC_NAV_LINKS.filter(link => link.to !== '/feedback') : PUBLIC_NAV_LINKS }]
   if (!isAuthenticated) return groups
   if (role === ROLES.USER) return [...groups, { title: 'My Account', links: USER_NAV_LINKS }]
   if (role === ROLES.ORGANIZER) return [...groups, { title: 'Organizer', links: ORGANIZER_NAV_LINKS }]

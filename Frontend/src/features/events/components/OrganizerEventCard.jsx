@@ -36,19 +36,19 @@ export default function OrganizerEventCard({ event, onDelete, onDuplicate }) {
               <div className="mt-5 grid grid-cols-2 gap-3 text-sm text-slate-600 lg:grid-cols-2">
                 <p className="flex items-start gap-2 rounded-2xl bg-slate-50 p-3">
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-teal-700" />
-                  <span><strong className="text-slate-800">{t('eventForm.venueLabel')}:</strong><br />{event.venue || t('eventForm.noVenue')}{event.city ? `, ${event.city}` : ''}{event.region ? `, ${event.region}` : ''}</span>
+                  <span><strong className="text-slate-800">{t('events.details.venueLabel')}:</strong><br />{event.venue || t('events.details.notSpecified')}{event.city ? `, ${event.city}` : ''}{event.region ? `, ${event.region}` : ''}</span>
                 </p>
                 <p className="flex items-start gap-2 rounded-2xl bg-slate-50 p-3">
                   <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-teal-700" />
-                  <span><strong className="text-slate-800">{t('eventForm.dateLabel')}:</strong><br />{formatDate(event.startDate)}</span>
+                  <span><strong className="text-slate-800">{t('event.dateLabel')}:</strong><br />{formatDate(event.startDate)}</span>
                 </p>
-                <p className="rounded-2xl bg-slate-50 p-3"><strong className="text-slate-800">{t('eventForm.priceLabel')}:</strong><br />{formatPrice(event.price)}</p>
-                <p className="rounded-2xl bg-slate-50 p-3"><strong className="text-slate-800">{t('eventForm.capacityLabel')}:</strong><br />{event.maximumParticipants || t('eventForm.unlimited')}</p>
+                <p className="rounded-2xl bg-slate-50 p-3"><strong className="text-slate-800">Price:</strong><br />{formatPrice(event.price)}</p>
+                <p className="rounded-2xl bg-slate-50 p-3"><strong className="text-slate-800">{t('events.details.capacityLabel')}:</strong><br />{event.maximumParticipants || t('events.details.notLimited')}</p>
               </div>
 
               <div className="mt-4 flex flex-wrap gap-3 text-xs font-semibold text-slate-600">
-                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1"><Ticket className="h-3 w-3" /> {event.registrations || 0} {t('eventForm.registrations')}</span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1"><Eye className="h-3 w-3" /> {event.views || 0} {t('eventForm.views')}</span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1"><Ticket className="h-3 w-3" /> {event.registrations || 0} {t('events.stats.registrations')}</span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1"><Eye className="h-3 w-3" /> {event.views || 0} {t('events.stats.views')}</span>
               </div>
             </div>
 
@@ -57,7 +57,7 @@ export default function OrganizerEventCard({ event, onDelete, onDuplicate }) {
               <Link to={`/organizer/events/${event.id}/attendees`}><Button variant="secondary" className="w-full sm:w-auto">{t('attendees')}</Button></Link>
               {!isPast && <Link to={`/organizer/events/${event.id}/scanner`}><Button variant="secondary" className="w-full sm:w-auto">{t('scanner')}</Button></Link>}
               {!isPast && <Link to={`/organizer/events/${event.id}/edit`}><Button className="w-full sm:w-auto">{t('edit')}</Button></Link>}
-              <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => onDuplicate(event.id)}><Copy className="mr-2 h-4 w-4" />{isPast ? t('duplicateForNewDate') : t('duplicate')}</Button>
+              <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => onDuplicate(event.id)}><Copy className="mr-2 h-4 w-4" />{t('duplicate')}</Button>
               <Button type="button" variant="danger" className="w-full sm:w-auto" onClick={() => onDelete(event.id)}><Trash2 className="mr-2 h-4 w-4" />{t('delete')}</Button>
             </div>
           </div>

@@ -40,7 +40,7 @@ class EventSeeder extends Seeder
                 'registration_deadline' => $now->copy()->addDay()->setTime(16, 0),
                 'maximum_participants' => 100,
                 'tickets' => [
-                    ['name' => 'Free', 'price' => 0, 'quantity' => 100, 'description' => 'Standard free access to the networking event.'],
+                    ['name' => 'Free', 'price' => 5, 'quantity' => 100, 'description' => 'Standard free access to the networking event.'],
                 ],
             ],
 
@@ -59,9 +59,9 @@ class EventSeeder extends Seeder
                 'registration_deadline' => $now->copy()->addDays(4)->setTime(23, 0),
                 'maximum_participants' => 300,
                 'tickets' => [
-                    ['name' => 'Classic', 'price' => 5000, 'quantity' => 200, 'description' => 'Access to talks, exhibitions and networking area.'],
-                    ['name' => 'VIP', 'price' => 15000, 'quantity' => 70, 'description' => 'Classic access plus reserved seating and coffee break.'],
-                    ['name' => 'VVIP', 'price' => 30000, 'quantity' => 30, 'description' => 'VIP access plus speaker lunch, front row seating and private networking.'],
+                    ['name' => 'Classic', 'price' => 5, 'quantity' => 200, 'description' => 'Access to talks, exhibitions and networking area.'],
+                    ['name' => 'VIP', 'price' => 5, 'quantity' => 70, 'description' => 'Classic access plus reserved seating and coffee break.'],
+                    ['name' => 'VVIP', 'price' => 5, 'quantity' => 30, 'description' => 'VIP access plus speaker lunch, front row seating and private networking.'],
                 ],
             ],
 
@@ -80,8 +80,8 @@ class EventSeeder extends Seeder
                 'registration_deadline' => $now->copy()->addDays(2)->setTime(20, 0),
                 'maximum_participants' => 10,
                 'tickets' => [
-                    ['name' => 'Workshop Seat', 'price' => 10000, 'quantity' => 5, 'description' => 'Full workshop access with learning materials.'],
-                    ['name' => 'Premium Seat', 'price' => 25000, 'quantity' => 2, 'description' => 'Workshop access plus one-on-one review session.'],
+                    ['name' => 'Workshop Seat', 'price' => 5, 'quantity' => 5, 'description' => 'Full workshop access with learning materials.'],
+                    ['name' => 'Premium Seat', 'price' => 5, 'quantity' => 2, 'description' => 'Workshop access plus one-on-one review session.'],
                 ],
             ],
 
@@ -100,9 +100,9 @@ class EventSeeder extends Seeder
                 'registration_deadline' => $now->copy()->addDays(9)->setTime(23, 0),
                 'maximum_participants' => 500,
                 'tickets' => [
-                    ['name' => 'Classic', 'price' => 2000, 'quantity' => 350, 'description' => 'Festival entry and access to public exhibitions.'],
-                    ['name' => 'Family Pass', 'price' => 7000, 'quantity' => 80, 'description' => 'Entry for up to four people.'],
-                    ['name' => 'VIP', 'price' => 12000, 'quantity' => 70, 'description' => 'Entry plus reserved seating and tasting coupons.'],
+                    ['name' => 'Classic', 'price' => 5, 'quantity' => 350, 'description' => 'Festival entry and access to public exhibitions.'],
+                    ['name' => 'Family Pass', 'price' => 5, 'quantity' => 80, 'description' => 'Entry for up to four people.'],
+                    ['name' => 'VIP', 'price' => 5, 'quantity' => 70, 'description' => 'Entry plus reserved seating and tasting coupons.'],
                 ],
             ],
 
@@ -121,7 +121,7 @@ class EventSeeder extends Seeder
                 'registration_deadline' => $now->copy()->addDays(14)->setTime(18, 0),
                 'maximum_participants' => 50,
                 'tickets' => [
-                    ['name' => 'Invite Only', 'price' => 0, 'quantity' => 50, 'description' => 'Private access for invited participants.'],
+                    ['name' => 'Invite Only', 'price' => 5, 'quantity' => 50, 'description' => 'Private access for invited participants.'],
                 ],
             ],
 
@@ -140,8 +140,8 @@ class EventSeeder extends Seeder
                 'registration_deadline' => $now->copy()->addDays(6)->setTime(20, 0),
                 'maximum_participants' => 40,
                 'tickets' => [
-                    ['name' => 'Student', 'price' => 3000, 'quantity' => 25, 'description' => 'Discounted access for students and beginners.'],
-                    ['name' => 'Professional', 'price' => 10000, 'quantity' => 15, 'description' => 'Full access with project review and certificate.'],
+                    ['name' => 'Student', 'price' => 5, 'quantity' => 25, 'description' => 'Discounted access for students and beginners.'],
+                    ['name' => 'Professional', 'price' => 5, 'quantity' => 15, 'description' => 'Full access with project review and certificate.'],
                 ],
             ],
 
@@ -160,11 +160,11 @@ class EventSeeder extends Seeder
                 'registration_deadline' => $now->copy()->addDays(3)->setTime(22, 0),
                 'maximum_participants' => 80,
                 'tickets' => [
-                    ['name' => 'Free Access', 'price' => 0, 'quantity' => 80, 'description' => 'Free access to the wellness meetup.'],
+                    ['name' => 'Free Access', 'price' => 5, 'quantity' => 80, 'description' => 'Free access to the wellness meetup.'],
                 ],
             ],
 
-            // Event 8 — Mboa Creators Meetup (QR Scan & Check-in Flow)
+            // Event 8 — Mboa Creators Meetup (Past Event for testing)
             [
                 'title' => 'Mboa Creators Meetup',
                 'description' => 'A meetup for content creators, photographers, designers, musicians and digital storytellers to connect, share experiences and collaborate.',
@@ -174,13 +174,13 @@ class EventSeeder extends Seeder
                 'region' => 'Littoral',
                 'city' => 'Douala',
                 'venue' => 'Bonamoussadi Creative Hub',
-                'start_date' => $now->copy()->addDays(2)->setTime(15, 0),
-                'end_date' => $now->copy()->addDays(2)->setTime(19, 0),
-                'registration_deadline' => $now->copy()->addDay()->setTime(22, 0),
+                'start_date' => $now->copy()->subDays(5)->setTime(15, 0),
+                'end_date' => $now->copy()->subDays(5)->setTime(19, 0),
+                'registration_deadline' => $now->copy()->subDays(6)->setTime(22, 0),
                 'maximum_participants' => 120,
                 'tickets' => [
-                    ['name' => 'Classic', 'price' => 1000, 'quantity' => 100, 'description' => 'Standard access to the meetup.'],
-                    ['name' => 'VIP Creator', 'price' => 5000, 'quantity' => 20, 'description' => 'Access plus creator spotlight and networking priority.'],
+                    ['name' => 'Classic', 'price' => 5, 'quantity' => 100, 'description' => 'Standard access to the meetup.'],
+                    ['name' => 'VIP Creator', 'price' => 5, 'quantity' => 20, 'description' => 'Access plus creator spotlight and networking priority.'],
                 ],
             ],
         ];
