@@ -13,7 +13,7 @@ import { formatMoney } from '../../../../shared/utils/currency.js'
 import { formatDate } from '../../../../shared/utils/formatDate.js'
 import { extractCollection } from '../../../events/utils/normalizeEvent.js'
 import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
-import { adminPayoutService } from '../../wallet/services/adminPayoutService.js'
+import { adminPayoutService } from '../../../wallet/services/adminPayoutService.js'
 import { useTranslation } from '../../../../shared/i18n/useTranslation.js'
 
 const STATUS_STYLES = {
