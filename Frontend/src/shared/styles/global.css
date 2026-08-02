@@ -50,7 +50,7 @@
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   color: #172033;
-  background: #f8fafc;
+  background: #ffffff;
 }
 
 * {
@@ -100,17 +100,17 @@ select {
 .react-datepicker__day--selected,
 .react-datepicker__day--keyboard-selected,
 .react-datepicker__time-list-item--selected {
-  background-color: #0f766e !important;
+  background-color: #b0551c !important;
   color: white !important;
 }
 
 .react-datepicker__day:hover,
 .react-datepicker__time-list-item:hover {
-  background-color: #ccfbf1 !important;
+  background-color: #f8ece5 !important;
 }
 
 .react-datepicker__close-icon::after {
-  background-color: #0f766e !important;
+  background-color: #b0551c !important;
 }
 
 @keyframes fadeIn {

@@ -1,4 +1,4 @@
-﻿import { ArrowRight, ShieldCheck } from 'lucide-react'
+import { ArrowRight, ShieldCheck } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Alert from '../../../shared/components/feedback/Alert.jsx'
@@ -8,6 +8,7 @@ import AuthCard from '../components/AuthCard.jsx'
 import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 import { useAuth } from '../hooks/useAuth.js'
 import { getDashboardPathByRole } from '../utils/authRedirects.js'
+import Etech2 from '../../../assets/E-tech2.png'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -45,7 +46,7 @@ export default function LoginPage() {
 
   return (
     <main className="mx-auto grid min-h-[calc(100vh-220px)] max-w-7xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_480px] lg:px-8 lg:py-14">
-      <section className="relative hidden overflow-hidden rounded-4xl bg-slate-950 bg-cover bg-center p-10 text-white lg:block" style={{ backgroundImage: 'linear-gradient(140deg, rgba(2,6,23,.82), rgba(15,118,110,.6)), url(/hero-events.svg)' }}>
+      <section className="relative hidden overflow-hidden rounded-4xl bg-slate-950 bg-cover bg-center p-10 text-white lg:block" style={{ backgroundImage: `linear-gradient(140deg, rgba(2,6,23,.82), rgba(15,118,110,.6)), url(${Etech2})` }}>
         <div className="relative z-10 flex h-full flex-col justify-between">
           <div>
             <span className="inline-flex rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100">{t('auth.welcomeBack')}</span>
@@ -63,8 +64,8 @@ export default function LoginPage() {
           footer={<> {t('auth.noAccount')} <Link className="font-bold text-teal-700" to="/register">{t('auth.createAccount')}</Link></>}
         >
           <form onSubmit={handleSubmit} className="grid gap-3">
-            <FormInput label={t('auth.email')} name="email" type="email" value={form.email} onChange={updateField} placeholder="you@example.com" required />
-            <FormInput label={t('auth.password')} name="password" type="password" value={form.password} onChange={updateField} placeholder="Your password" required />
+            <FormInput label={t('auth.email')} name="email" type="email" value={form.email} onChange={updateField} placeholder={t('auth.emailPlaceholder')} required />
+            <FormInput label={t('auth.password')} name="password" type="password" value={form.password} onChange={updateField} placeholder={t('auth.passwordPlaceholder')} required />
             <div className="flex items-center justify-between gap-3">
               <label className="flex items-center gap-2 text-sm text-slate-600">
                 <input type="checkbox" className="h-4 w-4 accent-teal-600" defaultChecked />

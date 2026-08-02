@@ -147,7 +147,7 @@ export default function EventDetailsPage() {
         onTouchEnd={handleTouchEnd}
       >
         <div key={activeHero?.id || activeHero?.url} className="absolute inset-0 animate-[fadeIn_.7s_ease-out]">
-          <img src={activeHero?.url} alt={event.title} className="h-full w-full object-cover" />
+          {activeHero?.url && <img src={activeHero.url} alt={event.title} className="h-full w-full object-cover" />}
         </div>
         <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/40 to-slate-950/5" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(20,184,166,.15),transparent_34%)]" />
@@ -162,12 +162,12 @@ export default function EventDetailsPage() {
         <div className="relative mx-auto flex min-h-135 max-w-7xl flex-col justify-end px-4 py-10 sm:px-6 lg:px-8">
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <Button type="button" variant="secondary" onClick={goBackToResults}>{t('events.details.backToResults')}</Button>
-            <Link to="/events" className="text-sm font-semibold text-slate-100 hover:text-teal-200">{t('events.details.browseAllEvents')}</Link>
+            <Link to="/events" className="text-sm font-semibold text-slate-100 hover:text-slate-200">{t('events.details.browseAllEvents')}</Link>
           </div>
           <div className="max-w-4xl animate-[slideUp_.55s_ease-out]">
             <div className="flex flex-wrap gap-2">
               <Badge className="bg-white/15 text-white backdrop-blur">{event.category || t('event.defaultCategory')}</Badge>
-              <Badge className="bg-teal-500 text-white">{formatPrice(event.price)}</Badge>
+              <Badge className="bg-slate-500 text-white">{formatPrice(event.price)}</Badge>
               <Badge className="bg-white/15 text-white capitalize backdrop-blur">{event.status}</Badge>
             </div>
             <h1 className="mt-5 text-4xl font-black leading-tight md:text-6xl">{event.title}</h1>
@@ -177,7 +177,7 @@ export default function EventDetailsPage() {
           {heroImages.length > 1 && (
             <div className="mt-8 flex gap-2">
               {heroImages.map((image, index) => (
-                <button key={image.id || image.url} type="button" onClick={() => setHeroIndex(index)} className={`h-2.5 rounded-full transition-all ${index === heroIndex ? 'w-10 bg-teal-300' : 'w-2.5 bg-white/50 hover:bg-white'}`} aria-label={t('events.details.galleryImageLabel', { index: index + 1 })} />
+                <button key={image.id || image.url} type="button" onClick={() => setHeroIndex(index)} className={`h-2.5 rounded-full transition-all ${index === heroIndex ? 'w-10 bg-slate-300' : 'w-2.5 bg-white/50 hover:bg-white'}`} aria-label={t('events.details.galleryImageLabel', { index: index + 1 })} />
               ))}
             </div>
           )}
@@ -190,19 +190,16 @@ export default function EventDetailsPage() {
             <Card>
               <h2 className="text-xl font-bold text-slate-950">{t('events.details.informationHeading')}</h2>
               <div className="mt-5 grid gap-4 md:grid-cols-2">
-                <p className="flex gap-3 text-slate-700"><MapPin className="h-5 w-5 text-teal-700" /><span><strong>{t('events.details.venueLabel')}:</strong><br />{event.venue || t('events.details.notSpecified')}</span></p>
-                <p className="flex gap-3 text-slate-700"><MapPin className="h-5 w-5 text-teal-700" /><span><strong>{t('events.details.locationLabel')}:</strong><br />{event.city}, {event.region}</span></p>
-                <p className="flex gap-3 text-slate-700"><CalendarDays className="h-5 w-5 text-teal-700" /><span><strong>{t('events.details.dateLabel')}:</strong><br />{formatDate(event.startDate)}</span></p>
-                <p className="flex gap-3 text-slate-700"><Users className="h-5 w-5 text-teal-700" /><span><strong>{t('events.details.capacityLabel')}:</strong><br />{event.maximumParticipants || t('events.details.notLimited')}</span></p>
-                <p className="flex gap-3 text-slate-700"><CalendarDays className="h-5 w-5 text-teal-700" /><span><strong>{t('events.details.deadlineLabel', 'Registration deadline')}:</strong><br />{event.registrationDeadline ? formatDate(event.registrationDeadline) : t('events.details.notSpecified')}</span></p>
+                <p className="flex gap-3 text-slate-700"><MapPin className="h-5 w-5 text-slate-700" /><span><strong>{t('events.details.venueLabel')}:</strong><br />{event.venue || t('events.details.notSpecified')}</span></p>
+                <p className="flex gap-3 text-slate-700"><MapPin className="h-5 w-5 text-slate-700" /><span><strong>{t('events.details.locationLabel')}:</strong><br />{event.city}, {event.region}</span></p>
+                <p className="flex gap-3 text-slate-700"><CalendarDays className="h-5 w-5 text-slate-700" /><span><strong>{t('events.details.dateLabel')}:</strong><br />{formatDate(event.startDate)}</span></p>
+                <p className="flex gap-3 text-slate-700"><Users className="h-5 w-5 text-slate-700" /><span><strong>{t('events.details.capacityLabel')}:</strong><br />{event.maximumParticipants || t('events.details.notLimited')}</span></p>
+                <p className="flex gap-3 text-slate-700"><CalendarDays className="h-5 w-5 text-slate-700" /><span><strong>{t('events.details.deadlineLabel')}:</strong><br />{event.registrationDeadline ? formatDate(event.registrationDeadline) : t('events.details.notSpecified')}</span></p>
               </div>
-              <div className="mt-6 flex flex-wrap gap-2"><Button type="button" variant="secondary" onClick={shareEvent}><Share2 className="mr-2 h-4 w-4" />{t('events.details.shareEvent')}</Button><a href={`https://wa.me/?text=${encodeURIComponent(`${event.title} — ${window.location.origin}/events/${event.id}`)}`} target="_blank" rel="noreferrer" className="inline-flex"><Button type="button" variant="secondary"><FaWhatsapp className="mr-2 h-4 w-4 text-green-600" />{t('events.details.shareWhatsApp', 'WhatsApp')}</Button></a></div>
-              {event.latitude && event.longitude && (
-                <div className="mt-6">
-                  <h3 className="mb-2 text-sm font-bold text-slate-950">{t('events.details.mapHeading', 'Location map')}</h3>
-                  <LocationMap latitude={event.latitude} longitude={event.longitude} height={300} />
-                </div>
-              )}
+              <div className="mt-6 flex flex-wrap gap-2">
+                <Button type="button" variant="secondary" onClick={shareEvent}><Share2 className="mr-2 h-4 w-4" />{t('events.details.shareEvent')}</Button>
+                <a href={`https://wa.me/?text=${encodeURIComponent(`${event.title} — ${window.location.origin}/events/${event.id}`)}`} target="_blank" rel="noreferrer" className="inline-flex"><Button type="button" variant="secondary"><FaWhatsapp className="mr-2 h-4 w-4 text-green-600" />{t('events.details.shareWhatsApp')}</Button></a>
+              </div>
               <a
                 href={
                   event.latitude && event.longitude
@@ -213,38 +210,42 @@ export default function EventDetailsPage() {
                 rel="noreferrer"
                 className="mt-3 inline-flex"
               >
-                <Button type="button" variant="secondary"><Navigation className="mr-2 h-4 w-4" />{t('events.details.getDirections', 'Get directions')}</Button>
+                <Button type="button" variant="secondary"><Navigation className="mr-2 h-4 w-4" />{t('events.details.getDirections')}</Button>
               </a>
             </Card>
 
             {galleryImages.length > 0 && (
               <section className="rounded-3xl bg-transparent p-0">
                 <div className="mb-4 flex items-center justify-between gap-3">
-                  <div>
-                    <p className="inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-xs font-black uppercase tracking-wide text-teal-700"><Images className="h-4 w-4" /> {t('events.details.galleryTitle')}</p>
-                    <h2 className="mt-2 text-2xl font-black text-slate-950">{t('events.details.galleryTitle')}</h2>
+                <div>
+                  <p className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1 text-xs font-black uppercase tracking-wide text-slate-700"><Images className="h-4 w-4" /> {t('events.details.galleryTitle')}</p>
+                  <h2 className="mt-2 text-2xl font-black text-slate-950">{t('events.details.galleryTitle')}</h2>
+                </div>
+                {galleryImages.length > 3 && (
+                  <div className="flex gap-2">
+                    <button type="button" onClick={() => moveGallery(-1)} className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-700" aria-label={t('events.details.previousGalleryImages')}><ChevronLeft className="h-5 w-5" /></button>
+                    <button type="button" onClick={() => moveGallery(1)} className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-700" aria-label={t('events.details.nextGalleryImages')}><ChevronRight className="h-5 w-5" /></button>
                   </div>
-                  {galleryImages.length > 3 && (
-                    <div className="flex gap-2">
-                      <button type="button" onClick={() => moveGallery(-1)} className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-teal-50 hover:text-teal-700" aria-label={t('events.details.previousGalleryImages')}><ChevronLeft className="h-5 w-5" /></button>
-                      <button type="button" onClick={() => moveGallery(1)} className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-teal-50 hover:text-teal-700" aria-label={t('events.details.nextGalleryImages')}><ChevronRight className="h-5 w-5" /></button>
-                    </div>
-                  )}
+                )}
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2 lg:hidden">
                   {visibleGalleryMobile.map((image, index) => (
-                    <a key={`${image.id}-mobile-${index}`} href={image.url} target="_blank" rel="noreferrer" className="group block overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-lg">
-                      <img src={image.url} alt={event.title} loading="lazy" decoding="async" srcSet={variantSrcSet(image.path)} sizes="(max-width: 768px) 50vw, 33vw" className="h-56 w-full object-cover transition duration-500 group-hover:scale-102" />
-                    </a>
+                    image.url && (
+                      <a key={`${image.id}-mobile-${index}`} href={image.url} target="_blank" rel="noreferrer" className="group block overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-lg">
+                        <img src={image.url} alt={event.title} loading="lazy" decoding="async" srcSet={variantSrcSet(image.path)} sizes="(max-width: 768px) 50vw, 33vw" className="h-56 w-full object-cover transition duration-500 group-hover:scale-102" />
+                      </a>
+                    )
                   ))}
                 </div>
 
                 <div className="hidden gap-5 lg:grid lg:grid-cols-3">
                   {visibleGalleryDesktop.map((image, index) => (
-                    <a key={`${image.id}-desktop-${index}`} href={image.url} target="_blank" rel="noreferrer" className="group block overflow-hidden rounded-4xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-lg">
-                      <img src={image.url} alt={event.title} loading="lazy" decoding="async" srcSet={variantSrcSet(image.path)} sizes="(max-width: 768px) 50vw, 33vw" className="h-72 w-full object-cover transition duration-500 group-hover:scale-102" />
-                    </a>
+                    image.url && (
+                      <a key={`${image.id}-desktop-${index}`} href={image.url} target="_blank" rel="noreferrer" className="group block overflow-hidden rounded-4xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-lg">
+                        <img src={image.url} alt={event.title} loading="lazy" decoding="async" srcSet={variantSrcSet(image.path)} sizes="(max-width: 768px) 50vw, 33vw" className="h-72 w-full object-cover transition duration-500 group-hover:scale-102" />
+                      </a>
+                    )
                   ))}
                 </div>
               </section>

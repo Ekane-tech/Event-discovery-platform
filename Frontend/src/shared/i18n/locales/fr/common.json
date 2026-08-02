@@ -121,6 +121,12 @@
     "resendVerificationEmail": "Renvoyer l'e-mail de vérification",
     "chooseAccountType": "Veuillez choisir comment vous souhaitez utiliser la plateforme.",
     "passwordMinLength": "Le mot de passe doit contenir au moins 8 caractères.",
+    "bullet1": "Découvrez des événements partout au Cameroun.",
+    "bullet2": "Gérez les inscriptions, les billets et les enregistrements.",
+    "registerPageTitle": "Rejoignez l'écosystème événementiel.",
+    "registerPageDescription": "Créez un compte participant ou enregistrez votre profil d'organisateur en quelques étapes.",
+    "registerFormTitle": "Créer votre compte",
+    "registerFormDescription": "Choisissez votre type de compte, puis complétez votre profil.",
     "passwordLetter": "Le mot de passe doit contenir au moins une lettre.",
     "passwordNumber": "Le mot de passe doit contenir au moins un chiffre.",
     "passwordsNotMatch": "Les mots de passe ne correspondent pas.",
@@ -134,7 +140,9 @@
     "checkNumber": "Contient un chiffre",
     "passwordChecks": "Vérifications du mot de passe",
     "registerBenefit2": "Recevez les mises à jour importantes par e-mail.",
-    "verificationEmailSentTo": "E-mail de vérification envoyé à"
+    "verificationEmailSentTo": "E-mail de vérification envoyé à",
+    "unableToResendVerificationEmail": "Impossible de renvoyer l'e-mail de vérification.",
+    "yourAccount": "votre compte"
   },
   "eventAction": {
     "title": "Actions d'événement",
@@ -162,13 +170,22 @@
     "paymentRequired": "Un paiement est requis pour finaliser cette inscription.",
     "registrationSuccess": "Inscription réussie.",
     "registrationSuccessTicket": "Inscription réussie. Billet : {{ticketNumber}}",
+    "registrationSuccessMultiple": "{{count}} billets enregistrés avec succès.",
     "registrationFailed": "Impossible de s'inscrire à l'événement.",
     "cancelSuccess": "Inscription annulée avec succès.",
     "cancelFailed": "Impossible d'annuler l'inscription.",
     "reportSubmitted": "Signalement soumis avec succès.",
     "reportSubmittedReview": "Signalement soumis avec succès. Notre équipe de modération l'examinera.",
     "reportEvent": "Signaler l'événement",
-    "soldOut": "Complet"
+    "soldOut": "Complet",
+    "lowCapacity": "Seulement {{count}} places disponibles — inscrivez-vous bientôt !",
+    "buyTickets": "Acheter des billets",
+    "registerForEvent": "S'inscrire",
+    "buyMoreTickets": "Acheter plus de billets",
+    "chooseTicketType": "Choisir le type de billet",
+    "numberOfTickets": "Nombre de billets",
+    "total": "Total",
+    "eventAccess": "Accès à l'événement"
   },
   "event": {
     "defaultCategory": "Événement",
@@ -276,7 +293,9 @@
       "errorMessage": "Impossible de mettre à jour l'événement.",
       "imageDeleted": "Image supprimée.",
       "coverUpdated": "Image de couverture mise à jour.",
-      "backToMyEvents": "Retour à mes événements"
+      "backToMyEvents": "Retour à mes événements",
+      "pastEventCannotBeEdited": "Impossible de modifier un événement passé",
+      "pastEventMessage": "Cet événement est déjà terminé, ses détails et photos sont donc verrouillés. Dupliquez-le depuis Mes événements pour créer une nouvelle édition avec de nouvelles dates."
     },
     "dashboard": {
       "title": "Mes événements",
@@ -306,13 +325,18 @@
       "unlimited": "Illimité",
       "registrations": "inscriptions",
       "views": "vues",
-      "publishingNote": "La publication et le refus sont gérés par les administrateurs.",
-      "details": "Détails",
-      "attendees": "Participants",
-      "scanner": "Scanner",
-      "edit": "Modifier",
-      "duplicate": "Dupliquer",
-      "delete": "Supprimer"
+    "publishingNote": "La publication et le refus sont gérés par les administrateurs.",
+    "details": "Détails",
+    "attendees": "Participants",
+    "scanner": "Scanner",
+    "edit": "Modifier",
+    "duplicate": "Dupliquer",
+    "delete": "Supprimer",
+    "duplicateForNewDate": "Dupliquer pour une nouvelle date",
+    "noVenue": "Aucun lieu",
+    "dateLabel": "Date",
+    "registrations": "inscriptions",
+    "views": "vues"
     },
     "stats": {
       "views": "Vues",
@@ -375,6 +399,30 @@
     "galleryReady_plural": "{{count}} nouvelles images de galerie prêtes à être téléchargées.",
     "saveDraft": "Enregistrer en tant que brouillon",
     "saving": "Enregistrement...",
+    "ticketTypesTitle": "Types de billets",
+    "ticketTypesDescription": "Créez des billets gratuits, Classique, VIP ou VVIP. Le prix sélectionné par le participant sera utilisé pour le paiement.",
+    "addTicketTypeButton": "Ajouter un type de billet",
+    "ticketNameLabel": "Nom du billet",
+    "ticketDescriptionLabel": "Description",
+    "ticketDescriptionPlaceholder": "Détails d'accès",
+    "ticketClassic": "Classique",
+    "ticketVIP": "VIP",
+    "quantityLabel": "Quantité",
+    "unlimited": "Illimité",
+    "ticketTypesTip": "Astuce : utilisez Gratuit avec un prix de 0 pour un accès gratuit, puis ajoutez Classique, VIP ou VVIP selon vos besoins.",
+    "galleryUsed": "galerie utilisée",
+    "existingImagesTitle": "Images existantes",
+    "coverImageTitle": "Télécharger une photo de couverture",
+    "coverImageDescription": "Apparaît sur les cartes d'événement et les détails. Remplace la couverture actuelle.",
+    "galleryImagesTitle": "Ajouter des photos de galerie",
+    "galleryImagesDescription": "Ajoutez jusqu'à {{remaining}} image(s) de galerie de plus.",
+    "imagesSelected": "{{count}} image(s) sélectionnée(s)",
+    "galleryReady": "{{count}} nouvelle(s) image(s) de galerie prête(s) à être téléchargée(s).",
+    "eventImageAlt": "Image de l'événement",
+    "coverBadge": "Couverture",
+    "makeCover": "Définir comme couverture",
+    "priceNote": "Le prix de l'événement est calculé à partir des types de billets ci-dessous. Utilisez le prix 0 pour les billets gratuits.",
+    "mapLabel": "Placer sur la carte",
     "errors": {
       "invalidDateRange": "La date de fin doit être postérieure à la date de début.",
       "saveFailed": "Impossible d'enregistrer l'événement. Veuillez réessayer.",
@@ -388,7 +436,11 @@
       "categoryRequired": "La catégorie est requise.",
       "startDateRequired": "La date de début est requise.",
       "coverRequired": "Veuillez télécharger ou choisir une photo de couverture.",
-      "galleryLimit": "Les images de galerie sont limitées à {{limit}}."
+      "galleryLimit": "Les images de galerie sont limitées à {{limit}}.",
+      "addTicketType": "Ajoutez au moins un type de billet, par exemple Classique ou Gratuit.",
+      "negativePrice": "Les prix des types de billets ne peuvent pas être négatifs.",
+      "deleteImage": "Impossible de supprimer l'image.",
+      "updateCoverImage": "Impossible de mettre à jour l'image de couverture."
     }
   },
   "report": {
@@ -885,6 +937,7 @@
     "emptyMessage": "Choisissez des centres d'intérêt, enregistrez des événements ou inscrivez-vous pour améliorer vos recommandations.",
     "emptyTitle": "Aucune recommandation",
     "errorTitle": "Impossible de charger les recommandations",
+    "match": "correspondance",
     "recommendedForYou": "Recommandé pour vous",
     "selectInterests": "Sélectionnez des centres d'intérêt pour améliorer la qualité de vos recommandations.",
     "subtitle": "Événements sélectionnés à partir de vos centres d'intérêt, votre lieu, votre activité enregistrée, vos inscriptions et les signaux de popularité.",
@@ -1120,5 +1173,641 @@
     "notYetEnded": "Les avis ouvrent une fois l'événement terminé.",
     "anonymous": "Participant",
     "verifiedAttendee": "Participant vérifié"
+  },
+  "admin": {
+    "common": {
+      "actions": "Actions",
+      "active": "Actif",
+      "all": "Tout",
+      "allRoles": "Tous les rôles",
+      "allStatuses": "Tous les statuts",
+      "cancel": "Annuler",
+      "chooseReason": "Choisir une raison",
+      "close": "Fermer",
+      "confirm": "Confirmer",
+      "create": "Créer",
+      "created": "Créé",
+      "delete": "Supprimer",
+      "description": "Description",
+      "disable": "Désactiver",
+      "disabled": "Désactivé",
+      "draft": "Brouillon",
+      "edit": "Modifier",
+      "enable": "Activer",
+      "errorLoading": "Impossible de charger {{type}}",
+      "errorTitle": "Erreur",
+      "filter": "Filtre",
+      "filterAll": "Tout",
+      "find": "Trouver",
+      "first": "Premier",
+      "for": "pour",
+      "from": "de",
+      "goBack": "Retour",
+      "inactive": "Inactif",
+      "loading": "Chargement {{type}}...",
+      "manage": "Gérer",
+      "name": "Nom",
+      "new": "Nouveau",
+      "no": "Non",
+      "noDescription": "Aucune description",
+      "noItems": "Aucun {{type}} trouvé",
+      "noItemsMessage": "Il n'y a aucun {{type}} à afficher",
+      "notAvailable": "Non disponible",
+      "notSpecified": "Non spécifié",
+      "of": "de",
+      "on": "le",
+      "or": "ou",
+      "other": "Autre",
+      "pending": "En attente",
+      "pendingApproval": "En attente d'approbation",
+      "publish": "Publier",
+      "published": "Publié",
+      "reject": "Rejeter",
+      "rejected": "Rejeté",
+      "remove": "Supprimer",
+      "reset": "Réinitialiser",
+      "resolve": "Résoudre",
+      "resolved": "Résolu",
+      "review": "Examiner",
+      "reviewing": "En examen",
+      "save": "Enregistrer",
+      "saving": "Enregistrement...",
+      "search": "Rechercher {{type}}",
+      "searchPlaceholder": "Rechercher par {{field}}",
+      "select": "Sélectionner",
+      "send": "Envoyer",
+      "sending": "Envoi...",
+      "status": "Statut",
+      "suspend": "Suspendre",
+      "suspended": "Suspendu",
+      "the": "le",
+      "to": "à",
+      "toggle": "Basculer",
+      "total": "Total",
+      "type": "Type",
+      "unverify": "Désapprouver",
+      "update": "Mettre à jour",
+      "updated": "Mis à jour",
+      "verify": "Vérifier",
+      "verified": "Vérifié",
+      "view": "Voir",
+      "yes": "Oui"
+    },
+    "users": {
+      "title": "Gérer les utilisateurs",
+      "description": "Examiner les comptes, les rôles et les statuts d'accès sur la plateforme.",
+      "totalUsers": "Total des utilisateurs",
+      "activeUsers": "Actifs",
+      "suspendedUsers": "Suspendus",
+      "organizersCount": "Organisateurs",
+      "searchPlaceholder": "Rechercher par nom ou email",
+      "roleFilter": {
+        "all": "Tous les rôles",
+        "user": "Utilisateurs",
+        "organizer": "Organisateurs",
+        "admin": "Administrateurs"
+      },
+      "statusFilter": {
+        "all": "Tous les statuts",
+        "active": "Actif",
+        "pending_approval": "En attente d'approbation",
+        "suspended": "Suspendu"
+      },
+      "table": {
+        "user": "Utilisateur",
+        "email": "Email",
+        "role": "Rôle",
+        "location": "Localisation",
+        "joined": "Inscrit le",
+        "ownStatusProtected": "Statut personnel protégé"
+      },
+      "actions": {
+        "activate": "Activer",
+        "suspend": "Suspendre",
+        "makeUser": "Faire Utilisateur",
+        "makeOrganizer": "Faire Organisateur",
+        "verifyOrganizer": "Vérifier Organisateur",
+        "unverifyOrganizer": "Désapprouver Organisateur"
+      },
+      "modals": {
+        "suspendAccount": "Suspendre le compte",
+        "activateAccount": "Activer le compte",
+        "suspendMessage": "Cela désactivera l'accès de {{name}} et enverra une notification par email avec la raison.",
+        "activateMessage": "Cela réactivera l'accès de {{name}} et enverra une notification par email.",
+        "reasonLabel": "Raison envoyée par email",
+        "detailsLabel": "Détails supplémentaires",
+        "detailsRequired": "(obligatoire)",
+        "detailsOptional": "(facultatif)",
+        "suspensionHelper": "Ajoutez des détails qui aideront l'utilisateur à comprendre la suspension.",
+        "activationHelper": "Ajoutez une courte note pour l'utilisateur si nécessaire.",
+        "suspendButton": "Suspendre le compte",
+        "activateButton": "Activer le compte"
+      },
+      "toasts": {
+        "suspended": "Utilisateur suspendu avec succès.",
+        "activated": "Utilisateur activé avec succès.",
+        "roleUpdated": "Rôle de l'utilisateur mis à jour avec succès.",
+        "organizerVerified": "Organisateur vérifié avec succès.",
+        "organizerUnverified": "Vérification de l'organisateur supprimée.",
+        "error": {
+          "load": "Impossible de charger les utilisateurs.",
+          "statusUpdate": "Impossible de mettre à jour le statut de l'utilisateur.",
+          "roleUpdate": "Impossible de mettre à jour le rôle de l'utilisateur.",
+          "verification": "Impossible de mettre à jour la vérification de l'organisateur.",
+          "chooseReason": "Veuillez choisir une raison.",
+          "describeReason": "Veuillez décrire la raison."
+        }
+      }
+    },
+    "events": {
+      "title": "Modérer les événements",
+      "description": "Examiner les événements soumis, publier les annonces valides et bloquer le contenu problématique.",
+      "totalEvents": "Total des événements",
+      "pendingEvents": "En attente",
+      "publishedEvents": "Publiés",
+      "reportedEvents": "Signalés",
+      "searchPlaceholder": "Rechercher des événements",
+      "statusFilter": {
+        "all": "Tous les statuts",
+        "pending": "En attente",
+        "published": "Publié",
+        "rejected": "Rejeté",
+        "cancelled": "Annulé",
+        "draft": "Brouillon"
+      },
+      "table": {
+        "title": "Événement",
+        "category": "Catégorie",
+        "city": "Ville",
+        "date": "Date",
+        "reports": "Signalements"
+      },
+      "actions": {
+        "details": "Détails",
+        "publish": "Publier",
+        "reject": "Rejeter",
+        "cancel": "Annuler"
+      },
+      "moderation": {
+        "publishTitle": "Publier l'événement",
+        "publishNote": "Cet événement sera visible dans la recherche publique et les participants pourront s'inscrire.",
+        "publishButton": "Confirmer la publication",
+        "rejectTitle": "Rejeter l'événement",
+        "rejectNote": "Cet événement ne sera pas visible publiquement. L'organisateur recevra votre raison.",
+        "rejectButton": "Confirmer le rejet",
+        "cancelTitle": "Annuler l'événement",
+        "cancelNote": "Cela supprime l'événement de l'accès public, efface les favoris, met à jour les inscriptions et notifie les utilisateurs concernés.",
+        "cancelButton": "Confirmer l'annulation",
+        "moderationAction": "Action de modération",
+        "reasonSentToOrganizer": "Raison envoyée à l'organisateur",
+        "reasonHelper": "Expliquez clairement pourquoi cette action de modération est appliquée. Ce message aide l'organisateur à corriger l'événement et à éviter la confusion.",
+        "publishingNote": "La publication ne nécessite pas de raison. L'organisateur sera informé que l'événement est en ligne."
+      },
+      "toasts": {
+        "published": "Événement publié avec succès.",
+        "rejected": "Événement rejeté avec succès.",
+        "cancelled": "Événement annulé avec succès.",
+        "error": {
+          "load": "Impossible de charger les événements.",
+          "statusUpdate": "Impossible de mettre à jour le statut de l'événement."
+        }
+      }
+    },
+    "categories": {
+      "title": "Gérer les catégories",
+      "description": "Créez des catégories d'événements claires pour que les participants puissent découvrir les bonnes expériences plus rapidement.",
+      "newCategory": "Nouvelle catégorie",
+      "totalCategories": "Total des catégories",
+      "activeCategories": "Actives",
+      "disabledCategories": "Désactivées",
+      "usedByEvents": "Utilisées par des événements",
+      "searchPlaceholder": "Rechercher des catégories",
+      "statusFilter": {
+        "all": "Tous les statuts",
+        "active": "Active",
+        "disabled": "Désactivée"
+      },
+      "table": {
+        "category": "Catégorie",
+        "description": "Description",
+        "eventCount": "Événements",
+        "status": "Statut"
+      },
+      "actions": {
+        "edit": "Modifier",
+        "disable": "Désactiver",
+        "enable": "Activer",
+        "delete": "Supprimer"
+      },
+      "form": {
+        "createTitle": "Créer une catégorie",
+        "editTitle": "Modifier la catégorie",
+        "setupBadge": "Configuration de la catégorie",
+        "updateCategory": "Mettre à jour la catégorie",
+        "newCategory": "Nouvelle catégorie",
+        "setupDescription": "Utilisez des noms courts et reconnaissables qui aident les participants à filtrer les événements rapidement.",
+        "nameLabel": "Nom de la catégorie",
+        "namePlaceholder": "Technologie",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Décrivez le type d'événements inclus dans cette catégorie.",
+        "imageTitle": "Image de la catégorie",
+        "imageDescription": "JPG, PNG ou WebP. Maximum 4 Mo. Cette image apparaît sur les cartes de catégories publiques et comme image de secours pour les événements.",
+        "chooseImage": "Choisir une image",
+        "removeImage": "Supprimer",
+        "imageHint": "Utilisez une photo ou un logo clair pour une meilleure présence sur Mboa."
+      },
+      "toasts": {
+        "created": "Catégorie créée avec succès.",
+        "updated": "Catégorie mise à jour avec succès.",
+        "deleted": "Catégorie supprimée avec succès.",
+        "disabled": "Catégorie désactivée.",
+        "enabled": "Catégorie activée.",
+        "error": {
+          "load": "Impossible de charger les catégories.",
+          "save": "Impossible d'enregistrer la catégorie.",
+          "statusUpdate": "Impossible de mettre à jour le statut de la catégorie.",
+          "delete": "Impossible de supprimer la catégorie."
+        }
+      }
+    },
+    "locations": {
+      "title": "Gérer les lieux",
+      "description": "Maintenez les régions, divisions et villes utilisées pour la publication d'événements et les filtres de recherche.",
+      "tabs": {
+        "regions": "Régions",
+        "divisions": "Divisions",
+        "cities": "Villes"
+      },
+      "regions": {
+        "addButton": "Ajouter une région",
+        "namePlaceholder": "Nom de la région",
+        "table": {
+          "region": "Région"
+        }
+      },
+      "divisions": {
+        "addButton": "Ajouter une division",
+        "regionLabel": "Sélectionner la région",
+        "namePlaceholder": "Nom de la division",
+        "table": {
+          "division": "Division",
+          "regionName": "Région"
+        }
+      },
+      "cities": {
+        "addButton": "Ajouter une ville",
+        "regionLabel": "Sélectionner la région",
+        "divisionLabel": "Sélectionner la division",
+        "noDivision": "Aucune division",
+        "namePlaceholder": "Nom de la ville",
+        "table": {
+          "city": "Ville",
+          "divisionName": "Division",
+          "regionName": "Région"
+        }
+      },
+      "actions": {
+        "disable": "Désactiver",
+        "enable": "Activer"
+      },
+      "toasts": {
+        "regionCreated": "Région créée.",
+        "divisionCreated": "Division créée.",
+        "cityCreated": "Ville créée.",
+        "error": {
+          "load": "Impossible de charger les lieux.",
+          "createRegion": "Impossible de créer la région.",
+          "createDivision": "Impossible de créer la division.",
+          "createCity": "Impossible de créer la ville.",
+          "updateRegion": "Impossible de mettre à jour la région.",
+          "updateDivision": "Impossible de mettre à jour la division.",
+          "updateCity": "Impossible de mettre à jour la ville."
+        }
+      },
+      "recordsCount": "{{count}} enregistrements"
+    },
+    "reports": {
+      "title": "Signalements",
+      "description": "Examiner les signalements des utilisateurs et résoudre les problèmes de confiance ou de qualité.",
+      "totalReports": "Total des signalements",
+      "openReports": "Ouverts",
+      "reviewingReports": "En examen",
+      "resolvedReports": "Résolus",
+      "searchPlaceholder": "Rechercher des signalements",
+      "typeFilter": {
+        "all": "Tous les types",
+        "fake_event": "Événement faux",
+        "wrong_information": "Informations incorrectes",
+        "wrong_location": "Mauvais emplacement",
+        "inappropriate_content": "Contenu inapproprié",
+        "duplicate_event": "Événement en double",
+        "scam_or_fraud": "Escroquerie ou fraude",
+        "other": "Autre"
+      },
+      "statusFilter": {
+        "all": "Tous les statuts",
+        "open": "Ouvert",
+        "reviewing": "En examen",
+        "resolved": "Résolu",
+        "rejected": "Rejeté"
+      },
+      "table": {
+        "type": "Type",
+        "target": "Cible",
+        "reportedBy": "Signalé par",
+        "date": "Date"
+      },
+      "actions": {
+        "details": "Détails",
+        "review": "Examiner",
+        "resolve": "Résoudre",
+        "reject": "Rejeter"
+      },
+      "modal": {
+        "title": "Détails du signalement",
+        "badge": "Signalement",
+        "statusLabel": "Statut",
+        "eventLabel": "Événement",
+        "reporterLabel": "Signaleur",
+        "dateLabel": "Date",
+        "messageLabel": "Message",
+        "noMessage": "Aucun message fourni.",
+        "markReviewing": "Marquer en examen",
+        "close": "Fermer"
+      },
+      "toasts": {
+        "statusUpdated": "Statut du signalement mis à jour.",
+        "error": {
+          "load": "Impossible de charger les signalements.",
+          "statusUpdate": "Impossible de mettre à jour le signalement."
+        }
+      }
+    },
+    "feedback": {
+      "title": "Avis des utilisateurs",
+      "description": "Examiner les notes, suggestions et retours d'expérience de votre communauté.",
+      "totalFeedback": "Total des avis",
+      "positiveRatings": "Notes positives",
+      "searchPlaceholder": "Rechercher des avis",
+      "categoryFilter": {
+        "all": "Toutes les catégories",
+        "general": "Général",
+        "bug": "Bug",
+        "feature": "Fonctionnalité",
+        "design": "Conception/UI",
+        "performance": "Performance"
+      },
+      "ratingFilter": {
+        "all": "Toutes les notes",
+        "5stars": "5 étoiles",
+        "4stars": "4 étoiles",
+        "3stars": "3 étoiles",
+        "2stars": "2 étoiles",
+        "1star": "1 étoile"
+      },
+      "table": {
+        "name": "Nom",
+        "email": "Email",
+        "rating": "Note",
+        "category": "Catégorie",
+        "message": "Message",
+        "date": "Date"
+      },
+      "actions": {
+        "read": "Lire"
+      },
+      "modal": {
+        "title": "Détails de l'avis",
+        "categoryLabel": "Catégorie",
+        "nameLabel": "Nom :",
+        "emailLabel": "Email :",
+        "dateLabel": "Date :"
+      },
+      "toasts": {
+        "error": {
+          "load": "Impossible de charger les avis."
+        }
+      }
+    },
+    "announcements": {
+      "title": "Annonces",
+      "description": "Créez des annonces et envoyez des notifications système aux audiences sélectionnées.",
+      "totalAnnouncements": "Total des annonces",
+      "drafts": "Brouillons",
+      "sent": "Envoyées",
+      "form": {
+        "titleLabel": "Titre",
+        "titlePlaceholder": "Titre de l'annonce",
+        "messageLabel": "Message",
+        "messagePlaceholder": "Message de notification",
+        "audienceLabel": "Public",
+        "audienceOptions": {
+          "users": "Utilisateurs enregistrés",
+          "organizers": "Organisateurs",
+          "admins": "Administrateurs",
+          "all": "Tout le monde"
+        },
+        "actionLabel": "Action",
+        "actionOptions": {
+          "draft": "Enregistrer comme brouillon",
+          "sent": "Envoyer immédiatement"
+        },
+        "saveButton": "Enregistrer l'annonce",
+        "saving": "Enregistrement..."
+      },
+      "audienceBadge": {
+        "users": "Utilisateurs",
+        "organizers": "Organisateurs",
+        "admins": "Administrateurs",
+        "all": "Tous"
+      },
+      "statusBadge": {
+        "draft": "Brouillon",
+        "sent": "Envoyé"
+      },
+      "actions": {
+        "send": "Envoyer"
+      },
+      "toasts": {
+        "saved": "Annonce enregistrée avec succès.",
+        "sent": "Annonce envoyée avec succès.",
+        "error": {
+          "load": "Impossible de charger les annonces.",
+          "save": "Impossible d'enregistrer l'annonce.",
+          "send": "Impossible d'envoyer l'annonce."
+        }
+      }
+    },
+    "auditLogs": {
+      "title": "Journaux d'audit",
+      "description": "Examiner les actions administratives et d'organisateur importantes sur la plateforme.",
+      "activityTrail": "Traçage de l'activité",
+      "activityTrailDescription": "Rechercher les noms d'actions, les acteurs, les descriptions et les cibles.",
+      "searchPlaceholder": "Rechercher dans les journaux d'audit",
+      "table": {
+        "action": "Action",
+        "actor": "Acteur",
+        "target": "Cible",
+        "description": "Description",
+        "ip": "IP",
+        "date": "Date"
+      },
+      "toasts": {
+        "error": {
+          "load": "Impossible de charger les journaux d'audit."
+        }
+      }
+    },
+    "payments": {
+      "title": "Suivi des paiements",
+      "description": "Surveiller les paiements d'événements, les revenus en attente et les transactions Mobile Money complétées.",
+      "totalRevenue": "Revenus totaux",
+      "pendingRevenue": "Revenus en attente",
+      "paidPayments": "Paiements effectués",
+      "pendingPayments": "Paiements en attente",
+      "transactionsTitle": "Transactions",
+      "transactionsDescription": "Rechercher par participant, événement, téléphone ou référence.",
+      "searchPlaceholder": "Rechercher des paiements",
+      "statusFilter": {
+        "all": "Tous les statuts",
+        "pending": "En attente",
+        "paid": "Payé",
+        "failed": "Échoué"
+      },
+      "table": {
+        "reference": "Référence",
+        "event": "Événement",
+        "attendee": "Participant",
+        "amount": "Montant",
+        "status": "Statut",
+        "operator": "Opérateur",
+        "phone": "Téléphone",
+        "paid": "Payé",
+        "created": "Créé"
+      },
+      "toasts": {
+        "error": {
+          "load": "Impossible de charger le suivi des paiements."
+        }
+      }
+    },
+    "email": {
+      "title": "Livraison des emails",
+      "description": "Tester la livraison des emails de production et surveiller les résultats des emails sortants.",
+      "sendTestEmail": "Envoyer un email de test",
+      "sendTestDescription": "Utilisez ceci pour vérifier la livraison Brevo après les changements de déploiement.",
+      "totalLogs": "Total des journaux",
+      "sent": "Envoyés",
+      "failed": "Échoués",
+      "emailLogs": "Journaux d'emails",
+      "emailLogsDescription": "Rechercher les tentatives de livraison, les échecs et les adresses des destinataires.",
+      "searchPlaceholder": "Rechercher dans les journaux",
+      "refreshButton": "Rafraîchir",
+      "form": {
+        "recipientLabel": "Email du destinataire",
+        "recipientPlaceholder": "admin@example.com",
+        "subjectLabel": "Sujet",
+        "messageLabel": "Message",
+        "sendButton": "Envoyer un email de test",
+        "sending": "Envoi..."
+      },
+      "table": {
+        "recipient": "Destinataire",
+        "subject": "Sujet",
+        "type": "Type",
+        "status": "Statut",
+        "error": "Erreur",
+        "date": "Date"
+      },
+      "statusBadge": {
+        "sent": "Envoyé",
+        "failed": "Échoué"
+      },
+      "toasts": {
+        "sent": "Email de test envoyé avec succès.",
+        "error": {
+          "load": "Impossible de charger les journaux d'emails.",
+          "send": "Impossible d'envoyer l'email de test."
+        }
+      }
+    },
+    "payouts": {
+      "badge": "Finance",
+      "title": "Paiements",
+      "subtitle": "Examiner les demandes de retrait des organisateurs, les approuver et enregistrer les paiements manuels.",
+      "requested": "Demandé",
+      "approved": "Approuvé",
+      "paid": "Payé",
+      "inView": "Dans la vue actuelle",
+      "settingsTitle": "Paramètres de la plateforme",
+      "feePercent": "Frais de plateforme (%)",
+      "graceHours": "Période de grâce (heures)",
+      "minPayout": "Paiement minimum",
+      "filter": {
+        "all": "Tous",
+        "requested": "Demandés",
+        "approved": "Approuvés",
+        "paid": "Payés",
+        "rejected": "Rejetés"
+      },
+      "table": {
+        "organizer": "Organisateur",
+        "amount": "Montant",
+        "method": "Méthode",
+        "status": "Statut",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "actions": {
+        "approve": "Approuver",
+        "reject": "Rejeter",
+        "markPaid": "Marquer payé"
+      },
+      "statusStyles": {
+        "requested": "Demandé",
+        "approved": "Approuvé",
+        "paid": "Payé",
+        "rejected": "Rejeté",
+        "cancelled": "Annulé"
+      },
+      "method": {
+        "bank": "Banque",
+        "mobileMoney": "Mobile Money"
+      },
+      "toasts": {
+        "approveDone": "Paiement approuvé.",
+        "rejectDone": "Paiement rejeté.",
+        "markPaidDone": "Marqué comme payé.",
+        "settingsSaved": "Paramètres enregistrés.",
+        "error": {
+          "load": "Impossible de charger les paiements.",
+          "actionFailed": "Échec de l'action.",
+          "settingsSaveFailed": "Impossible d'enregistrer les paramètres."
+        }
+      }
+    },
+    "dashboard": {
+      "title": "Tableau de bord Admin",
+      "description": "Aperçu de l'activité de la plateforme, de la croissance des utilisateurs et des indicateurs clés.",
+      "moderateEvents": "Modérer les événements",
+      "metrics": {
+        "users": "Utilisateurs",
+        "events": "Événements",
+        "organizers": "Organisateurs",
+        "openReports": "Signalements ouverts",
+        "published": "Publiés",
+        "categories": "Catégories",
+        "regions": "Régions",
+        "registrations": "Inscriptions"
+      },
+      "recentReports": "Signalements récents",
+      "eventsNeedingAttention": "Événements nécessitant une attention",
+      "manage": "Gérer",
+      "noReports": "Aucun signalement pour le moment.",
+      "noEventsNeedReview": "Aucun événement ne nécessite de révision.",
+      "manageUsers": "Gérer les utilisateurs",
+      "reviewFeedback": "Examiner les avis",
+      "sendAnnouncement": "Envoyer une annonce"
+    }
   }
 }

@@ -35,11 +35,11 @@ export default function RoleSidebar({ section = 'user', collapsed = false }) {
     return 0
   }
   return (
-    <aside className={`sticky top-0 z-20 hidden h-screen shrink-0 overflow-hidden border-r border-slate-200 bg-white transition-all duration-300 xl:flex xl:flex-col ${collapsed ? 'w-24' : 'w-72'}`}>
-      <div className={`flex items-center gap-3 border-b border-slate-100 px-5 py-5 ${collapsed ? 'justify-center' : 'justify-start'}`}>
+    <aside className={`sticky top-0 z-20 hidden h-screen shrink-0 overflow-hidden border-r border-teal-500/20 bg-white transition-all duration-300 xl:flex xl:flex-col ${collapsed ? 'w-24' : 'w-72'}`}>
+      <div className={`flex items-center gap-3 border-b border-teal-500/20 px-5 py-5 ${collapsed ? 'justify-center' : 'justify-start'}`}>
         <div className="flex min-w-0 items-center gap-3">
-          <img src="/applogo.png" alt={APP_NAME} className="h-12 w-12 shrink-0 rounded-2xl object-cover shadow-lg shadow-teal-200" />
-          {!collapsed && <div className="min-w-0"><p className="truncate text-lg font-bold text-slate-950">{APP_NAME}</p><p className="text-sm text-slate-500">{sectionSubtitles[section] || 'Console'}</p></div>}
+          <img src="/applogo.png" alt={APP_NAME} className="h-10 w-12 shrink-0 rounded-2xl object-cover shadow-lg shadow-teal-200" />
+          {!collapsed && <div className="min-w-0"><p className="truncate text-lg font-bold text-teal-600">{APP_NAME}</p><p className="text-sm text-slate-500">{sectionSubtitles[section] || 'Console'}</p></div>}
         </div>
       </div>
       <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-5">

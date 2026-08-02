@@ -121,18 +121,16 @@ export default function OrganizerWalletPage() {
 
   return (
     <PageContainer>
-      <section className="overflow-hidden rounded-3xl bg-gradient-to-r from-teal-700 to-emerald-700 p-8 text-white">
-        <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-bold backdrop-blur"><WalletIcon className="h-4 w-4" /> {t('wallet.badge', 'Earnings & payouts')}</span>
-        <h1 className="mt-5 text-4xl font-black">{t('wallet.title', 'Your wallet')}</h1>
-        <p className="mt-3 max-w-2xl text-white/90">{t('wallet.subtitle', 'Track ticket earnings, request payouts, and follow your transactions.')}</p>
-        <div className="mt-5 flex flex-wrap gap-2 text-xs">
-          {rules.fee_percent != null && <span className="rounded-full bg-white/15 px-3 py-1 font-semibold">{t('wallet.feeNote', { fee: rules.fee_percent, defaultValue: '{{fee}}% platform fee' })}</span>}
-          {rules.grace_hours != null && <span className="rounded-full bg-white/15 px-3 py-1 font-semibold">{t('wallet.graceNote', { hours: rules.grace_hours, defaultValue: 'Available {{hours}}h after the event' })}</span>}
-          <span className="rounded-full bg-white/15 px-3 py-1 font-semibold">{t('wallet.minNote', { min: fmt(rules.min_payout || 0), defaultValue: 'Min payout {{min}}' })}</span>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-2xl font-black text-slate-950">{t('wallet.title', 'Your wallet')}</h1>
+        <div className="flex flex-wrap gap-2 text-xs">
+          {rules.fee_percent != null && <span className="rounded-full bg-teal-50 px-3 py-1 font-semibold text-teal-700">{t('wallet.feeNote', { fee: rules.fee_percent, defaultValue: '{{fee}}% platform fee' })}</span>}
+          {rules.grace_hours != null && <span className="rounded-full bg-teal-50 px-3 py-1 font-semibold text-teal-700">{t('wallet.graceNote', { hours: rules.grace_hours, defaultValue: 'Available {{hours}}h after the event' })}</span>}
+          <span className="rounded-full bg-teal-50 px-3 py-1 font-semibold text-teal-700">{t('wallet.minNote', { min: fmt(rules.min_payout || 0), defaultValue: 'Min payout {{min}}' })}</span>
         </div>
-      </section>
+      </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-4 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
         <StatCard icon={Banknote} label={t('wallet.available', 'Available')} value={fmt(wallet.available)} gradient="from-teal-600 to-emerald-700" />
         <StatCard icon={Clock} label={t('wallet.pending', 'Pending (held)')} value={fmt(wallet.pending)} gradient="from-amber-500 to-orange-600" />
         <StatCard icon={TrendingUp} label={t('wallet.lifetime', 'Lifetime earnings')} value={fmt(wallet.lifetime_earnings)} gradient="from-blue-600 to-indigo-700" />

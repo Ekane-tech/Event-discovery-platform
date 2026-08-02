@@ -84,7 +84,7 @@ export default function EventActionPanel({ event }) {
       }
       toast.success(t('eventAction.registrationSuccess'))
       setBuyingMore(false)
-      setMessage(selectedQuantity > 1 ? `${selectedQuantity} tickets registered successfully.` : t('eventAction.registrationSuccessTicket', { ticketNumber: nextRegistration.ticketNumber }))
+      setMessage(selectedQuantity > 1 ? t('eventAction.registrationSuccessMultiple', { count: selectedQuantity }) : t('eventAction.registrationSuccessTicket', { ticketNumber: nextRegistration.ticketNumber }))
     } catch (registrationError) {
       const message = getApiErrorMessage(registrationError, t('eventAction.registrationFailed'))
       toast.error(message)
@@ -118,7 +118,7 @@ export default function EventActionPanel({ event }) {
         <p className="mt-2 text-sm text-slate-600">{t('eventAction.interestedDescription')}</p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Link to="/login"><Button>{t('eventAction.loginToRegister')}</Button></Link>
-          <Link to="/register"><Button variant="secondary">{t('createAccount')}</Button></Link>
+          <Link to="/register"><Button variant="secondary">{t('auth.createAccount')}</Button></Link>
         </div>
       </Card>
     )
@@ -148,7 +148,7 @@ export default function EventActionPanel({ event }) {
           <Alert type="error">{getApiErrorMessage(error, t('eventAction.registrationFailed'))}</Alert>
           {isEmailVerificationError(error) && (
             <Link to="/verify-email?status=required" className="mt-2 inline-block text-sm font-bold text-red-700 hover:text-red-900">
-              Verify your email →
+              {t('auth.verifyEmailTitle')} →
             </Link>
           )}
         </div>
@@ -162,53 +162,55 @@ export default function EventActionPanel({ event }) {
       )}
 
       {!registered && isLowCapacity && !isSoldOut && !isPast && (
-        <div className="mt-4"><Alert type="warning">{t('eventAction.lowCapacity', { count: remaining, defaultValue: 'Only {{count}} spots left — register soon!' })}</Alert></div>
+        <div className="mt-4"><Alert type="warning">{t('eventAction.lowCapacity', { count: remaining })}</Alert></div>
       )}
 
       {isPast && (
-        <div className="mt-4"><Alert type="info">{t('eventAction.eventEndedInfo', 'This event has ended.')}</Alert></div>
+        <div className="mt-4"><Alert type="info">{t('eventAction.eventEndedInfo')}</Alert></div>
       )}
 
       {showPurchaseForm && (
-        <div className="mt-5">
-          <div className="mb-2 flex items-center justify-between gap-3">
-            <p className="text-sm font-bold text-slate-800">Choose ticket type</p>
-            {registered && <button type="button" onClick={() => setBuyingMore(false)} className="text-xs font-bold text-slate-500 hover:text-slate-800">Cancel</button>}
+        <>
+          <div className="mt-5">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <p className="text-sm font-bold text-slate-800">{t('eventAction.chooseTicketType')}</p>
+              {registered && <button type="button" onClick={() => setBuyingMore(false)} className="text-xs font-bold text-slate-500 hover:text-slate-800">{t('cancel')}</button>}
+            </div>
+            <div className="grid gap-3">
+              {ticketOptions.map((ticket) => {
+                const active = String(ticket.id || '') === String(selectedTicketTypeId)
+                return (
+                  <button key={ticket.id || ticket.name} type="button" onClick={() => setSelectedTicketTypeId(ticket.id ? String(ticket.id) : '')} className={`rounded-2xl border p-4 text-left transition ${active ? 'border-teal-600 bg-teal-50 ring-2 ring-teal-100' : 'border-slate-200 bg-white hover:border-teal-200'}`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div><p className="font-black text-slate-950">{ticket.name}</p><p className="mt-1 text-sm text-slate-600">{ticket.description || t('eventAction.eventAccess')}</p></div>
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-black text-slate-800">{formatPrice(ticket.price)}</span>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+            <label className="mt-4 block">
+              <span className="mb-1 block text-sm font-bold text-slate-800">{t('eventAction.numberOfTickets')}</span>
+              <input type="number" min="1" max="10" value={quantity} onChange={(event) => setQuantity(event.target.value)} className="h-12 w-32 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100" />
+              <p className="mt-2 text-sm text-slate-600">{t('eventAction.total')}: <strong>{formatPrice(totalAmount)}</strong></p>
+            </label>
           </div>
-          <div className="grid gap-3">
-            {ticketOptions.map((ticket) => {
-              const active = String(ticket.id || '') === String(selectedTicketTypeId)
-              return (
-                <button key={ticket.id || ticket.name} type="button" onClick={() => setSelectedTicketTypeId(ticket.id ? String(ticket.id) : '')} className={`rounded-2xl border p-4 text-left transition ${active ? 'border-teal-600 bg-teal-50 ring-2 ring-teal-100' : 'border-slate-200 bg-white hover:border-teal-200'}`}>
-                  <div className="flex items-start justify-between gap-3">
-                    <div><p className="font-black text-slate-950">{ticket.name}</p><p className="mt-1 text-sm text-slate-600">{ticket.description || 'Event access'}</p></div>
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-black text-slate-800">{formatPrice(ticket.price)}</span>
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-          <label className="mt-4 block">
-            <span className="mb-1 block text-sm font-bold text-slate-800">Number of tickets</span>
-            <input type="number" min="1" max="10" value={quantity} onChange={(event) => setQuantity(event.target.value)} className="h-12 w-32 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100" />
-            <p className="mt-2 text-sm text-slate-600">Total: <strong>{formatPrice(totalAmount)}</strong></p>
-          </label>
-        </div>
+        </>
       )}
 
       <div className="mt-5 flex flex-wrap gap-3">
         {registered && !buyingMore ? (
           <>
             <Link to={`/tickets/${event.id}`}><Button disabled={busy}>{t('eventAction.viewTicket')}</Button></Link>
-            {!isPast && <Button type="button" variant="secondary" disabled={busy} onClick={() => setBuyingMore(true)}>Buy more tickets</Button>}
+            {!isPast && <Button type="button" variant="secondary" disabled={busy} onClick={() => setBuyingMore(true)}>{t('eventAction.buyMoreTickets')}</Button>}
             {cancellationAllowed && <Button type="button" variant="danger" disabled={busy} onClick={handleCancelRegistration}>{t('eventAction.cancelRegistration')}</Button>}
           </>
         ) : isPast ? (
-          <Button type="button" disabled>{t('eventAction.eventEnded', 'Event has ended')}</Button>
+          <Button type="button" disabled>{t('eventAction.eventEnded')}</Button>
         ) : isSoldOut ? (
-          <Button type="button" disabled>{t('eventAction.soldOut', 'Sold out')}</Button>
+          <Button type="button" disabled>{t('eventAction.soldOut')}</Button>
         ) : (
-          <Button type="button" disabled={busy} onClick={handleRegister}>{busy ? t('eventAction.processing') : `${selectedQuantity > 1 ? 'Buy tickets' : 'Register'} - ${formatPrice(totalAmount)}`}</Button>
+          <Button type="button" disabled={busy} onClick={handleRegister}>{busy ? t('eventAction.processing') : `${selectedQuantity > 1 ? t('eventAction.buyTickets') : t('eventAction.registerForEvent')} - ${formatPrice(totalAmount)}`}</Button>
         )}
 
         <Button type="button" disabled={busy} variant={bookmarked ? 'outline' : 'secondary'} onClick={handleBookmark}>

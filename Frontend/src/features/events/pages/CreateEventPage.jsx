@@ -23,7 +23,7 @@ export default function CreateEventPage() {
       const eventId = response.data.event.id
       const files = extractEventFiles(payload)
       if (hasEventFiles(files)) await eventService.uploadImages(eventId, buildEventImagesFormData(files))
-      toast.success(status === 'draft' ? t('events.create.draftSaved') : 'Event published successfully.')
+      toast.success(status === 'draft' ? t('events.create.draftSaved') : t('events.create.successMessage'))
       navigate('/organizer/events')
     } catch (createError) {
       const message = getApiErrorMessage(createError, t('events.create.errorMessage'))
@@ -47,14 +47,14 @@ export default function CreateEventPage() {
           <p className="text-sm font-medium text-red-800">{error}</p>
           {isVerificationError && (
             <Link to="/verify-email?status=required" className="mt-2 inline-block text-sm font-bold text-red-700 hover:text-red-900">
-              Verify your email →
+              {t('auth.verifyEmailTitle')} →
             </Link>
           )}
         </div>
       )}
       <EventForm
         initialValues={createEmptyEventForm()}
-        submitLabel="Publish Event"
+        submitLabel={t('events.create.submitButton')}
         onSubmit={(payload) => saveEvent(payload, 'published')}
         onDraft={(payload) => saveEvent(payload, 'draft')}
         submitting={submitting}

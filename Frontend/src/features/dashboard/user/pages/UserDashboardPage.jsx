@@ -64,15 +64,12 @@ export default function UserDashboardPage() {
 
   return (
     <PageContainer>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-2xl font-black text-slate-950">{t('dashboard.user.welcomeTitle', 'Your attendee space')}</h1>
+        <div className="flex flex-wrap gap-2"><Link to="/events"><Button variant="light">{t('browseEvents', 'Browse Events')}</Button></Link><Link to="/interests"><Button className="bg-teal-500 text-white hover:bg-teal-600">{t('dashboard.user.updateInterests', 'Update Interests')}</Button></Link></div>
+      </div>
 
-      <section className="overflow-hidden rounded-3xl bg-slate-950 bg-cover bg-center p-8 text-white" style={{ backgroundImage: 'linear-gradient(90deg, rgba(2,6,23,.88), rgba(15,118,110,.68)), url(/hero-events.svg)' }}>
-        <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100">{t('dashboard.user.badge', 'Your attendee space')}</span>
-        <h1 className="mt-5 max-w-3xl text-4xl font-black md:text-5xl">{t('dashboard.user.welcomeTitle', 'Welcome back. Your next event is waiting.')}</h1>
-        <p className="mt-4 max-w-2xl text-slate-200">{t('dashboard.user.welcomeSubtitle', 'Track tickets, saved events, notifications and recommendations in one place.')}</p>
-        <div className="mt-6 flex flex-wrap gap-3"><Link to="/events"><Button variant="light">{t('browseEvents', 'Browse Events')}</Button></Link><Link to="/interests"><Button className="bg-teal-500 text-white hover:bg-teal-600">{t('dashboard.user.updateInterests', 'Update Interests')}</Button></Link></div>
-      </section>
-
-      <div className="mt-6 grid grid-cols-2 gap-4 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-5">
         {loading ? Array.from({ length: 5 }).map((_, index) => <StatCardSkeleton key={index} />) : cards.map((item) => <StatCard key={item.title} {...item} />)}
       </div>
 

@@ -1,6 +1,6 @@
 import { BadgeCheck, Bookmark, CalendarDays, Clock, MapPin, Star } from 'lucide-react'
 import { toast } from 'sonner'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Badge from '../../../shared/components/ui/Badge.jsx'
 import Avatar from '../../../shared/components/ui/Avatar.jsx'
 import Button from '../../../shared/components/ui/Button.jsx'
@@ -16,6 +16,7 @@ import { variantSrcSet } from '../../../shared/utils/imageVariants.js'
 
 export default function EventCard({ event }) {
   const location = useLocation()
+  const navigate = useNavigate()
   const { t } = useTranslation()
   const { isAuthenticated, role } = useAuth()
   const { isBookmarked, toggleBookmark } = useBookmarks()
@@ -24,15 +25,23 @@ export default function EventCard({ event }) {
   const canBookmark = isAuthenticated && role === ROLES.USER
   const lifecycle = getEventLifecycle(event)
 
+  function handleOrganizerClick(clickEvent) {
+    clickEvent.preventDefault()
+    clickEvent.stopPropagation()
+    if (event.organizerId) {
+      navigate(`/organizers/${event.organizerId}`)
+    }
+  }
+
   async function handleBookmark(clickEvent) {
     clickEvent.preventDefault()
     clickEvent.stopPropagation()
-    if (!canBookmark) return toast.info(t('events.card.signInToBookmark', 'Sign in as an attendee to bookmark events.'))
+    if (!canBookmark) return toast.info(t('events.card.signInToBookmark'))
     try {
       const added = await toggleBookmark(event.id)
-      toast.success(added ? t('eventAction.bookmarkAdded', 'Event bookmarked successfully.') : t('eventAction.bookmarkRemoved', 'Bookmark removed successfully.'))
+      toast.success(added ? t('eventAction.bookmarkAdded') : t('eventAction.bookmarkRemoved'))
     } catch (error) {
-      toast.error(getApiErrorMessage(error, t('eventAction.bookmarkUpdateFailed', 'Unable to update bookmark.')))
+      toast.error(getApiErrorMessage(error, t('eventAction.bookmarkUpdateFailed')))
     }
   }
 
@@ -47,20 +56,20 @@ export default function EventCard({ event }) {
             <Clock className="h-5 w-5" />
           </span>
         )}
-        <button onClick={handleBookmark} className={`flex h-9 w-9 items-center justify-center rounded-full backdrop-blur transition ${bookmarked ? 'bg-yellow-400 text-slate-950' : 'bg-white/25 text-white hover:bg-white/40'}`} aria-label={t('events.card.bookmarkAria', 'Bookmark event')}>
+        <button onClick={handleBookmark} className={`flex h-9 w-9 items-center justify-center rounded-full backdrop-blur transition ${bookmarked ? 'bg-yellow-400 text-slate-950' : 'bg-white/25 text-white hover:bg-white/40'}`} aria-label={t('events.card.bookmarkAria')}>
           <Bookmark className="h-5 w-5" fill={bookmarked ? 'currentColor' : 'none'} />
         </button>
       </div>
       <div className="absolute left-4 top-4 z-10 flex max-w-[calc(100%-5rem)] flex-wrap gap-2">
         {lifecycle.isPast && (
           <span className="inline-flex items-center gap-1 rounded-full bg-slate-950/85 px-3 py-1 text-xs font-black uppercase tracking-wide text-white ring-1 ring-white/20 backdrop-blur">
-            <Clock className="h-3.5 w-3.5" /> {t('events.card.pastEvent', 'Past event')}
+            <Clock className="h-3.5 w-3.5" /> {t('events.card.pastEvent')}
           </span>
         )}
       </div>
       <div className="relative flex flex-1 flex-col justify-end p-5 text-white">
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          <Badge className="bg-white/20 text-white backdrop-blur">{event.category || t('events.card.eventFallback', 'Event')}</Badge>
+          <Badge className="bg-white/20 text-white backdrop-blur">{event.category || t('events.card.eventFallback')}</Badge>
           <span className="rounded-full bg-teal-500 px-3 py-1 text-sm font-bold text-white">{formatPrice(event.price)}</span>
           {event.averageRating > 0 && (
             <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-sm font-bold text-slate-950 shadow-sm">
@@ -72,27 +81,27 @@ export default function EventCard({ event }) {
         <h3 className="text-xl font-black leading-tight drop-shadow-sm">{event.title}</h3>
         <p className="mt-2 line-clamp-2 text-sm leading-6 text-white drop-shadow-sm">{event.description}</p>
         <div className="mt-4 grid gap-2 text-sm text-slate-100">
-          <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-teal-200" /> {event.city || t('events.card.unknownCity', 'Unknown city')}, {event.region || t('events.card.unknownRegion', 'Unknown region')}</p>
+          <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-teal-200" /> {event.city || t('events.card.unknownCity')}, {event.region || t('events.card.unknownRegion')}</p>
           <p className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-teal-200" /> {formatDate(event.startDate)}</p>
         </div>
         <div className="mt-auto flex flex-col gap-3 pt-4">
           <div className="flex items-center gap-2">
-            <Link to={event.organizerId ? `/organizers/${event.organizerId}` : '#'} onClick={(clickEvent) => clickEvent.stopPropagation()} className="relative shrink-0">
+            <div onClick={handleOrganizerClick} className="relative shrink-0 cursor-pointer">
               <Avatar name={event.organizerName || event.organizer} src={event.organizerAvatar} className="h-9 w-9 text-xs" />
               {event.organizerVerified && (
                 <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-teal-500 text-white shadow-md">
                   <BadgeCheck className="h-2.5 w-2.5" />
                 </div>
               )}
-            </Link>
+            </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-200">{t('events.card.organizedBy', 'Organized by')}</p>
-              <Link to={event.organizerId ? `/organizers/${event.organizerId}` : '#'} onClick={(clickEvent) => clickEvent.stopPropagation()} className="truncate text-sm font-black text-white">
-                {event.organizerName || event.organizer || t('events.card.organizerFallback', 'Organizer')}
-              </Link>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-200">{t('events.card.organizedBy')}</p>
+              <div onClick={handleOrganizerClick} className="truncate text-sm font-black text-white cursor-pointer hover:underline">
+                {event.organizerName || event.organizer || t('events.card.organizerFallback')}
+              </div>
             </div>
           </div>
-          <Button className="w-auto rounded-full bg-teal-600 px-5 text-white hover:bg-teal-700">{t('viewDetails', 'View Details')}</Button>
+          <Button variant="primary" className="w-auto rounded-full px-5">{t('viewDetails')}</Button>
         </div>
       </div>
     </Link>

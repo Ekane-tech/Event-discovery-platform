@@ -13,6 +13,7 @@ import { categoryService } from '../../categories/services/categoryService.js'
 import { locationService } from '../../locations/services/locationService.js'
 import { extractCollection } from '../utils/normalizeEvent.js'
 import LocationPicker from '../../../shared/components/map/LocationPicker.jsx'
+import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
 const MAX_GALLERY_IMAGES = 8
 const MAX_SOURCE_IMAGE_MB = 10
@@ -92,12 +93,13 @@ function UploadBox({ title, description, icon: Icon, multiple = false, name, onC
 }
 
 function ExistingImageCard({ image, isCover, onSetCover, onDelete, busy }) {
+  const { t } = useTranslation()
   return (
     <div className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
       <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
-        <img src={image.url} alt="Event" className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
+        <img src={image.url} alt={t('eventForm.eventImageAlt')} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
         <div className="absolute left-3 top-3 flex gap-2">
-          {isCover && <span className="rounded-full bg-amber-400 px-3 py-1 text-xs font-black text-slate-950">Cover</span>}
+          {isCover && <span className="rounded-full bg-amber-400 px-3 py-1 text-xs font-black text-slate-950">{t('eventForm.coverBadge')}</span>}
         </div>
         <a href={image.url} target="_blank" rel="noreferrer" className="absolute right-3 top-3 rounded-full bg-white/90 p-2 text-slate-800 shadow-sm transition hover:bg-white">
           <Eye className="h-4 w-4" />
@@ -106,11 +108,11 @@ function ExistingImageCard({ image, isCover, onSetCover, onDelete, busy }) {
       <div className="flex flex-wrap gap-2 p-3">
         {!isCover && (
           <Button type="button" variant="secondary" className="!px-3 !py-2 text-xs" onClick={() => onSetCover(image)} disabled={busy}>
-            <Star className="mr-1 h-3.5 w-3.5" /> Make cover
+            <Star className="mr-1 h-3.5 w-3.5" /> {t('eventForm.makeCover')}
           </Button>
         )}
         <Button type="button" variant="danger" className="!px-3 !py-2 text-xs" onClick={() => onDelete(image)} disabled={busy}>
-          <Trash2 className="mr-1 h-3.5 w-3.5" /> Delete
+          <Trash2 className="mr-1 h-3.5 w-3.5" /> {t('delete')}
         </Button>
       </div>
     </div>
@@ -127,6 +129,7 @@ export default function EventForm({
   onSetExistingCover,
   onDraft,
 }) {
+  const { t } = useTranslation()
   const [form, setForm] = useState(initialValues || createEmptyEventForm())
   const [error, setError] = useState('')
   const [imageBusy, setImageBusy] = useState(false)
@@ -181,20 +184,20 @@ export default function EventForm({
     const selectedFiles = Array.from(files || [])
     if (selectedFiles.some((file) => fileSizeMb(file) > MAX_SOURCE_IMAGE_MB)) {
       event.target.value = ''
-      setError(`Each source image must be ${MAX_SOURCE_IMAGE_MB}MB or smaller.`)
+      setError(t('eventForm.errors.sourceImageSize', { size: MAX_SOURCE_IMAGE_MB }))
       return
     }
 
     if (name === 'galleryImages' && selectedFiles.length > galleryRemaining) {
       event.target.value = ''
-      setError(`You can add ${galleryRemaining} more gallery image${galleryRemaining === 1 ? '' : 's'}. Maximum is ${MAX_GALLERY_IMAGES}.`)
+      setError(t('eventForm.errors.galleryCount', { remaining: galleryRemaining, max: MAX_GALLERY_IMAGES }))
       return
     }
 
     const compressed = await Promise.all(selectedFiles.map(compressImage))
     if (compressed.some((file) => fileSizeMb(file) > MAX_OUTPUT_IMAGE_MB)) {
       event.target.value = ''
-      setError(`After compression, each image must be ${MAX_OUTPUT_IMAGE_MB}MB or smaller. Please choose a smaller image.`)
+      setError(t('eventForm.errors.compressedImageSize', { size: MAX_OUTPUT_IMAGE_MB }))
       return
     }
 
@@ -239,7 +242,7 @@ export default function EventForm({
       const event = await onDeleteExistingImage(image)
       setForm((current) => ({ ...current, ...imageStateFromEvent(event) }))
     } catch (deleteError) {
-      setError(deleteError?.message || 'Unable to delete image.')
+      setError(deleteError?.message || t('eventForm.errors.deleteImage'))
     } finally {
       setImageBusy(false)
     }
@@ -253,7 +256,7 @@ export default function EventForm({
       const event = await onSetExistingCover(image)
       setForm((current) => ({ ...current, ...imageStateFromEvent(event) }))
     } catch (coverError) {
-      setError(coverError?.message || 'Unable to update cover image.')
+      setError(coverError?.message || t('eventForm.errors.updateCoverImage'))
     } finally {
       setImageBusy(false)
     }
@@ -261,15 +264,15 @@ export default function EventForm({
 
   function validateForm() {
     setError('')
-    if (!form.title.trim()) return setError('Event title is required.')
-    if (!form.description.trim()) return setError('Event description is required.')
-    if (!form.category_id) return setError('Category is required.')
-    if (!form.startDate) return setError('Start date is required.')
-    if (!form.coverImage && !form.existingCoverImage) return setError('Please upload or choose a cover photo.')
-    if (existingGalleryCount + selectedGalleryCount > MAX_GALLERY_IMAGES) return setError(`Gallery images are limited to ${MAX_GALLERY_IMAGES}.`)
+    if (!form.title.trim()) return setError(t('eventForm.errors.titleRequired'))
+    if (!form.description.trim()) return setError(t('eventForm.errors.descriptionRequired'))
+    if (!form.category_id) return setError(t('eventForm.errors.categoryRequired'))
+    if (!form.startDate) return setError(t('eventForm.errors.startDateRequired'))
+    if (!form.coverImage && !form.existingCoverImage) return setError(t('eventForm.errors.coverRequired'))
+    if (existingGalleryCount + selectedGalleryCount > MAX_GALLERY_IMAGES) return setError(t('eventForm.errors.galleryLimit', { limit: MAX_GALLERY_IMAGES }))
     const validTicketTypes = (form.ticketTypes || []).filter((ticket) => ticket.name?.trim())
-    if (validTicketTypes.length === 0) return setError('Add at least one ticket type, for example Classic or Free.')
-    if (validTicketTypes.some((ticket) => Number(ticket.price || 0) < 0)) return setError('Ticket type prices cannot be negative.')
+    if (validTicketTypes.length === 0) return setError(t('eventForm.errors.addTicketType'))
+    if (validTicketTypes.some((ticket) => Number(ticket.price || 0) < 0)) return setError(t('eventForm.errors.negativePrice'))
     return true
   }
 
@@ -282,7 +285,7 @@ export default function EventForm({
     if (validateForm()) onDraft(form)
   }
 
-  if (optionsLoading) return <Loader message="Preparing event form..." />
+  if (optionsLoading) return <Loader message={t('eventForm.loadingMessage')} />
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-6">
@@ -290,26 +293,26 @@ export default function EventForm({
       {serverError && <Alert type="error">{serverError}</Alert>}
 
       <Card>
-        <h2 className="mb-4 text-xl font-black text-slate-950">Event basics</h2>
+        <h2 className="mb-4 text-xl font-black text-slate-950">{t('eventForm.sections.basicsTitle')}</h2>
         <div className="grid gap-4">
-          <FormInput label="Event title" name="title" value={form.title} onChange={updateTextField} placeholder="Douala Tech Summit" required />
-          <FormTextarea label="Description" name="description" value={form.description} onChange={updateTextField} rows="5" placeholder="Describe the experience, audience, program and benefits." required />
+          <FormInput label={t('eventForm.titleLabel')} name="title" value={form.title} onChange={updateTextField} placeholder={t('eventForm.titlePlaceholder')} required />
+          <FormTextarea label={t('eventForm.descriptionLabel')} name="description" value={form.description} onChange={updateTextField} rows="5" placeholder={t('eventForm.descriptionPlaceholder')} required />
           <div className="grid gap-4 md:grid-cols-2">
-            <SearchableSelect label="Category" value={form.category_id} onChange={(value) => updateValue('category_id', value)} options={categoryOptions} placeholder="Select category" />
-            <SearchableSelect label="Visibility" value={form.visibility} onChange={(value) => updateValue('visibility', value)} options={EVENT_VISIBILITIES.map((v) => ({ value: v.value, label: v.label }))} placeholder="Select visibility" />
+            <SearchableSelect label={t('eventForm.categoryLabel')} value={form.category_id} onChange={(value) => updateValue('category_id', value)} options={categoryOptions} placeholder={t('eventForm.categoryPlaceholder')} />
+            <SearchableSelect label={t('eventForm.visibilityLabel')} value={form.visibility} onChange={(value) => updateValue('visibility', value)} options={EVENT_VISIBILITIES.map((v) => ({ value: v.value, label: v.label }))} placeholder={t('eventForm.visibilityPlaceholder')} />
           </div>
         </div>
       </Card>
 
       <Card>
-        <h2 className="mb-4 text-xl font-black text-slate-950">Location</h2>
+        <h2 className="mb-4 text-xl font-black text-slate-950">{t('eventForm.sections.locationTitle')}</h2>
         <div className="grid gap-4 md:grid-cols-3">
-          <SearchableSelect label="Region" value={form.region_id} onChange={(value) => updateValue('region_id', value)} options={regionOptions} placeholder="Select region" />
-          <SearchableSelect label="City" value={form.city_id} onChange={(value) => updateValue('city_id', value)} options={cityOptions} placeholder="Select city" />
-            <FormInput label="Venue" name="venue" value={form.venue} onChange={updateTextField} placeholder="Bonanjo Conference Hall" />
+          <SearchableSelect label={t('eventForm.regionLabel')} value={form.region_id} onChange={(value) => updateValue('region_id', value)} options={regionOptions} placeholder={t('eventForm.regionPlaceholder')} />
+          <SearchableSelect label={t('eventForm.cityLabel')} value={form.city_id} onChange={(value) => updateValue('city_id', value)} options={cityOptions} placeholder={t('eventForm.cityPlaceholder')} />
+          <FormInput label={t('eventForm.venueLabel')} name="venue" value={form.venue} onChange={updateTextField} placeholder={t('eventForm.venuePlaceholder')} />
         </div>
         <div className="mt-4">
-          <span className="mb-2 block text-sm font-medium text-slate-700">Pin on map</span>
+          <span className="mb-2 block text-sm font-medium text-slate-700">{t('eventForm.mapLabel')}</span>
           <LocationPicker
             value={{ venue: form.venue, latitude: form.latitude, longitude: form.longitude }}
             onChange={({ latitude, longitude, venue }) => setForm((current) => ({ ...current, latitude, longitude, venue: venue ?? current.venue }))}
@@ -318,56 +321,56 @@ export default function EventForm({
       </Card>
 
       <Card>
-        <h2 className="mb-4 text-xl font-black text-slate-950">Schedule and capacity</h2>
+        <h2 className="mb-4 text-xl font-black text-slate-950">{t('eventForm.sections.scheduleTitle')}</h2>
         <div className="grid gap-4 md:grid-cols-2">
-          <DateTimeField label="Start date and time" name="startDate" value={form.startDate} onChange={updateTextField} helper="When the event begins." required />
-          <DateTimeField label="End date and time" name="endDate" value={form.endDate} onChange={updateTextField} helper="Optional, but recommended for longer events." />
+          <DateTimeField label={t('eventForm.startDateLabel')} name="startDate" value={form.startDate} onChange={updateTextField} helper={t('eventForm.startDateHelper')} required />
+          <DateTimeField label={t('eventForm.endDateLabel')} name="endDate" value={form.endDate} onChange={updateTextField} helper={t('eventForm.endDateHelper')} />
         </div>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <FormInput label="Maximum participants" name="maximumParticipants" type="number" value={form.maximumParticipants} onChange={updateTextField} placeholder="500" min="1" />
-          <DateTimeField label="Registration deadline" name="registrationDeadline" value={form.registrationDeadline} onChange={updateTextField} helper="Last moment attendees can register." />
+          <FormInput label={t('eventForm.capacityLabel')} name="maximumParticipants" type="number" value={form.maximumParticipants} onChange={updateTextField} placeholder={t('eventForm.capacityPlaceholder')} min="1" />
+          <DateTimeField label={t('eventForm.registrationDeadlineLabel')} name="registrationDeadline" value={form.registrationDeadline} onChange={updateTextField} helper={t('eventForm.registrationDeadlineHelper')} />
         </div>
-        <p className="mt-3 rounded-2xl bg-slate-50 p-3 text-sm text-slate-600">Event price is calculated from the ticket types below. Use price 0 for free tickets.</p>
+        <p className="mt-3 rounded-2xl bg-slate-50 p-3 text-sm text-slate-600">{t('eventForm.priceNote')}</p>
       </Card>
 
       <Card>
         <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <h2 className="text-xl font-black text-slate-950">Ticket types</h2>
-            <p className="text-sm text-slate-600">Create free, Classic, VIP or VVIP tickets. The price selected by the attendee will be used for payment.</p>
+            <h2 className="text-xl font-black text-slate-950">{t('eventForm.ticketTypesTitle')}</h2>
+            <p className="text-sm text-slate-600">{t('eventForm.ticketTypesDescription')}</p>
           </div>
-          <Button type="button" variant="secondary" onClick={addTicketType} disabled={(form.ticketTypes || []).length >= 6}>Add ticket type</Button>
+          <Button type="button" variant="secondary" onClick={addTicketType} disabled={(form.ticketTypes || []).length >= 6}>{t('eventForm.addTicketTypeButton')}</Button>
         </div>
         <div className="grid gap-4">
           {(form.ticketTypes || []).map((ticket, index) => (
             <div key={ticket.id || index} className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
               <div className="grid gap-3 md:grid-cols-[1.2fr_1fr_130px_130px_auto] md:items-end">
-                <FormInput label="Ticket name" value={ticket.name} onChange={(event) => updateTicketType(index, 'name', event.target.value)} placeholder={index === 0 ? 'Classic' : 'VIP'} />
-                <FormInput label="Description" value={ticket.description || ''} onChange={(event) => updateTicketType(index, 'description', event.target.value)} placeholder="Access details" />
-                <FormInput label="Price (XAF)" type="number" min="0" value={ticket.price} onChange={(event) => updateTicketType(index, 'price', event.target.value)} />
-                <FormInput label="Quantity" type="number" min="1" value={ticket.quantity || ''} onChange={(event) => updateTicketType(index, 'quantity', event.target.value)} placeholder="Unlimited" />
-                <Button type="button" variant="danger" onClick={() => removeTicketType(index)} disabled={(form.ticketTypes || []).length <= 1}><Trash2 className="mr-2 h-4 w-4" />Remove</Button>
+                <FormInput label={t('eventForm.ticketNameLabel')} value={ticket.name} onChange={(event) => updateTicketType(index, 'name', event.target.value)} placeholder={index === 0 ? t('eventForm.ticketClassic') : t('eventForm.ticketVIP')} />
+                <FormInput label={t('eventForm.ticketDescriptionLabel')} value={ticket.description || ''} onChange={(event) => updateTicketType(index, 'description', event.target.value)} placeholder={t('eventForm.ticketDescriptionPlaceholder')} />
+                <FormInput label={t('eventForm.priceLabel')} type="number" min="0" value={ticket.price} onChange={(event) => updateTicketType(index, 'price', event.target.value)} />
+                <FormInput label={t('eventForm.quantityLabel')} type="number" min="1" value={ticket.quantity || ''} onChange={(event) => updateTicketType(index, 'quantity', event.target.value)} placeholder={t('eventForm.unlimited')} />
+                <Button type="button" variant="danger" onClick={() => removeTicketType(index)} disabled={(form.ticketTypes || []).length <= 1}><Trash2 className="mr-2 h-4 w-4" />{t('remove')}</Button>
               </div>
             </div>
           ))}
         </div>
         <div className="mt-4 rounded-2xl bg-teal-50 p-4 text-sm leading-6 text-teal-900">
-          Tip: use <strong>Free</strong> with price 0 for free access, then add <strong>Classic</strong>, <strong>VIP</strong> or <strong>VVIP</strong> as needed.
+          {t('eventForm.ticketTypesTip')}
         </div>
       </Card>
 
       <Card>
         <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <h2 className="text-xl font-black text-slate-950">Event photos</h2>
-            <p className="text-sm text-slate-600">Images are compressed before upload where possible. Gallery limit: {MAX_GALLERY_IMAGES} images.</p>
+            <h2 className="text-xl font-black text-slate-950">{t('eventForm.sections.photosTitle')}</h2>
+            <p className="text-sm text-slate-600">{t('eventForm.photosDescription', { limit: MAX_GALLERY_IMAGES })}</p>
           </div>
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-700">{existingGalleryCount + selectedGalleryCount}/{MAX_GALLERY_IMAGES} gallery used</span>
+          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-700">{existingGalleryCount + selectedGalleryCount}/{MAX_GALLERY_IMAGES} {t('eventForm.galleryUsed')}</span>
         </div>
 
         {(form.existingCoverImage || existingGalleryCount > 0) && (
           <div className="mb-5">
-            <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-slate-500">Existing images</h3>
+            <h3 className="mb-3 text-sm font-black uppercase tracking-wide text-slate-500">{t('eventForm.existingImagesTitle')}</h3>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {form.existingCoverImage && <ExistingImageCard image={form.existingCoverImage} isCover onDelete={handleDeleteImage} onSetCover={handleSetCover} busy={imageBusy} />}
               {(form.existingGalleryImages || []).map((image) => (
@@ -378,13 +381,13 @@ export default function EventForm({
         )}
 
         <div className="grid gap-4 md:grid-cols-2">
-          <UploadBox title="Upload cover photo" description="Appears on event cards and details. Replaces the current cover." icon={ImagePlus} name="coverImage" onChange={updateFileField} selected={form.coverImage?.name} existing={form.existingCoverImage} />
-          <UploadBox title="Add gallery photos" description={`Add up to ${galleryRemaining} more gallery image${galleryRemaining === 1 ? '' : 's'}.`} icon={Images} name="galleryImages" onChange={updateFileField} multiple selected={form.galleryImages?.length ? `${form.galleryImages.length} image(s) selected` : ''} existing={existingGalleryCount} />
+          <UploadBox title={t('eventForm.coverImageTitle')} description={t('eventForm.coverImageDescription')} icon={ImagePlus} name="coverImage" onChange={updateFileField} selected={form.coverImage?.name} existing={form.existingCoverImage} />
+          <UploadBox title={t('eventForm.galleryImagesTitle')} description={t('eventForm.galleryImagesDescription', { remaining: galleryRemaining })} icon={Images} name="galleryImages" onChange={updateFileField} multiple selected={form.galleryImages?.length ? t('eventForm.imagesSelected', { count: form.galleryImages.length }) : ''} existing={existingGalleryCount} />
         </div>
 
         {form.galleryImages?.length > 0 && (
           <div className="mt-4 rounded-2xl bg-teal-50 p-4 text-sm font-semibold text-teal-800">
-            <UploadCloud className="mr-2 inline h-4 w-4" /> {form.galleryImages.length} new gallery image(s) ready for upload.
+            <UploadCloud className="mr-2 inline h-4 w-4" /> {t('eventForm.galleryReady', { count: form.galleryImages.length })}
           </div>
         )}
       </Card>
@@ -392,12 +395,12 @@ export default function EventForm({
       <div className="flex flex-wrap justify-end gap-3">
         {onDraft && (
           <Button type="button" variant="secondary" disabled={submitting || imageBusy} onClick={handleDraft}>
-            Save as Draft
+            {t('eventForm.saveDraft')}
           </Button>
         )}
         <Button type="submit" disabled={submitting || imageBusy}>
           <Save className="mr-2 h-4 w-4" />
-          {submitting ? 'Saving...' : submitLabel}
+          {submitting ? t('saving') : submitLabel}
         </Button>
       </div>
     </form>
