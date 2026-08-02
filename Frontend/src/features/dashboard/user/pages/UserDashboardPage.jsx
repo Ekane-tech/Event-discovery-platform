@@ -11,7 +11,7 @@ import EventGrid from '../../../events/components/EventGrid.jsx'
 import { dashboardService } from '../../services/dashboardService.js'
 import { extractCollection, normalizeEvents } from '../../../events/utils/normalizeEvent.js'
 import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
-import { useTranslation } from '../../../shared/i18n/useTranslation.js'
+import { useTranslation } from '../../../../shared/i18n/useTranslation.js'
 
 function StatCard({ title, value, to, icon: Icon, gradient, iconBg }) {
   return (
