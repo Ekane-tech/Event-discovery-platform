@@ -13,8 +13,8 @@ import PageContainer from '../../../../shared/components/layout/PageContainer.js
 import SectionHeader from '../../../../shared/components/layout/SectionHeader.jsx'
 import { formatDate } from '../../../../shared/utils/formatDate.js'
 import { adminService } from '../../services/adminService.js'
-import { extractCollection } from '../../events/utils/normalizeEvent.js'
-import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
+import { extractCollection } from '../../../events/utils/normalizeEvent.js'
+import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
 import { useTranslation } from '../../../../shared/i18n/useTranslation.js'
 
 function normalizeEmailLog(log) {

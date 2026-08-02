@@ -7,9 +7,9 @@ import Table from '../../../../shared/components/ui/Table.jsx'
 import PageContainer from '../../../../shared/components/layout/PageContainer.jsx'
 import SectionHeader from '../../../../shared/components/layout/SectionHeader.jsx'
 import { formatDate } from '../../../../shared/utils/formatDate.js'
-import { adminService } from '../../../../services/adminService.js'
-import { extractCollection } from '../../events/utils/normalizeEvent.js'
-import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
+import { adminService } from '../../services/adminService.js'
+import { extractCollection } from '../../../events/utils/normalizeEvent.js'
+import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
 import { useTranslation } from '../../../../shared/i18n/useTranslation.js'
 
 function normalizeLog(log) {
