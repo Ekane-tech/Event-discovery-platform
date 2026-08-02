@@ -173,7 +173,7 @@ export default function EventActionPanel({ event }) {
         <div className="mt-5">
           <div className="mb-2 flex items-center justify-between gap-3">
             <p className="text-sm font-bold text-slate-800">{t('eventAction.chooseTicketType')}</p>
-            {registered && <button type="button" onClick={() => setBuyingMore(false)} className="text-xs font-bold text-slate-500 hover:text-slate-800">{t('cancel')}</button>}</div>
+            {registered && <button type="button" onClick={() => setBuyingMore(false)} className="text-xs font-bold text-slate-500 hover:text-slate-800">{t('cancel')}</button>}
           </div>
           <div className="grid gap-3">
             {ticketOptions.map((ticket) => {

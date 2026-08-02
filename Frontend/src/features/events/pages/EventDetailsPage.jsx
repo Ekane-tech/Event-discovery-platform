@@ -147,7 +147,7 @@ export default function EventDetailsPage() {
         onTouchEnd={handleTouchEnd}
       >
         <div key={activeHero?.id || activeHero?.url} className="absolute inset-0 animate-[fadeIn_.7s_ease-out]">
-          <img src={activeHero?.url} alt={event.title} className="h-full w-full object-cover" />
+          {activeHero?.url && <img src={activeHero.url} alt={event.title} className="h-full w-full object-cover" />}
         </div>
         <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/40 to-slate-950/5" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(20,184,166,.15),transparent_34%)]" />
@@ -231,17 +231,21 @@ export default function EventDetailsPage() {
 
                 <div className="grid gap-4 sm:grid-cols-2 lg:hidden">
                   {visibleGalleryMobile.map((image, index) => (
-                    <a key={`${image.id}-mobile-${index}`} href={image.url} target="_blank" rel="noreferrer" className="group block overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-lg">
-                      <img src={image.url} alt={event.title} loading="lazy" decoding="async" srcSet={variantSrcSet(image.path)} sizes="(max-width: 768px) 50vw, 33vw" className="h-56 w-full object-cover transition duration-500 group-hover:scale-102" />
-                    </a>
+                    image.url && (
+                      <a key={`${image.id}-mobile-${index}`} href={image.url} target="_blank" rel="noreferrer" className="group block overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-lg">
+                        <img src={image.url} alt={event.title} loading="lazy" decoding="async" srcSet={variantSrcSet(image.path)} sizes="(max-width: 768px) 50vw, 33vw" className="h-56 w-full object-cover transition duration-500 group-hover:scale-102" />
+                      </a>
+                    )
                   ))}
                 </div>
 
                 <div className="hidden gap-5 lg:grid lg:grid-cols-3">
                   {visibleGalleryDesktop.map((image, index) => (
-                    <a key={`${image.id}-desktop-${index}`} href={image.url} target="_blank" rel="noreferrer" className="group block overflow-hidden rounded-4xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-lg">
-                      <img src={image.url} alt={event.title} loading="lazy" decoding="async" srcSet={variantSrcSet(image.path)} sizes="(max-width: 768px) 50vw, 33vw" className="h-72 w-full object-cover transition duration-500 group-hover:scale-102" />
-                    </a>
+                    image.url && (
+                      <a key={`${image.id}-desktop-${index}`} href={image.url} target="_blank" rel="noreferrer" className="group block overflow-hidden rounded-4xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-lg">
+                        <img src={image.url} alt={event.title} loading="lazy" decoding="async" srcSet={variantSrcSet(image.path)} sizes="(max-width: 768px) 50vw, 33vw" className="h-72 w-full object-cover transition duration-500 group-hover:scale-102" />
+                      </a>
+                    )
                   ))}
                 </div>
               </section>

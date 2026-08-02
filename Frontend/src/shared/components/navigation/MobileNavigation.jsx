@@ -31,7 +31,7 @@ export default function MobileNavigation({ open, groups = [], unreadCount = 0, i
               <nav className="grid gap-1">
                 {group.links.map((link) => (
                   <NavLink
-                    key={link.to}
+                    key={link.labelKey || link.to}
                     to={link.to}
                     onClick={onClose}
                     className={({ isActive }) => `flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition ${
@@ -96,7 +96,7 @@ export default function MobileNavigation({ open, groups = [], unreadCount = 0, i
                 <nav className="grid gap-1">
                   {group.links.map((link) => (
                     <NavLink
-                      key={link.to}
+                      key={link.labelKey || link.to}
                       to={link.to}
                       onClick={onClose}
                       className={({ isActive }) => `flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition ${

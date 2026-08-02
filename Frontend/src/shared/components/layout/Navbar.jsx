@@ -47,7 +47,7 @@ export default function Navbar() {
           
           <nav className="hidden items-center gap-1 lg:flex">
             {desktopLinks.map((link) => (
-              <NavLink key={link.to} to={link.to} className={navLinkClass}>
+              <NavLink key={link.labelKey || link.to} to={link.to} className={navLinkClass}>
                 {t(link.labelKey, link.label)}
                 <NavigationBadge count={getBadgeCount(link)} />
               </NavLink>
