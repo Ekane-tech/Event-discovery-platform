@@ -170,30 +170,32 @@ export default function EventActionPanel({ event }) {
       )}
 
       {showPurchaseForm && (
-        <div className="mt-5">
-          <div className="mb-2 flex items-center justify-between gap-3">
-            <p className="text-sm font-bold text-slate-800">{t('eventAction.chooseTicketType')}</p>
-            {registered && <button type="button" onClick={() => setBuyingMore(false)} className="text-xs font-bold text-slate-500 hover:text-slate-800">{t('cancel')}</button>}
+        <>
+          <div className="mt-5">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <p className="text-sm font-bold text-slate-800">{t('eventAction.chooseTicketType')}</p>
+              {registered && <button type="button" onClick={() => setBuyingMore(false)} className="text-xs font-bold text-slate-500 hover:text-slate-800">{t('cancel')}</button>}
+            </div>
+            <div className="grid gap-3">
+              {ticketOptions.map((ticket) => {
+                const active = String(ticket.id || '') === String(selectedTicketTypeId)
+                return (
+                  <button key={ticket.id || ticket.name} type="button" onClick={() => setSelectedTicketTypeId(ticket.id ? String(ticket.id) : '')} className={`rounded-2xl border p-4 text-left transition ${active ? 'border-teal-600 bg-teal-50 ring-2 ring-teal-100' : 'border-slate-200 bg-white hover:border-teal-200'}`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div><p className="font-black text-slate-950">{ticket.name}</p><p className="mt-1 text-sm text-slate-600">{ticket.description || t('eventAction.eventAccess')}</p></div>
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-black text-slate-800">{formatPrice(ticket.price)}</span>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+            <label className="mt-4 block">
+              <span className="mb-1 block text-sm font-bold text-slate-800">{t('eventAction.numberOfTickets')}</span>
+              <input type="number" min="1" max="10" value={quantity} onChange={(event) => setQuantity(event.target.value)} className="h-12 w-32 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100" />
+              <p className="mt-2 text-sm text-slate-600">{t('eventAction.total')}: <strong>{formatPrice(totalAmount)}</strong></p>
+            </label>
           </div>
-          <div className="grid gap-3">
-            {ticketOptions.map((ticket) => {
-              const active = String(ticket.id || '') === String(selectedTicketTypeId)
-              return (
-                <button key={ticket.id || ticket.name} type="button" onClick={() => setSelectedTicketTypeId(ticket.id ? String(ticket.id) : '')} className={`rounded-2xl border p-4 text-left transition ${active ? 'border-teal-600 bg-teal-50 ring-2 ring-teal-100' : 'border-slate-200 bg-white hover:border-teal-200'}`}>
-                  <div className="flex items-start justify-between gap-3">
-                    <div><p className="font-black text-slate-950">{ticket.name}</p><p className="mt-1 text-sm text-slate-600">{ticket.description || t('eventAction.eventAccess')}</p></div>
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-black text-slate-800">{formatPrice(ticket.price)}</span>
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-          <label className="mt-4 block">
-            <span className="mb-1 block text-sm font-bold text-slate-800">{t('eventAction.numberOfTickets')}</span>
-            <input type="number" min="1" max="10" value={quantity} onChange={(event) => setQuantity(event.target.value)} className="h-12 w-32 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100" />
-            <p className="mt-2 text-sm text-slate-600">{t('eventAction.total')}: <strong>{formatPrice(totalAmount)}</strong></p>
-          </label>
-        </div>
+        </>
       )}
 
       <div className="mt-5 flex flex-wrap gap-3">
