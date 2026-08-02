@@ -13,7 +13,7 @@ class EventImageResource extends JsonResource
         return [
             'id' => $this->id,
             'path' => $this->path,
-            'url' => $this->path ? Storage::disk('public')->temporaryUrl($this->path, now()->addHours(2)) : null,
+            'url' => $this->path ? Storage::disk('public')->url($this->path) : null,
             'type' => $this->type,
             'is_cover' => (bool) $this->is_cover,
             'created_at' => $this->created_at,
