@@ -1,4 +1,4 @@
-import axiosClient from '../../../shared/api/axiosClient.js'
+import axiosClient from '../../../../shared/api/axiosClient.js'
 
 function multipartConfig(payload) {
   return payload instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {}

@@ -1,4 +1,4 @@
-import { useTranslation } from '../../../shared/i18n/useTranslation.js'
+import { useTranslation } from '../../../../shared/i18n/useTranslation.js'
 
 export default function AdminHero({ eyebrow, title, description, action }) {
   const { t } = useTranslation()

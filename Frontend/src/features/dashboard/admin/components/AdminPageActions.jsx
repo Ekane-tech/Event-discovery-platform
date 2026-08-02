@@ -1,4 +1,4 @@
-import Button from '../../../shared/components/ui/Button.jsx'
+import Button from '../../../../shared/components/ui/Button.jsx'
 
 export default function AdminPageActions({ children }) {
   return <div className="flex flex-wrap gap-2">{children}</div>
