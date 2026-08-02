@@ -40,14 +40,14 @@ export default function SearchSuggestInput({ label, placeholder, value, onChange
       {showDropdown && (
         <div className="absolute z-30 mt-1 max-h-56 w-full overflow-auto rounded-xl border border-slate-200 bg-white p-2 text-left shadow-xl ring-1 ring-slate-200">
           {matches.length === 0 ? (
-            <div className="rounded-lg px-4 py-3 text-sm text-slate-500">{t('searchPage.noMatches', 'No matches found')}</div>
+            <div className="rounded-lg px-4 py-3 text-sm text-slate-500">{t('searchPage.noMatches')}</div>
           ) : (
             matches.map((suggestion) => (
               <button
                 key={`${suggestion.type}-${suggestion.id}-${suggestion.label}`}
                 type="button"
                 onMouseDown={() => selectSuggestion(suggestion)}
-                className="flex w-full items-center justify-between rounded-lg px-4 py-3 text-left text-sm transition-all duration-200 hover:bg-teal-50 hover:shadow-sm"
+                className="flex w-full items-center justify-between rounded-lg px-4 py-3 text-left text-sm transition-all duration-200 hover:bg-slate-50 hover:shadow-sm"
               >
                 <span className="font-medium text-slate-800">{suggestion.label}</span>
                 <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold capitalize text-slate-600">{suggestion.type}</span>

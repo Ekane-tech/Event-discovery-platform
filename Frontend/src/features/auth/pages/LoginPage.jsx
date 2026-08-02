@@ -1,4 +1,4 @@
-﻿import { ArrowRight, ShieldCheck } from 'lucide-react'
+import { ArrowRight, ShieldCheck } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Alert from '../../../shared/components/feedback/Alert.jsx'
@@ -64,8 +64,8 @@ export default function LoginPage() {
           footer={<> {t('auth.noAccount')} <Link className="font-bold text-teal-700" to="/register">{t('auth.createAccount')}</Link></>}
         >
           <form onSubmit={handleSubmit} className="grid gap-3">
-            <FormInput label={t('auth.email')} name="email" type="email" value={form.email} onChange={updateField} placeholder="you@example.com" required />
-            <FormInput label={t('auth.password')} name="password" type="password" value={form.password} onChange={updateField} placeholder="Your password" required />
+            <FormInput label={t('auth.email')} name="email" type="email" value={form.email} onChange={updateField} placeholder={t('auth.emailPlaceholder')} required />
+            <FormInput label={t('auth.password')} name="password" type="password" value={form.password} onChange={updateField} placeholder={t('auth.passwordPlaceholder')} required />
             <div className="flex items-center justify-between gap-3">
               <label className="flex items-center gap-2 text-sm text-slate-600">
                 <input type="checkbox" className="h-4 w-4 accent-teal-600" defaultChecked />

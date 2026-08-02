@@ -12,6 +12,7 @@ import SearchResultsHeader from '../components/SearchResultsHeader.jsx'
 import { useEventSearch } from '../hooks/useEventSearch.js'
 import { extractCollection, normalizeEvents } from '../../events/utils/normalizeEvent.js'
 import { useTranslation } from '../../../shared/i18n/useTranslation.js'
+import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
 
 export default function SearchResultsPage() {
   const { t } = useTranslation()
@@ -33,22 +34,22 @@ export default function SearchResultsPage() {
         const response = await eventService.getEvents({ per_page: 100 })
         setEvents(normalizeEvents(extractCollection(response.data, 'events')))
       } catch (fetchError) {
-        setError(getApiErrorMessage(fetchError, 'Unable to load events.'))
+        setError(getApiErrorMessage(fetchError, t('searchPage.loadError')))
       } finally {
         setLoading(false)
       }
     }
     fetchEvents()
-  }, [])
+  }, [t])
 
   if (loading) {
     return (
       <PageContainer>
         <SectionHeader
-          title={t('searchPage.title', 'Search Events')}
-          description={t('searchPage.description', 'Find events by keyword, category, region, city, date, price, organizer, and popularity.')}
+          title={t('searchPage.title')}
+          description={t('searchPage.description')}
         />
-        <div className="text-center text-slate-500">{t('searchPage.loadingEvents', 'Loading events...')}</div>
+        <div className="text-center text-slate-500">{t('searchPage.loadingEvents')}</div>
       </PageContainer>
     )
   }
@@ -56,8 +57,8 @@ export default function SearchResultsPage() {
   return (
     <PageContainer>
       <SectionHeader
-        title={t('searchPage.title', 'Search Events')}
-        description={t('searchPage.description', 'Find events by keyword, category, region, city, date, price, organizer, and popularity.')}
+        title={t('searchPage.title')}
+        description={t('searchPage.description')}
       />
 
       <div className="grid gap-5">
@@ -67,11 +68,11 @@ export default function SearchResultsPage() {
         <SearchResultsHeader totalResults={totalResults} totalEvents={events.length} />
 
         {error ? (
-          <ErrorState title="Unable to load events" message={error} />
+          <ErrorState title={t('searchPage.loadErrorTitle')} message={error} />
         ) : filteredEvents.length === 0 ? (
           <EmptyState
-            title={t('searchPage.noResults', 'No events found')}
-            message={t('searchPage.noResultsMessage', 'Try changing the keyword, category, region, date, or price filter.')}
+            title={t('searchPage.noResults')}
+            message={t('searchPage.noResultsMessage')}
           />
         ) : (
           <EventGrid events={filteredEvents} />

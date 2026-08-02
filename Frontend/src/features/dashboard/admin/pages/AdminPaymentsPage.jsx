@@ -11,6 +11,7 @@ import { formatPrice } from '../../../../shared/utils/currency.js'
 import { adminService } from '../services/adminService.js'
 import { extractCollection } from '../../../events/utils/normalizeEvent.js'
 import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
+import { useTranslation } from '../../../../shared/i18n/useTranslation.js'
 
 function normalizePayment(payment) {
   return {
@@ -31,6 +32,7 @@ function normalizePayment(payment) {
 }
 
 export default function AdminPaymentsPage() {
+  const { t } = useTranslation()
   const [payments, setPayments] = useState([])
   const [summary, setSummary] = useState(null)
   const [filters, setFilters] = useState({ keyword: '', status: '' })
@@ -48,7 +50,7 @@ export default function AdminPaymentsPage() {
       setPayments(extractCollection(paymentsResponse.data, 'payments').map(normalizePayment))
       setSummary(summaryResponse.data.summary || {})
     } catch (fetchError) {
-      setError(getApiErrorMessage(fetchError, 'Unable to load payment tracking.'))
+      setError(getApiErrorMessage(fetchError, t('admin.payments.toasts.error.load', 'Unable to load payment tracking.')))
     } finally {
       setLoading(false)
     }
@@ -59,15 +61,22 @@ export default function AdminPaymentsPage() {
   const visiblePayments = useMemo(() => {
     const keyword = filters.keyword.trim().toLowerCase()
     if (!keyword) return payments
-    return payments.filter((payment) => [payment.reference, payment.event, payment.attendee, payment.email, payment.phone].some((value) => String(value || '').toLowerCase().includes(keyword)))
+    return payments.filter((payment) => 
+      [payment.reference, payment.event, payment.attendee, payment.email, payment.phone].some((value) => 
+        String(value || '').toLowerCase().includes(keyword)
+      )
+    )
   }, [payments, filters.keyword])
 
-  if (loading) return <PageContainer><Loader message="Loading payment tracking..." /></PageContainer>
-  if (error) return <PageContainer><ErrorState title="Payment tracking error" message={error} /></PageContainer>
+  if (loading) return <PageContainer><Loader message={t('admin.common.loading', { type: t('admin.payments.title', 'payment tracking') }, 'Loading payment tracking...')} /></PageContainer>
+  if (error) return <PageContainer><ErrorState title={t('admin.common.errorTitle', 'Error')} message={error} /></PageContainer>
 
   return (
     <PageContainer>
-      <SectionHeader title="Payment Tracking" description="Monitor event payments, pending revenue and completed mobile money transactions." />
+      <SectionHeader 
+        title={t('admin.payments.title', 'Payment Tracking')} 
+        description={t('admin.payments.description', 'Monitor event payments, pending revenue and completed mobile money transactions.')} 
+      />
 
       <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         {[
@@ -78,7 +87,7 @@ export default function AdminPaymentsPage() {
         ].map(([label, value, gradient]) => (
           <div key={label} className={`rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm`}>
             <WalletCards className="h-6 w-6 text-white/90" />
-            <p className="mt-3 text-sm text-white/80">{label}</p>
+            <p className="mt-3 text-sm text-white/80">{t(`admin.payments.${label.replace(/\s+/g, '')}`, label)}</p>
             <p className="mt-1 text-2xl font-black">{value}</p>
           </div>
         ))}
@@ -87,19 +96,28 @@ export default function AdminPaymentsPage() {
       <Card className="mb-6">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="text-lg font-black text-slate-950">Transactions</h2>
-            <p className="text-sm text-slate-600">Search by attendee, event, phone or reference.</p>
+            <h2 className="text-lg font-black text-slate-950">{t('admin.payments.transactionsTitle', 'Transactions')}</h2>
+            <p className="text-sm text-slate-600">{t('admin.payments.transactionsDescription', 'Search by attendee, event, phone or reference.')}</p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input className="rounded-2xl border border-slate-200 py-2 pl-9 pr-4 text-sm outline-none focus:border-teal-500" value={filters.keyword} onChange={(event) => setFilters((current) => ({ ...current, keyword: event.target.value }))} placeholder="Search payments" />
+              <input 
+                className="rounded-2xl border border-slate-200 py-2 pl-9 pr-4 text-sm outline-none focus:border-teal-500" 
+                value={filters.keyword} 
+                onChange={(event) => setFilters((current) => ({ ...current, keyword: event.target.value }))} 
+                placeholder={t('admin.payments.searchPlaceholder', 'Search payments')} 
+              />
             </div>
-            <select className="rounded-2xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-teal-500" value={filters.status} onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}>
-              <option value="">All statuses</option>
-              <option value="pending">Pending</option>
-              <option value="paid">Paid</option>
-              <option value="failed">Failed</option>
+            <select 
+              className="rounded-2xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-teal-500" 
+              value={filters.status} 
+              onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}
+            >
+              <option value="">{t('admin.payments.statusFilter.all', 'All statuses')}</option>
+              <option value="pending">{t('admin.payments.statusFilter.pending', 'Pending')}</option>
+              <option value="paid">{t('admin.payments.statusFilter.paid', 'Paid')}</option>
+              <option value="failed">{t('admin.payments.statusFilter.failed', 'Failed')}</option>
             </select>
           </div>
         </div>
@@ -107,20 +125,24 @@ export default function AdminPaymentsPage() {
 
       <Table
         columns={[
-          { key: 'reference', label: 'Reference' },
-          { key: 'event', label: 'Event' },
-          { key: 'attendee', label: 'Attendee' },
-          { key: 'amount', label: 'Amount' },
-          { key: 'status', label: 'Status' },
-          { key: 'operator', label: 'Operator' },
-          { key: 'phone', label: 'Phone' },
-          { key: 'paidAt', label: 'Paid' },
-          { key: 'createdAt', label: 'Created' },
+          { key: 'reference', label: t('admin.payments.table.reference', 'Reference') },
+          { key: 'event', label: t('admin.payments.table.event', 'Event') },
+          { key: 'attendee', label: t('admin.payments.table.attendee', 'Attendee') },
+          { key: 'amount', label: t('admin.payments.table.amount', 'Amount') },
+          { key: 'status', label: t('admin.common.status', 'Status') },
+          { key: 'operator', label: t('admin.payments.table.operator', 'Operator') },
+          { key: 'phone', label: t('admin.payments.table.phone', 'Phone') },
+          { key: 'paidAt', label: t('admin.payments.table.paid', 'Paid') },
+          { key: 'createdAt', label: t('admin.payments.table.created', 'Created') },
         ]}
         rows={visiblePayments.map((payment) => ({
           ...payment,
-          reference: <span className="inline-flex items-center gap-1 font-mono text-xs"><CreditCard className="h-3.5 w-3.5 text-teal-700" />{payment.reference}</span>,
-          status: <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black capitalize text-slate-700">{payment.status}</span>,
+          reference: <span className="inline-flex items-center gap-1 font-mono text-xs">
+            <CreditCard className="h-3.5 w-3.5 text-teal-700" />{payment.reference}
+          </span>,
+          status: <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black capitalize text-slate-700">
+            {t(`admin.common.${payment.status}`, payment.status)}
+          </span>,
         }))}
       />
     </PageContainer>

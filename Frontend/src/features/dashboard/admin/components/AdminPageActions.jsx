@@ -4,6 +4,6 @@ export default function AdminPageActions({ children }) {
   return <div className="flex flex-wrap gap-2">{children}</div>
 }
 
-export function AdminActionButton({ children, ...props }) {
-  return <Button type="button" variant="secondary" className="px-3 py-1 text-sm" {...props}>{children}</Button>
+export function AdminActionButton({ children, variant = 'admin', ...props }) {
+  return <Button type="button" variant={variant} className="px-3 py-1 text-sm" {...props}>{children}</Button>
 }

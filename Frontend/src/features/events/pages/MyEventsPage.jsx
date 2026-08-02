@@ -19,13 +19,13 @@ function StatusCard({ label, value, icon: Icon, gradient }) { return <div classN
 export default function MyEventsPage() {
   const { t } = useTranslation()
   const [events,setEvents]=useState([]); const[loading,setLoading]=useState(true); const[error,setError]=useState(''); const[deleteTarget,setDeleteTarget]=useState(null); const[deleting,setDeleting]=useState(false); const[duplicating,setDuplicating]=useState(false)
-  async function fetchEvents(){setLoading(true);setError('');try{const r=await eventService.getOrganizerEvents({per_page:50});setEvents(normalizeEvents(extractCollection(r.data,'events')))}catch(e){setError(getApiErrorMessage(e,'Unable to load organizer events.'))}finally{setLoading(false)}}
+  async function fetchEvents(){setLoading(true);setError('');try{const r=await eventService.getOrganizerEvents({per_page:50});setEvents(normalizeEvents(extractCollection(r.data,'events')))}catch(e){setError(getApiErrorMessage(e,t('events.dashboard.loadError')))}finally{setLoading(false)}}
   useEffect(()=>{fetchEvents()},[])
   const stats=useMemo(()=>({total:events.length,published:events.filter(e=>e.status==='published').length,pending:events.filter(e=>e.status==='pending').length,drafts:events.filter(e=>e.status==='draft').length}),[events])
   async function handleDelete(){
     if(!deleteTarget) return
     setDeleting(true)
-    try{await eventService.deleteEvent(deleteTarget.id); setDeleteTarget(null); await fetchEvents()}catch(e){setError(getApiErrorMessage(e,'Unable to delete event.'))}finally{setDeleting(false)}
+    try{await eventService.deleteEvent(deleteTarget.id); setDeleteTarget(null); await fetchEvents()}catch(e){setError(getApiErrorMessage(e,t('events.dashboard.errorMessage')))}finally{setDeleting(false)}
   }
 
   async function handleDuplicate(eventId){
