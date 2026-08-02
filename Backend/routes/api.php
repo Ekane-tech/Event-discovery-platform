@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/public/notifications', [NotificationController::class, 'publicAnnouncements'])->middleware('throttle:public-read');
 Route::post('/feedback', [FeedbackController::class, 'store'])->middleware('throttle:feedback-submit');
-Route::post('/payments/callback/campay', [PaymentController::class, 'campayCallback'])->middleware('throttle:payments');
+Route::post('/payments/callback/notchpay', [PaymentController::class, 'notchpayCallback'])->middleware('throttle:payments');
 
 Route::get('/img', [ImageVariantController::class, 'show'])->middleware('throttle:public-read');
 

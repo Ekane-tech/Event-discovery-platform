@@ -105,7 +105,7 @@ class PaymentController extends Controller
             ], 422);
         }
 
-        if ($payment->provider === 'campay') {
+        if ($payment->provider === 'notchpay') {
             $payment = $paymentService->refreshStatus($payment);
 
             return response()->json([
@@ -143,7 +143,7 @@ class PaymentController extends Controller
     {
         $this->authorizePaymentOwner($request, $payment);
 
-        if ($payment->provider === 'campay' && in_array($payment->status, ['pending', 'processing'], true)) {
+        if ($payment->provider === 'notchpay' && in_array($payment->status, ['pending', 'processing'], true)) {
             $payment = $paymentService->refreshStatus($payment);
         }
 
@@ -152,15 +152,18 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function campayCallback(Request $request, MobileMoneyPaymentService $paymentService): JsonResponse
+    public function notchpayCallback(Request $request, MobileMoneyPaymentService $paymentService): JsonResponse
     {
-        if (! $this->validCampayCallback($request)) {
+        if (! $this->validNotchPayCallback($request)) {
             return response()->json(['message' => 'Invalid callback signature.'], 403);
         }
 
         $reference = $request->input('external_reference')
             ?? $request->input('reference')
-            ?? $request->input('merchant_reference');
+            ?? $request->input('merchant_reference')
+            ?? $request->input('data.reference')
+            ?? $request->input('transaction.reference')
+            ?? $request->input('payment.reference');
 
         if (! $reference) {
             return response()->json(['message' => 'Missing payment reference.'], 422);
@@ -207,18 +210,17 @@ class PaymentController extends Controller
         return '+237'.$digits;
     }
 
-    private function validCampayCallback(Request $request): bool
+    private function validNotchPayCallback(Request $request): bool
     {
-        $secret = env('CAMPAY_CALLBACK_SECRET');
+        $secret = env('NOTCHPAY_WEBHOOK_SECRET');
 
         if (! $secret) {
             // Fail open only outside production so local/dev flows keep working.
-            // In production an unsigned callback must never be trusted, otherwise
-            // anyone could mark arbitrary payments as paid.
+            // In production an unsigned webhook must never be trusted.
             return ! app()->environment('production');
         }
 
-        $signature = $request->header('X-Campay-Signature')
+        $signature = $request->header('X-Notchpay-Signature')
             ?? $request->header('X-Signature')
             ?? $request->input('signature');
 
