@@ -18,26 +18,27 @@ class MobileMoneyPaymentService
         $provider = strtolower((string) env('PAYMENT_PROVIDER', 'mock'));
 
         return match ($provider) {
-            'campay' => $this->initiateCampay($payment, $operator, $phoneNumber),
+            'notchpay' => $this->initiateNotchPay($payment, $operator, $phoneNumber),
             default => $this->initiateMock($payment, $operator, $phoneNumber),
         };
     }
 
     public function refreshStatus(Payment $payment): Payment
     {
-        if ($payment->provider !== 'campay') {
+        if ($payment->provider !== 'notchpay') {
             return $payment->fresh();
         }
 
-        return $this->refreshCampayStatus($payment);
+        return $this->refreshNotchPayStatus($payment);
     }
 
     public function applyProviderStatus(Payment $payment, array $payload, string $source = 'callback'): Payment
     {
-        $mappedStatus = $this->mapCampayStatus($payload['status'] ?? $payload['payment_status'] ?? null);
+        $statusValue = $payload['status'] ?? $payload['payment_status'] ?? $payload['transaction']['status'] ?? null;
+        $mappedStatus = $this->mapNotchPayStatus($statusValue);
         $metadata = [
             ...($payment->metadata ?? []),
-            'last_provider_status' => $payload['status'] ?? $payload['payment_status'] ?? null,
+            'last_provider_status' => $payload['status'] ?? $payload['payment_status'] ?? $payload['transaction']['status'] ?? null,
             'last_status_source' => $source,
             'last_status_checked_at' => now()->toISOString(),
         ];
@@ -95,48 +96,82 @@ class MobileMoneyPaymentService
         return $payment->fresh();
     }
 
-    private function initiateCampay(Payment $payment, string $operator, string $phoneNumber): Payment
+    private function initiateNotchPay(Payment $payment, string $operator, string $phoneNumber): Payment
     {
         try {
-            $token = $this->campayToken();
-            $baseUrl = $this->campayBaseUrl();
+            $baseUrl = $this->notchpayBaseUrl();
+            $key = $this->notchpayKey();
+            $channel = $operator === 'mtn' ? 'cm.mtn' : 'cm.orange';
+            $normalizedPhone = $this->notchpayPhone($phoneNumber);
 
-            $response = Http::withToken($token, 'Token')
-                ->acceptJson()
-                ->asJson()
-                ->timeout((int) env('CAMPAY_TIMEOUT', 30))
-                ->post($baseUrl.'/api/collect/', [
-                    'amount' => (string) (int) round((float) $payment->amount),
+            // Step 1: Initialize payment
+            $initResponse = Http::withHeaders([
+                    'Authorization' => $key,
+                    'Content-Type' => 'application/json',
+                ])
+                ->timeout((int) env('NOTCHPAY_TIMEOUT', 30))
+                ->post($baseUrl.'/payments', [
+                    'amount' => (int) round((float) $payment->amount),
                     'currency' => $payment->currency ?: 'XAF',
-                    'from' => $this->campayPhone($phoneNumber),
-                    'description' => Str::limit('Payment for '.$payment->event?->title, 120, ''),
-                    'external_reference' => $payment->reference,
+                    'customer' => [
+                        'name' => $payment->user?->name ?? 'Customer',
+                        'email' => $payment->user?->email ?? 'customer@example.com',
+                        'phone' => $normalizedPhone,
+                    ],
+                    'description' => Str::limit('Payment for '.($payment->event?->title ?? 'event'), 120, ''),
+                    'reference' => $payment->reference,
+                    'metadata' => [
+                        'operator' => $operator,
+                        'event_id' => $payment->event_id,
+                        'registration_ids' => $payment->metadata['registration_ids'] ?? [$payment->registration_id],
+                    ],
                 ]);
 
-            $payload = $response->json() ?? [];
-            $providerReference = $payload['reference'] ?? $payload['transaction_id'] ?? null;
-            $mappedStatus = $this->mapCampayStatus($payload['status'] ?? null, $response->successful());
+            $initPayload = $initResponse->json() ?? [];
+
+            if (! $initResponse->successful() || (empty($initPayload['transaction']['reference']) && empty($initPayload['transaction']['id']))) {
+                return $this->failPayment($payment, 'NotchPay initialization failed: '.($initPayload['message'] ?? 'Unknown error'), new \RuntimeException($initPayload['message'] ?? 'NotchPay initialization error'));
+            }
+
+            $reference = $initPayload['transaction']['reference'] ?? $initPayload['transaction']['id'] ?? $payment->reference;
+
+            // Step 2: Process mobile money
+            $chargeResponse = Http::withHeaders([
+                    'Authorization' => $key,
+                    'Content-Type' => 'application/json',
+                ])
+                ->timeout((int) env('NOTCHPAY_TIMEOUT', 60))
+                ->post($baseUrl.'/payments/'.$reference, [
+                    'channel' => $channel,
+                    'data' => [
+                        'phone' => $normalizedPhone,
+                    ],
+                ]);
+
+            $chargePayload = $chargeResponse->json() ?? [];
+            $providerReference = $chargePayload['transaction']['id'] ?? $chargePayload['transaction']['reference'] ?? $reference;
+            $mappedStatus = $this->mapNotchPayStatus($chargePayload['transaction']['status'] ?? $chargePayload['status'] ?? null, $chargeResponse->successful());
 
             $payment->update([
-                'provider' => 'campay',
+                'provider' => 'notchpay',
                 'operator' => $operator,
-                'phone_number' => $this->campayPhone($phoneNumber),
+                'phone_number' => $normalizedPhone,
                 'external_reference' => $payment->reference,
                 'provider_reference' => $providerReference,
                 'status' => $mappedStatus,
-                'failure_reason' => $mappedStatus === 'failed' ? ($payload['message'] ?? 'Payment provider request failed.') : null,
-                'callback_payload' => $payload,
+                'failure_reason' => $mappedStatus === 'failed' ? ($chargePayload['message'] ?? $initPayload['message'] ?? 'Payment provider request failed.') : null,
+                'callback_payload' => $chargePayload,
                 'initiated_at' => now(),
                 'metadata' => [
                     ...($payment->metadata ?? []),
-                    'ussd_code' => $payload['ussd_code'] ?? null,
-                    'operator' => $payload['operator'] ?? $operator,
-                    'provider_environment' => env('CAMPAY_ENV', 'DEV'),
+                    'operator' => $operator,
+                    'provider_environment' => env('NOTCHPAY_ENV', 'DEV'),
+                    'notchpay_reference' => $reference,
                 ],
             ]);
 
             AuditLog::record($payment->user, 'payment.initiated', $payment, 'Payment initiated.', [
-                'provider' => 'campay',
+                'provider' => 'notchpay',
                 'operator' => $operator,
                 'provider_reference' => $providerReference,
                 'status' => $mappedStatus,
@@ -155,7 +190,7 @@ class MobileMoneyPaymentService
         }
     }
 
-    private function refreshCampayStatus(Payment $payment): Payment
+    private function refreshNotchPayStatus(Payment $payment): Payment
     {
         $reference = $payment->provider_reference ?: $payment->external_reference ?: $payment->reference;
 
@@ -165,10 +200,15 @@ class MobileMoneyPaymentService
         }
 
         try {
-            $response = Http::withToken($this->campayToken(), 'Token')
-                ->acceptJson()
-                ->timeout((int) env('CAMPAY_TIMEOUT', 30))
-                ->get($this->campayBaseUrl().'/api/transaction/'.$reference.'/');
+            $baseUrl = $this->notchpayBaseUrl();
+            $key = $this->notchpayKey();
+
+            $response = Http::withHeaders([
+                    'Authorization' => $key,
+                    'Content-Type' => 'application/json',
+                ])
+                ->timeout((int) env('NOTCHPAY_TIMEOUT', 30))
+                ->get($baseUrl.'/payments/'.$reference);
 
             $payload = $response->json() ?? [];
 
@@ -186,7 +226,7 @@ class MobileMoneyPaymentService
 
             return $this->applyProviderStatus($payment, $payload, 'status_check');
         } catch (\Throwable $exception) {
-            Log::warning('Campay payment status check failed.', [
+            Log::warning('NotchPay payment status check failed.', [
                 'payment_id' => $payment->id,
                 'provider' => $payment->provider,
                 'error' => $exception->getMessage(),
@@ -207,7 +247,7 @@ class MobileMoneyPaymentService
     private function failPayment(Payment $payment, string $message, \Throwable $exception): Payment
     {
         $payment->update([
-            'provider' => strtolower((string) env('PAYMENT_PROVIDER', 'campay')),
+            'provider' => strtolower((string) env('PAYMENT_PROVIDER', 'notchpay')),
             'status' => 'failed',
             'failure_reason' => $message,
             'metadata' => [
@@ -229,64 +269,46 @@ class MobileMoneyPaymentService
         return $payment->fresh();
     }
 
-    private function campayToken(): string
+    private function notchpayKey(): string
     {
-        if (env('CAMPAY_TOKEN')) {
-            return (string) env('CAMPAY_TOKEN');
+        $key = env('NOTCHPAY_PUBLIC_KEY');
+        if (! $key) {
+            throw new \RuntimeException('NotchPay credentials are missing. Set NOTCHPAY_PUBLIC_KEY.');
         }
-
-        $username = env('CAMPAY_APP_USERNAME');
-        $password = env('CAMPAY_APP_PASSWORD');
-
-        if (! $username || ! $password) {
-            throw new \RuntimeException('Campay credentials are missing. Set CAMPAY_APP_USERNAME and CAMPAY_APP_PASSWORD.');
-        }
-
-        return Cache::remember('campay_api_token_'.md5($username.'|'.env('CAMPAY_ENV', 'DEV')), now()->addMinutes(45), function () use ($username, $password) {
-            $response = Http::acceptJson()
-                ->asJson()
-                ->timeout((int) env('CAMPAY_TIMEOUT', 30))
-                ->post($this->campayBaseUrl().'/api/token/', [
-                    'username' => $username,
-                    'password' => $password,
-                ]);
-
-            $payload = $response->json() ?? [];
-
-            if (! $response->successful() || empty($payload['token'])) {
-                throw new \RuntimeException($payload['message'] ?? 'Unable to authenticate with Campay.');
-            }
-
-            return $payload['token'];
-        });
+        return (string) $key;
     }
 
-    private function campayBaseUrl(): string
+    private function notchpayBaseUrl(): string
     {
-        if (env('CAMPAY_BASE_URL')) {
-            return rtrim((string) env('CAMPAY_BASE_URL'), '/');
+        if (env('NOTCHPAY_BASE_URL')) {
+            return rtrim((string) env('NOTCHPAY_BASE_URL'), '/');
         }
-
-        return strtoupper((string) env('CAMPAY_ENV', 'DEV')) === 'PROD'
-            ? 'https://www.campay.net'
-            : 'https://demo.campay.net';
+        return 'https://api.notchpay.co';
     }
 
-    private function campayPhone(string $phoneNumber): string
+    private function notchpayPhone(string $phoneNumber): string
     {
-        return ltrim(preg_replace('/\D+/', '', $phoneNumber), '+');
+        $digits = preg_replace('/\D+/', '', $phoneNumber);
+        if (! str_starts_with($digits, '237')) {
+            $digits = '237'.$digits;
+        }
+        return '+'.$digits;
     }
 
-    private function mapCampayStatus(mixed $status, bool $requestAccepted = false): string
+    private function mapNotchPayStatus(mixed $status, bool $requestAccepted = false): string
     {
-        $value = strtoupper((string) $status);
+        $value = strtolower((string) $status);
 
-        if (in_array($value, ['SUCCESSFUL', 'SUCCESS', 'COMPLETED', 'PAID'], true)) {
+        if (in_array($value, ['complete', 'paid', 'successful', 'success', 'completed'], true)) {
             return 'paid';
         }
 
-        if (in_array($value, ['FAILED', 'FAILURE', 'CANCELLED', 'CANCELED', 'EXPIRED'], true)) {
+        if (in_array($value, ['failed', 'failure', 'cancelled', 'canceled', 'expired', 'rejected'], true)) {
             return 'failed';
+        }
+
+        if ($value === 'pending' || $value === 'processing') {
+            return 'processing';
         }
 
         return $requestAccepted ? 'processing' : 'failed';
