@@ -1,17 +1,17 @@
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { Bell, Bookmark, CalendarCheck, Heart, Ticket } from 'lucide-react'
-import PageContainer from '../../../../shared/components/layout/PageContainer.jsx'
-import Card from '../../../../shared/components/ui/Card.jsx'
-import Button from '../../../../shared/components/ui/Button.jsx'
-import ErrorState from '../../../../shared/components/feedback/ErrorState.jsx'
-import StatCardSkeleton from '../../../../shared/components/feedback/StatCardSkeleton.jsx'
+import PageContainer from '../../../shared/components/layout/PageContainer.jsx'
+import Card from '../../../shared/components/ui/Card.jsx'
+import Button from '../../../shared/components/ui/Button.jsx'
+import ErrorState from '../../../shared/components/feedback/ErrorState.jsx'
+import StatCardSkeleton from '../../../shared/components/feedback/StatCardSkeleton.jsx'
 import { EventGridSkeleton } from '../../../events/components/EventCardSkeleton.jsx'
 import EventGrid from '../../../events/components/EventGrid.jsx'
 import { dashboardService } from '../../services/dashboardService.js'
 import { extractCollection, normalizeEvents } from '../../../events/utils/normalizeEvent.js'
 import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
-import { useTranslation } from '../../../../shared/i18n/useTranslation.js'
+import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 
 function StatCard({ title, value, to, icon: Icon, gradient, iconBg }) {
   return (
