@@ -212,21 +212,76 @@ class EventController extends Controller
 
         Log::info('uploadImages validation passed', ['has_cover' => $request->hasFile('cover'), 'gallery_count' => $incomingGalleryCount]);
 
+        $diskRoot = config('filesystems.disks.'.ImageStorage::DISK.'.root');
+        Log::info('uploadImages filesystem path in use', [
+            'event_id' => $event->id,
+            'disk' => ImageStorage::DISK,
+            'disk_root' => $diskRoot,
+            'disk_root_exists' => $diskRoot ? is_dir($diskRoot) : false,
+            'disk_root_writable' => $diskRoot ? is_writable($diskRoot) : false,
+        ]);
+
+        try {
+            ImageStorage::ensureDiskIsWritable();
+        } catch (Throwable $exception) {
+            Log::error('uploadImages aborted because the storage disk is not usable.', [
+                'event_id' => $event->id,
+                'disk' => ImageStorage::DISK,
+                'disk_root' => $diskRoot,
+                'error' => $exception->getMessage(),
+            ]);
+
+            return response()->json([
+                'message' => 'Unable to upload images right now. The storage location is unavailable. Please contact support.',
+            ], 500);
+        }
+
         if ($request->hasFile('cover')) {
             $oldCover = $event->images()->where('is_cover', true)->first();
             if ($oldCover) {
                 ImageStorage::delete($oldCover->path);
                 $oldCover->delete();
             }
-            Log::info('uploadImages storing cover', ['event_id' => $event->id]);
-            $path = ImageStorage::store($request->file('cover'), 'events/'.$event->id);
+            Log::info('uploadImages storing cover', ['event_id' => $event->id, 'disk_root' => $diskRoot]);
+
+            try {
+                $path = ImageStorage::store($request->file('cover'), 'events/'.$event->id);
+            } catch (Throwable $exception) {
+                Log::error('uploadImages failed to store cover image.', [
+                    'event_id' => $event->id,
+                    'disk' => ImageStorage::DISK,
+                    'disk_root' => $diskRoot,
+                    'error' => $exception->getMessage(),
+                ]);
+
+                return response()->json([
+                    'message' => 'Failed to upload the cover image. Please try again or contact support if the issue persists.',
+                ], 500);
+            }
+
             Log::info('uploadImages cover stored', ['path' => $path]);
             $event->images()->create(['path' => $path, 'type' => 'cover', 'is_cover' => true]);
         }
 
         foreach ($request->file('gallery', []) as $index => $image) {
-            Log::info('uploadImages storing gallery image', ['event_id' => $event->id, 'index' => $index]);
-            $path = ImageStorage::store($image, 'events/'.$event->id);
+            Log::info('uploadImages storing gallery image', ['event_id' => $event->id, 'index' => $index, 'disk_root' => $diskRoot]);
+
+            try {
+                $path = ImageStorage::store($image, 'events/'.$event->id);
+            } catch (Throwable $exception) {
+                Log::error('uploadImages failed to store gallery image.', [
+                    'event_id' => $event->id,
+                    'index' => $index,
+                    'disk' => ImageStorage::DISK,
+                    'disk_root' => $diskRoot,
+                    'error' => $exception->getMessage(),
+                ]);
+
+                return response()->json([
+                    'message' => 'Failed to upload one or more gallery images. Please try again or contact support if the issue persists.',
+                ], 500);
+            }
+
             Log::info('uploadImages gallery image stored', ['path' => $path]);
             $event->images()->create(['path' => $path, 'type' => 'gallery', 'is_cover' => false]);
         }
