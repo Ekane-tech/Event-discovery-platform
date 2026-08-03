@@ -38,17 +38,11 @@ return [
             'report' => false,
         ],
 
-        // Public uploads now live in S3 (or S3-compatible, e.g. Backblaze B2).
-        // All uploads/thumbnail reads go through Storage::disk('public').
+        // Railway volume-backed public disk (reverted from S3/R2).
         'public' => [
-            'driver' => 's3',
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            'region' => env('AWS_DEFAULT_REGION'),
-            'bucket' => env('AWS_BUCKET'),
-            'url' => env('AWS_URL'),
-            'endpoint' => env('AWS_ENDPOINT'),
-            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+            'driver' => 'local',
+            'root' => env('RAILWAY_VOLUME_MOUNT_PATH', storage_path('app/public')),
+            'url' => env('APP_URL', 'http://localhost').'/storage',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

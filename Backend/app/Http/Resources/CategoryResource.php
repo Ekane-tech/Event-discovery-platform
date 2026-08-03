@@ -16,7 +16,7 @@ class CategoryResource extends JsonResource
             'slug' => $this->slug,
             'description' => $this->description,
             'image_path' => $this->image_path,
-            'image_url' => $this->image_path ? Storage::disk('public')->temporaryUrl($this->image_path, now()->addHours(2)) : null,
+            'image_url' => $this->image_path ? Storage::disk('public')->url($this->image_path) : null,
             'is_active' => (bool) $this->is_active,
             'events_count' => $this->whenCounted('events'),
             'created_at' => $this->created_at,
