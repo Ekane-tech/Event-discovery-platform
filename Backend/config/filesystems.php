@@ -38,11 +38,11 @@ return [
             'report' => false,
         ],
 
-        // Railway volume-backed public disk (reverted from S3/R2).
+        // Public uploads - uses local storage on Railway volumes
         'public' => [
             'driver' => 'local',
             'root' => env('RAILWAY_VOLUME_MOUNT_PATH', storage_path('app/public')),
-            'url' => env('APP_URL', 'http://localhost').'/storage',
+            'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,
