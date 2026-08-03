@@ -95,7 +95,7 @@ return [
     */
 
     'links' => [
-        public_path('storage') => storage_path('app/public'),
+        public_path('storage') => env('RAILWAY_VOLUME_MOUNT_PATH', storage_path('app/public')),
     ],
 
 ];
