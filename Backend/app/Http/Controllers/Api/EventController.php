@@ -182,11 +182,16 @@ class EventController extends Controller
 
     public function uploadImages(Request $request, Event $event): JsonResponse
     {
+        Log::info('uploadImages called', ['event_id' => $event->id, 'user_id' => $request->user()?->id]);
+
         $user = $request->user();
 
         if (! $event->isManageableBy($user)) {
+            Log::warning('uploadImages permission denied', ['event_id' => $event->id, 'user_id' => $user?->id]);
             abort(403, 'You do not have permission to upload images for this event.');
         }
+
+        Log::info('uploadImages permission passed', ['event_id' => $event->id]);
 
         $this->ensureEventCanBeEdited($event, 'Past events can no longer have photos changed. Duplicate the event to create a new edition.');
 
@@ -205,17 +210,24 @@ class EventController extends Controller
             ], 422);
         }
 
+        Log::info('uploadImages validation passed', ['has_cover' => $request->hasFile('cover'), 'gallery_count' => $incomingGalleryCount]);
+
         if ($request->hasFile('cover')) {
-            foreach ($event->images()->where('is_cover', true)->get() as $oldCover) {
+            $oldCover = $event->images()->where('is_cover', true)->first();
+            if ($oldCover) {
                 ImageStorage::delete($oldCover->path);
                 $oldCover->delete();
             }
+            Log::info('uploadImages storing cover', ['event_id' => $event->id]);
             $path = ImageStorage::store($request->file('cover'), 'events/'.$event->id);
+            Log::info('uploadImages cover stored', ['path' => $path]);
             $event->images()->create(['path' => $path, 'type' => 'cover', 'is_cover' => true]);
         }
 
-        foreach ($request->file('gallery', []) as $image) {
+        foreach ($request->file('gallery', []) as $index => $image) {
+            Log::info('uploadImages storing gallery image', ['event_id' => $event->id, 'index' => $index]);
             $path = ImageStorage::store($image, 'events/'.$event->id);
+            Log::info('uploadImages gallery image stored', ['path' => $path]);
             $event->images()->create(['path' => $path, 'type' => 'gallery', 'is_cover' => false]);
         }
 
