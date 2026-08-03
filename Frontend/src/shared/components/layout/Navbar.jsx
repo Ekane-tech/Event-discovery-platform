@@ -75,7 +75,6 @@ export default function Navbar() {
                 <Link to="/public-notifications" className="relative inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-teal-50 hover:text-teal-700">
                   <Bell className="h-5 w-5" />
                 </Link>
-                <Link to="/feedback"><Button variant="secondary">{t('feedback', 'Feedback')}</Button></Link>
                 <Link to="/login"><Button variant="secondary">{t('login', 'Login')}</Button></Link>
                 <Link to="/register"><Button>{t('register', 'Register')}</Button></Link>
               </>
