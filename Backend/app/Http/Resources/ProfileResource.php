@@ -26,7 +26,7 @@ class ProfileResource extends JsonResource
             'phone' => $this->profile?->phone,
             'city' => $this->profile?->city,
             'region' => $this->profile?->region,
-            'avatar' => $avatar && !str_starts_with($avatar, 'http') ? Storage::disk('public')->temporaryUrl($avatar, now()->addHours(2)) : $avatar,
+            'avatar' => $avatar && !str_starts_with($avatar, 'http') ? Storage::disk('public')->url($avatar) : $avatar,
             'bio' => $this->profile?->bio,
             'preferred_language' => $this->profile?->preferred_language,
             'created_at' => $this->created_at,
