@@ -25,7 +25,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/public/notifications', [NotificationController::class, 'publicAnnouncements'])->middleware('throttle:public-read');
 Route::post('/feedback', [FeedbackController::class, 'store'])->middleware('throttle:feedback-submit');
-Route::post('/payments/callback/notchpay', [PaymentController::class, 'notchpayCallback'])->middleware('throttle:payments');
+// NotchPay webhook — NOT throttled. NotchPay can legitimately burst events
+// and throttling would drop real payment callbacks. Backpressure is handled
+// by the queue worker instead.
+Route::post('/payments/callback/notchpay', [PaymentController::class, 'notchpayCallback']);
 
 Route::get('/img', [ImageVariantController::class, 'show'])->middleware('throttle:public-read');
 
