@@ -25,6 +25,7 @@ export const ACCOUNT_NAV_LINKS = [
   { label: 'Settings', labelKey: 'nav.settings', to: '/settings', icon: 'settings' },
 ]
 
+
 export const ORGANIZER_NAV_LINKS = [
   { label: 'Organizer Dashboard', labelKey: 'nav.organizerDashboard', to: '/organizer/dashboard', icon: 'layoutDashboard' },
   { label: 'My Events', labelKey: 'nav.myEvents', to: '/organizer/events', icon: 'calendarDays' },
