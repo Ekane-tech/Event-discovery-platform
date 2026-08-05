@@ -8,6 +8,7 @@ export const PUBLIC_NAV_LINKS = [
   { label: 'About', labelKey: 'nav.about', to: '/about', icon: 'calendarSearch' },
 ]
 
+
 export const USER_NAV_LINKS = [
   { label: 'Dashboard', labelKey: 'nav.dashboard', to: '/dashboard', icon: 'layoutDashboard' },
   { label: 'Recommendations', labelKey: 'nav.recommendations', to: '/recommendations', icon: 'calendarSearch' },
