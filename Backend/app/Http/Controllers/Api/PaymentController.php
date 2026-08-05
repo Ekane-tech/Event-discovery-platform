@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PaymentResource;
+use App\Jobs\ProcessNotchPayWebhookJob;
 use App\Models\AuditLog;
 use App\Models\Payment;
 use App\Models\Registration;
 use App\Services\Payments\MobileMoneyPaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -37,6 +39,16 @@ class PaymentController extends Controller
         ]);
     }
 
+    /**
+     * Initiate a mobile-money payment.
+     *
+     * For NotchPay, this is now FAST: it only calls the /payments
+     * endpoint (1-2s), then queues the slow /payments/{ref} charge
+     * call. The user gets the response immediately and sees
+     * "Check your phone and confirm the prompt".
+     *
+     * The final status (paid/failed) comes from the webhook.
+     */
     public function initiate(Request $request, Payment $payment, MobileMoneyPaymentService $paymentService): JsonResponse
     {
         $this->authorizePaymentOwner($request, $payment);
@@ -80,13 +92,18 @@ class PaymentController extends Controller
         return response()->json([
             'message' => match ($payment->status) {
                 'paid' => 'Payment completed successfully.',
-                'failed' => 'Payment initiation failed.',
-                default => 'Mobile money payment request initiated. Confirm the prompt on your phone.',
+                'failed' => $payment->failure_reason ?? 'Payment initiation failed.',
+                default => 'Check your phone and confirm the payment prompt. We will email you when it is confirmed.',
             },
             'payment' => new PaymentResource($payment->load(['event.category', 'event.region', 'event.city', 'registration'])),
-        ], $payment->status === 'failed' ? 422 : 200);
+        ], $payment->status === 'failed' ? 422 : ($payment->status === 'paid' ? 200 : 202));
     }
 
+    /**
+     * User-facing "Confirm" button. Asks NotchPay for the current
+     * status. Useful when the webhook is delayed or the user wants
+     * an instant check.
+     */
     public function confirm(Request $request, Payment $payment, MobileMoneyPaymentService $paymentService): JsonResponse
     {
         $this->authorizePaymentOwner($request, $payment);
@@ -109,13 +126,16 @@ class PaymentController extends Controller
             $payment = $paymentService->refreshStatus($payment);
 
             return response()->json([
-                'message' => $payment->status === 'paid'
-                    ? 'Payment confirmed successfully.'
-                    : 'Payment is still pending. Confirm the prompt on your phone, then check again.',
+                'message' => match ($payment->status) {
+                    'paid' => 'Payment confirmed successfully.',
+                    'failed' => $payment->failure_reason ?? 'Payment failed.',
+                    default => 'Still waiting for confirmation. Please approve the prompt on your phone.',
+                },
                 'payment' => new PaymentResource($payment->load(['event.category', 'event.region', 'event.city', 'registration'])),
             ], $payment->status === 'failed' ? 422 : 200);
         }
 
+        // Mock provider: just flip to paid synchronously.
         $payment->update([
             'status' => 'paid',
             'paid_at' => now(),
@@ -152,34 +172,67 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function notchpayCallback(Request $request, MobileMoneyPaymentService $paymentService): JsonResponse
+    /**
+     * NotchPay webhook receiver.
+     *
+     * Deliberately tiny so the response stays sub-100ms:
+     *   1. Verify the X-Notch-Signature HMAC.
+     *   2. Extract the event type + reference.
+     *   3. Enqueue ProcessNotchPayWebhookJob.
+     *   4. Return 200.
+     *
+     * All DB work and email side-effects happen in the queued job.
+     */
+    public function notchpayCallback(Request $request): JsonResponse
     {
         if (! $this->validNotchPayCallback($request)) {
+            Log::warning('NotchPay webhook rejected: invalid signature.', [
+                'ip' => $request->ip(),
+                'has_header' => (bool) $request->header('X-Notch-Signature'),
+                'has_body_field' => (bool) $request->input('signature'),
+            ]);
             return response()->json(['message' => 'Invalid callback signature.'], 403);
         }
 
-        $reference = $request->input('external_reference')
+        $eventType = (string) ($request->input('type') ?? '');
+        $data = (array) $request->input('data', []);
+
+        $reference = $data['reference']
+            ?? $data['id']
+            ?? $request->input('external_reference')
             ?? $request->input('reference')
-            ?? $request->input('merchant_reference')
-            ?? $request->input('data.reference')
-            ?? $request->input('transaction.reference')
-            ?? $request->input('payment.reference');
+            ?? $request->input('merchant_reference');
 
         if (! $reference) {
+            Log::warning('NotchPay webhook rejected: missing payment reference.', [
+                'event' => $eventType,
+                'payload_keys' => array_keys($request->all()),
+            ]);
             return response()->json(['message' => 'Missing payment reference.'], 422);
         }
 
-        $payment = Payment::where('reference', $reference)
-            ->orWhere('external_reference', $reference)
-            ->orWhere('provider_reference', $reference)
-            ->firstOrFail();
+        if ($eventType !== '' && ! str_starts_with($eventType, 'payment.')) {
+            Log::info('NotchPay webhook ignored: non-payment event.', ['event' => $eventType]);
+            return response()->json(['message' => 'Event ignored.'], 200);
+        }
 
-        $payment = $paymentService->applyProviderStatus($payment, $request->all(), 'callback');
+        try {
+            ProcessNotchPayWebhookJob::dispatch(
+                (string) $reference,
+                $request->all(),
+                $eventType,
+            );
+        } catch (\Throwable $e) {
+            // Queue is down — fail loud so NotchPay retries.
+            Log::error('NotchPay webhook: failed to enqueue process job.', [
+                'reference' => $reference,
+                'event' => $eventType,
+                'error' => $e->getMessage(),
+            ]);
+            return response()->json(['message' => 'Queue unavailable, please retry.'], 503);
+        }
 
-        return response()->json([
-            'message' => 'Callback processed.',
-            'status' => $payment->status,
-        ]);
+        return response()->json(['message' => 'Callback queued.']);
     }
 
     private function authorizePaymentOwner(Request $request, Payment $payment): void
@@ -188,7 +241,6 @@ class PaymentController extends Controller
             abort(403, 'You do not have permission to access this payment.');
         }
     }
-
 
     private function generatePaymentReference(Payment $payment): string
     {
@@ -210,17 +262,25 @@ class PaymentController extends Controller
         return '+237'.$digits;
     }
 
+    /**
+     * Verify the NotchPay webhook signature.
+     *
+     * Official header: X-Notch-Signature (HMAC-SHA256 of the raw
+     * request body, hex-encoded, signed with the webhook secret).
+     *
+     * In production the secret MUST be set or we reject the request.
+     */
     private function validNotchPayCallback(Request $request): bool
     {
         $secret = env('NOTCHPAY_WEBHOOK_SECRET');
 
         if (! $secret) {
-            // Fail open only outside production so local/dev flows keep working.
-            // In production an unsigned webhook must never be trusted.
-            return ! app()->environment('production');
+            $env = app()->environment();
+            return in_array($env, ['local', 'testing'], true);
         }
 
-        $signature = $request->header('X-Notchpay-Signature')
+        $signature = $request->header('X-Notch-Signature')
+            ?? $request->header('X-Notchpay-Signature')
             ?? $request->header('X-Signature')
             ?? $request->input('signature');
 
@@ -228,7 +288,7 @@ class PaymentController extends Controller
             return false;
         }
 
-        $expected = hash_hmac('sha256', $request->getContent(), $secret);
+        $expected = hash_hmac('sha256', $request->getContent(), (string) $secret);
 
         return hash_equals($expected, (string) $signature);
     }

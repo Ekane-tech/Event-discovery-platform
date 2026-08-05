@@ -2,27 +2,142 @@
 
 namespace App\Services\Payments;
 
+use App\Jobs\ProcessNotchPayChargeJob;
 use App\Models\AuditLog;
 use App\Models\Payment;
 use App\Models\Registration;
 use Illuminate\Http\Client\ConnectionException;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
+/**
+ * Payment service for Mboa Events 237.
+ *
+ * Supports two providers:
+ *   - "mock"    : local development, no external calls
+ *   - "notchpay" : Cameroon mobile money (MTN / Orange) via NotchPay
+ *
+ * The NotchPay flow is split into two phases so the user-facing
+ * "Pay" button feels instant:
+ *
+ *   1. initiate()  → initializeOnNotchPay()  (fast, < 2s)
+ *      Creates the payment on NotchPay and returns 202 immediately.
+ *      The user sees "Check your phone and confirm the prompt".
+ *
+ *   2. chargeNotchPay() runs in the background via
+ *      ProcessNotchPayChargeJob. It calls the slow endpoint
+ *      (5-30s, blocks on the user's phone confirmation).
+ *
+ *   3. NotchPay fires a webhook when the user confirms. We
+ *      verify the signature and dispatch ProcessNotchPayWebhookJob
+ *      which updates the DB and sends the email.
+ *
+ * All three steps are independently retried and idempotent.
+ */
 class MobileMoneyPaymentService
 {
+    // -------------------------------------------------------------------
+    // PUBLIC API (called from the controller)
+    // -------------------------------------------------------------------
+
+    /**
+     * Step 1: initialize the payment and return quickly.
+     * For NotchPay: just create the payment object, then queue the
+     * slow charge. For mock: do everything synchronously.
+     */
     public function initiate(Payment $payment, string $operator, string $phoneNumber): Payment
     {
-        $provider = strtolower((string) env('PAYMENT_PROVIDER', 'mock'));
+        $provider = strtolower((string) config('payments.provider', env('PAYMENT_PROVIDER', 'mock')));
+
+        if ($provider === 'notchpay' && empty(env('NOTCHPAY_PUBLIC_KEY'))) {
+            return $this->failPayment(
+                $payment,
+                'Payment provider is not configured. Please contact support.',
+                new \RuntimeException('NOTCHPAY_PUBLIC_KEY is not set')
+            );
+        }
 
         return match ($provider) {
-            'notchpay' => $this->initiateNotchPay($payment, $operator, $phoneNumber),
+            'notchpay' => $this->initializeOnNotchPay($payment, $operator, $phoneNumber),
             default => $this->initiateMock($payment, $operator, $phoneNumber),
         };
     }
 
+    /**
+     * Step 2: do the actual mobile-money charge. Called from
+     * ProcessNotchPayChargeJob in the background. NEVER call this
+     * synchronously from a web request.
+     */
+    public function chargeNotchPay(Payment $payment, string $operator, string $phoneNumber): Payment
+    {
+        try {
+            $reference = (string) ($payment->external_reference ?: $payment->reference);
+            $channel = $this->notchpayChannel($operator);
+            $phone = $this->notchpayPhone($phoneNumber);
+            $key = $this->notchpayKey();
+            $baseUrl = $this->notchpayBaseUrl();
+            $chargeTimeout = (int) env('NOTCHPAY_CHARGE_TIMEOUT', 90);
+
+            $chargeResponse = Http::withHeaders([
+                    'Authorization' => $key,
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
+                ])
+                ->timeout($chargeTimeout)
+                ->connectTimeout(10)
+                ->post($baseUrl.'/payments/'.$reference, [
+                    'channel' => $channel,
+                    'data' => [
+                        'phone' => $phone,
+                    ],
+                ]);
+
+            $payload = $chargeResponse->json() ?? [];
+            $data = (array) ($payload['data'] ?? []);
+            $transaction = (array) ($data['transaction'] ?? $payload['transaction'] ?? []);
+
+            $providerReference = (string) (
+                $transaction['id'] ?? $data['id'] ?? $payload['id'] ?? $reference
+            );
+
+            $payment->update([
+                'provider_reference' => $providerReference,
+                'callback_payload' => $payload,
+                'metadata' => [
+                    ...($payment->metadata ?? []),
+                    'channel' => $channel,
+                    'notchpay_reference' => $reference,
+                    'charge_completed_at' => now()->toISOString(),
+                ],
+            ]);
+
+            Log::info('NotchPay charge call completed.', [
+                'payment_id' => $payment->id,
+                'provider_reference' => $providerReference,
+                'http_status' => $chargeResponse->status(),
+            ]);
+
+            return $payment->fresh();
+        } catch (ConnectionException $e) {
+            Log::warning('NotchPay charge: connection failed, will retry.', [
+                'payment_id' => $payment->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        } catch (\Throwable $e) {
+            Log::error('NotchPay charge: unexpected failure, will retry.', [
+                'payment_id' => $payment->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Called from the user's "Confirm" button or from /payments/{id}/status
+     * to ask NotchPay for the latest status (in case the webhook is delayed).
+     */
     public function refreshStatus(Payment $payment): Payment
     {
         if ($payment->provider !== 'notchpay') {
@@ -32,29 +147,59 @@ class MobileMoneyPaymentService
         return $this->refreshNotchPayStatus($payment);
     }
 
+    /**
+     * Apply a NotchPay status to our local DB. Used by both the
+     * webhook job and the refresh-status path.
+     */
     public function applyProviderStatus(Payment $payment, array $payload, string $source = 'callback'): Payment
     {
-        $statusValue = $payload['status'] ?? $payload['payment_status'] ?? $payload['transaction']['status'] ?? null;
+        $data = (array) ($payload['data'] ?? []);
+        $transaction = (array) ($data['transaction'] ?? $payload['transaction'] ?? []);
+
+        // Status can be in any of these places depending on payload shape.
+        $statusValue = $payload['status']
+            ?? $payload['payment_status']
+            ?? $transaction['status']
+            ?? $data['status']
+            ?? null;
+
         $mappedStatus = $this->mapNotchPayStatus($statusValue);
+
+        $failureReason = $mappedStatus === 'failed'
+            ? Str::limit((string) (
+                $payload['message']
+                ?? $transaction['message']
+                ?? 'Payment failed.'
+            ), 500, '')
+            : null;
+
         $metadata = [
             ...($payment->metadata ?? []),
-            'last_provider_status' => $payload['status'] ?? $payload['payment_status'] ?? $payload['transaction']['status'] ?? null,
+            'last_provider_status' => $statusValue,
             'last_status_source' => $source,
             'last_status_checked_at' => now()->toISOString(),
         ];
 
-        $payment->update([
+        $updates = [
             'status' => $mappedStatus,
-            'paid_at' => $mappedStatus === 'paid' ? ($payment->paid_at ?: now()) : null,
-            'failure_reason' => $mappedStatus === 'failed' ? ($payload['message'] ?? 'Payment failed.') : null,
+            'failure_reason' => $failureReason,
             'callback_payload' => $payload,
             'metadata' => $metadata,
-        ]);
+        ];
+
+        // Only flip paid_at on the actual transition into paid.
+        // (Duplicate webhooks would otherwise overwrite the real time.)
+        if ($mappedStatus === 'paid' && ! $payment->paid_at) {
+            $updates['paid_at'] = now();
+        }
+
+        $payment->update($updates);
 
         $registrationIds = $payment->metadata['registration_ids'] ?? [$payment->registration_id];
 
         if ($mappedStatus === 'paid') {
-            Registration::whereIn('id', array_filter($registrationIds))->update(['status' => 'confirmed']);
+            Registration::whereIn('id', array_filter($registrationIds))
+                ->update(['status' => 'confirmed']);
         }
 
         if ($mappedStatus === 'failed') {
@@ -67,10 +212,15 @@ class MobileMoneyPaymentService
             'status' => $mappedStatus,
             'source' => $source,
             'provider' => $payment->provider,
+            'raw_status' => $statusValue,
         ]);
 
         return $payment->fresh();
     }
+
+    // -------------------------------------------------------------------
+    // PROVIDER-SPECIFIC INITIALIZERS
+    // -------------------------------------------------------------------
 
     private function initiateMock(Payment $payment, string $operator, string $phoneNumber): Payment
     {
@@ -96,27 +246,46 @@ class MobileMoneyPaymentService
         return $payment->fresh();
     }
 
-    private function initiateNotchPay(Payment $payment, string $operator, string $phoneNumber): Payment
+    /**
+     * Fast part of the NotchPay flow: just create the payment object
+     * on NotchPay. Returns within 1-2 seconds. The user already
+     * sees "processing" by the time this returns; the slow charge
+     * call runs in the background via ProcessNotchPayChargeJob.
+     */
+    private function initializeOnNotchPay(Payment $payment, string $operator, string $phoneNumber): Payment
     {
         try {
             $baseUrl = $this->notchpayBaseUrl();
             $key = $this->notchpayKey();
-            $channel = $operator === 'mtn' ? 'cm.mtn' : 'cm.orange';
-            $normalizedPhone = $this->notchpayPhone($phoneNumber);
+            $phone = $this->notchpayPhone($phoneNumber);
+            $initTimeout = (int) env('NOTCHPAY_INIT_TIMEOUT', 30);
 
-            // Step 1: Initialize payment
+            $customerEmail = $payment->user?->email;
+            if (! $customerEmail || ! filter_var($customerEmail, FILTER_VALIDATE_EMAIL)) {
+                return $this->failPayment(
+                    $payment,
+                    'A valid customer email is required to initiate a payment.',
+                    new \RuntimeException('Missing customer email')
+                );
+            }
+
+            $idempotencyKey = $payment->reference;
+
             $initResponse = Http::withHeaders([
                     'Authorization' => $key,
                     'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
+                    'Idempotency-Key' => $idempotencyKey,
                 ])
-                ->timeout((int) env('NOTCHPAY_TIMEOUT', 30))
+                ->timeout($initTimeout)
+                ->connectTimeout(10)
                 ->post($baseUrl.'/payments', [
                     'amount' => (int) round((float) $payment->amount),
                     'currency' => $payment->currency ?: 'XAF',
                     'customer' => [
                         'name' => $payment->user?->name ?? 'Customer',
-                        'email' => $payment->user?->email ?? 'customer@example.com',
-                        'phone' => $normalizedPhone,
+                        'email' => $customerEmail,
+                        'phone' => $phone,
                     ],
                     'description' => Str::limit('Payment for '.($payment->event?->title ?? 'event'), 120, ''),
                     'reference' => $payment->reference,
@@ -129,66 +298,67 @@ class MobileMoneyPaymentService
 
             $initPayload = $initResponse->json() ?? [];
 
-            if (! $initResponse->successful() || (empty($initPayload['transaction']['reference']) && empty($initPayload['transaction']['id']))) {
-                return $this->failPayment($payment, 'NotchPay initialization failed: '.($initPayload['message'] ?? 'Unknown error'), new \RuntimeException($initPayload['message'] ?? 'NotchPay initialization error'));
+            $reference = $initPayload['transaction']['reference']
+                ?? $initPayload['transaction']['id']
+                ?? $initPayload['payment']['reference']
+                ?? null;
+
+            if (! $initResponse->successful() || ! $reference) {
+                return $this->failPayment(
+                    $payment,
+                    'NotchPay initialization failed: '.Str::limit((string) ($initPayload['message'] ?? 'Unknown error'), 200, ''),
+                    new \RuntimeException((string) ($initPayload['message'] ?? 'NotchPay initialization error'))
+                );
             }
 
-            $reference = $initPayload['transaction']['reference'] ?? $initPayload['transaction']['id'] ?? $payment->reference;
-
-            // Step 2: Process mobile money
-            $chargeResponse = Http::withHeaders([
-                    'Authorization' => $key,
-                    'Content-Type' => 'application/json',
-                ])
-                ->timeout((int) env('NOTCHPAY_TIMEOUT', 60))
-                ->post($baseUrl.'/payments/'.$reference, [
-                    'channel' => $channel,
-                    'data' => [
-                        'phone' => $normalizedPhone,
-                    ],
-                ]);
-
-            $chargePayload = $chargeResponse->json() ?? [];
-            $providerReference = $chargePayload['transaction']['id'] ?? $chargePayload['transaction']['reference'] ?? $reference;
-            $mappedStatus = $this->mapNotchPayStatus($chargePayload['transaction']['status'] ?? $chargePayload['status'] ?? null, $chargeResponse->successful());
-
+            // Mark the payment as "processing" and persist the operator / phone
+            // so the background job knows what to charge. external_reference is
+            // the NotchPay reference we'll POST against in the charge step.
             $payment->update([
                 'provider' => 'notchpay',
                 'operator' => $operator,
-                'phone_number' => $normalizedPhone,
-                'external_reference' => $payment->reference,
-                'provider_reference' => $providerReference,
-                'status' => $mappedStatus,
-                'failure_reason' => $mappedStatus === 'failed' ? ($chargePayload['message'] ?? $initPayload['message'] ?? 'Payment provider request failed.') : null,
-                'callback_payload' => $chargePayload,
+                'phone_number' => $phone,
+                'external_reference' => (string) $reference,
+                'status' => 'processing',
                 'initiated_at' => now(),
                 'metadata' => [
                     ...($payment->metadata ?? []),
                     'operator' => $operator,
                     'provider_environment' => env('NOTCHPAY_ENV', 'DEV'),
-                    'notchpay_reference' => $reference,
+                    'notchpay_reference' => (string) $reference,
+                    'idempotency_key' => $idempotencyKey,
                 ],
             ]);
 
             AuditLog::record($payment->user, 'payment.initiated', $payment, 'Payment initiated.', [
                 'provider' => 'notchpay',
                 'operator' => $operator,
-                'provider_reference' => $providerReference,
-                'status' => $mappedStatus,
+                'notchpay_reference' => (string) $reference,
             ]);
 
-            if ($mappedStatus === 'paid') {
-                $registrationIds = $payment->metadata['registration_ids'] ?? [$payment->registration_id];
-                Registration::whereIn('id', array_filter($registrationIds))->update(['status' => 'confirmed']);
-            }
+            // Queue the SLOW charge call. This is the bit that waits for the
+            // user to approve the prompt on their phone. We do NOT block on it.
+            ProcessNotchPayChargeJob::dispatch($payment->id);
 
             return $payment->fresh();
-        } catch (ConnectionException $exception) {
-            return $this->failPayment($payment, 'Payment provider connection failed.', $exception);
-        } catch (\Throwable $exception) {
-            return $this->failPayment($payment, 'Payment provider request failed.', $exception);
+        } catch (ConnectionException $e) {
+            return $this->failPayment(
+                $payment,
+                'Could not reach the payment provider. Please check your internet and try again.',
+                $e
+            );
+        } catch (\Throwable $e) {
+            return $this->failPayment(
+                $payment,
+                'Payment initialization failed. Please try again.',
+                $e
+            );
         }
     }
+
+    // -------------------------------------------------------------------
+    // PROVIDER-SPECIFIC HELPERS
+    // -------------------------------------------------------------------
 
     private function refreshNotchPayStatus(Payment $payment): Payment
     {
@@ -206,8 +376,10 @@ class MobileMoneyPaymentService
             $response = Http::withHeaders([
                     'Authorization' => $key,
                     'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
                 ])
-                ->timeout((int) env('NOTCHPAY_TIMEOUT', 30))
+                ->timeout((int) env('NOTCHPAY_STATUS_TIMEOUT', 30))
+                ->connectTimeout(10)
                 ->get($baseUrl.'/payments/'.$reference);
 
             $payload = $response->json() ?? [];
@@ -220,15 +392,13 @@ class MobileMoneyPaymentService
                         'last_status_checked_at' => now()->toISOString(),
                     ],
                 ]);
-
                 return $payment->fresh();
             }
 
             return $this->applyProviderStatus($payment, $payload, 'status_check');
         } catch (\Throwable $exception) {
-            Log::warning('NotchPay payment status check failed.', [
+            Log::warning('NotchPay status check failed.', [
                 'payment_id' => $payment->id,
-                'provider' => $payment->provider,
                 'error' => $exception->getMessage(),
             ]);
 
@@ -247,7 +417,7 @@ class MobileMoneyPaymentService
     private function failPayment(Payment $payment, string $message, \Throwable $exception): Payment
     {
         $payment->update([
-            'provider' => strtolower((string) env('PAYMENT_PROVIDER', 'notchpay')),
+            'provider' => strtolower((string) config('payments.provider', env('PAYMENT_PROVIDER', 'notchpay'))),
             'status' => 'failed',
             'failure_reason' => $message,
             'metadata' => [
@@ -280,10 +450,21 @@ class MobileMoneyPaymentService
 
     private function notchpayBaseUrl(): string
     {
-        if (env('NOTCHPAY_BASE_URL')) {
-            return rtrim((string) env('NOTCHPAY_BASE_URL'), '/');
-        }
-        return 'https://api.notchpay.co';
+        $base = env('NOTCHPAY_BASE_URL');
+        return $base ? rtrim((string) $base, '/') : 'https://api.notchpay.co';
+    }
+
+    /**
+     * Map our internal operator code to a NotchPay channel.
+     * See https://developer.notchpay.co/accept-payments/mobile-money
+     */
+    private function notchpayChannel(string $operator): string
+    {
+        return match (strtolower($operator)) {
+            'mtn' => 'cm.mtn',
+            'orange' => 'cm.orange',
+            default => 'cm.mobile',
+        };
     }
 
     private function notchpayPhone(string $phoneNumber): string
