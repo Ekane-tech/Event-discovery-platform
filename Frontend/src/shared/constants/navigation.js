@@ -20,6 +20,7 @@ export const USER_NAV_LINKS = [
   { label: 'Settings', labelKey: 'nav.settings', to: '/settings', icon: 'settings' },
 ]
 
+
 export const ACCOUNT_NAV_LINKS = [
   { label: 'Settings', labelKey: 'nav.settings', to: '/settings', icon: 'settings' },
 ]
