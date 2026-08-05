@@ -7,10 +7,20 @@ use Illuminate\Support\Facades\Storage;
 
 class ImageStorage
 {
+    /**
+     * Disk used for every image the app stores.
+     *
+     * This is intentionally the 'public' disk and never changes: the disk
+     * itself is env-switchable (see config/filesystems.php). When R2_BUCKET
+     * + R2_ENDPOINT + R2_* credentials are set on Railway, 'public' IS
+     * Cloudflare R2 (S3-compatible, no egress fees) and all images go there
+     * automatically — no operator-side code changes needed.
+     */
     public const DISK = 'public';
 
     /**
-     * Store an uploaded image in the given directory on the public disk.
+     * Store an uploaded image in the given directory on the public disk
+     * (Cloudflare R2 when configured, local storage otherwise).
      */
     public static function store(UploadedFile $file, string $directory): string
     {
