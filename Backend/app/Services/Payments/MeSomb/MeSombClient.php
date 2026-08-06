@@ -106,6 +106,21 @@ class MeSombClient
         return $this->request('GET', 'payment/transactions/?'.$query);
     }
 
+    /**
+     * Fetch the application status + balances for the configured keys.
+     *
+     * Used by the `payments:test-mesomb` artisan command to verify
+     * credentials and connectivity without charging anyone.
+     *
+     * @return array<string, mixed>
+     *
+     * @throws MeSombApiException|ConnectionException|RuntimeException
+     */
+    public function getStatus(): array
+    {
+        return $this->request('GET', 'payment/status/');
+    }
+
     // -------------------------------------------------------------------
     // HTTP + signing (mirrors hachther/mesomb-php exactly)
     // -------------------------------------------------------------------
