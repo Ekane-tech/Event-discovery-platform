@@ -5,7 +5,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.tile.openstreetmap.org https://*.up.railway.app https://t3.storageapi.dev https://*.tigrisfiles.io; font-src 'self' data:; connect-src 'self' https://nominatim.openstreetmap.org https://*.up.railway.app; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.tile.openstreetmap.org https://*.up.railway.app https://*.r2.cloudflarestorage.com https://*.r2.dev; font-src 'self' data:; connect-src 'self' https://nominatim.openstreetmap.org https://*.up.railway.app; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"
         },
         {
           "key": "X-Content-Type-Options",

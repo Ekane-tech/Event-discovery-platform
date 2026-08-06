@@ -11,9 +11,10 @@ use Intervention\Image\ImageManager;
 /**
  * On-demand, cached image variants (thumbnails). Given a stored image path and
  * a target width, serve a resized JPEG. Variants are cached on the public disk
- * (S3) and served with immutable cache headers. On ANY failure (no GD, bad
- * image, etc.) it falls back to the original bytes — so it can never break the
- * app or the upload flow (uploads are untouched).
+ * (Cloudflare R2 when configured, local otherwise — see config/filesystems.php)
+ * and served with immutable cache headers. On ANY failure (no GD, bad image,
+ * etc.) it falls back to the original bytes — so it can never break the app or
+ * the upload flow (uploads are untouched).
  */
 class ImageVariantController extends Controller
 {
@@ -41,7 +42,7 @@ class ImageVariantController extends Controller
             return $this->jpegResponse((string) $disk->get($cacheRel));
         }
 
-        // Read the source bytes from the public disk (S3) and resize.
+        // Read the source bytes from the public disk (R2 when configured) and resize.
         $bytes = $this->resize((string) $disk->get($path), $width);
 
         if ($bytes !== null) {
