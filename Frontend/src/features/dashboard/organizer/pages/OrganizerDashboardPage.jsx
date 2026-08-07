@@ -17,6 +17,37 @@ function StatCard({ title, value, icon: Icon }) {
   return <MetricCard label={title} value={value} icon={Icon} />
 }
 
+const STATUS_STYLES = {
+  published: 'bg-green-50 text-green-700',
+  pending: 'bg-amber-50 text-amber-700',
+  draft: 'bg-slate-100 text-slate-600',
+  rejected: 'bg-red-50 text-red-700',
+  cancelled: 'bg-red-50 text-red-700',
+}
+
+function StatusPill({ status }) {
+  return (
+    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-bold capitalize ${STATUS_STYLES[status] || STATUS_STYLES.draft}`}>
+      {status}
+    </span>
+  )
+}
+
+function eventDate(value) {
+  if (!value) return '—'
+  return new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+function EventsTableSkeleton() {
+  return (
+    <div className="grid gap-3">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div key={index} className="h-14 animate-pulse rounded-xl bg-slate-100" />
+      ))}
+    </div>
+  )
+}
+
 export default function OrganizerDashboardPage() {
   const [dashboard, setDashboard] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -33,10 +64,68 @@ export default function OrganizerDashboardPage() {
     <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">{loading?Array.from({length:4}).map((_,i)=><StatCardSkeleton key={i}/>):cards.map(([title,value,Icon,gradient])=><StatCard key={title} title={title} value={value} icon={Icon} gradient={gradient}/>)}</div>
     <section className="mt-8">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-2xl font-black text-slate-950"><BarChart3 className="h-6 w-6 text-blue-700"/>Recent organizer events</h2>
-        <Link to="/organizer/events" className="text-sm font-bold text-blue-700">View all</Link>
+        <h2 className="flex items-center gap-2 text-2xl font-black text-slate-950"><BarChart3 className="h-6 w-6 text-teal-700"/>Recent organizer events</h2>
+        <Link to="/organizer/events" className="text-sm font-bold text-teal-700">View all</Link>
       </div>
-      <div className="grid gap-4">{loading?Array.from({length:3}).map((_,i)=><Card key={i} className="h-24 animate-pulse bg-slate-100"/>):events.map(event=><Card key={event.id}><div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"><div><h3 className="font-black text-lg sm:text-xl text-slate-950">{event.title}</h3><p className="text-sm text-slate-600">{event.city}, {event.region} • {event.status}</p></div><div className="flex gap-2"><Link to={`/organizer/events/${event.id}/details`}><Button variant="secondary">Details</Button></Link>{!hasEventEnded(event) && <Link to={`/organizer/events/${event.id}/edit`}><Button>Edit</Button></Link>}</div></div></Card>)}</div>
+
+      {loading ? (
+        <EventsTableSkeleton />
+      ) : events.length === 0 ? (
+        <Card>
+          <p className="text-sm text-slate-600">No events yet. Create your first event to get started.</p>
+        </Card>
+      ) : (
+        <Card className="overflow-hidden p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[680px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500">
+                  <th className="px-5 py-3">Event</th>
+                  <th className="px-5 py-3">Date</th>
+                  <th className="px-5 py-3 text-center">Registrations</th>
+                  <th className="hidden px-5 py-3 text-center md:table-cell">Views</th>
+                  <th className="px-5 py-3">Status</th>
+                  <th className="px-5 py-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {events.map((event) => (
+                  <tr key={event.id} className="transition hover:bg-slate-50">
+                    <td className="max-w-[280px] px-5 py-3">
+                      <p className="truncate font-bold text-slate-950">{event.title}</p>
+                      <p className="mt-0.5 truncate text-xs text-slate-500">
+                        {event.city}{event.city && event.region ? ', ' : ''}{event.region}
+                      </p>
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-3 text-slate-600">{eventDate(event.startDate)}</td>
+                    <td className="px-5 py-3 text-center font-semibold text-slate-800">{event.registrations}</td>
+                    <td className="hidden px-5 py-3 text-center text-slate-600 md:table-cell">{event.views}</td>
+                    <td className="px-5 py-3"><StatusPill status={event.status} /></td>
+                    <td className="px-5 py-3">
+                      <div className="flex justify-end gap-2">
+                        <Link
+                          to={`/organizer/events/${event.id}/details`}
+                          className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 transition hover:bg-slate-50"
+                        >
+                          Details
+                        </Link>
+                        {!hasEventEnded(event) && (
+                          <Link
+                            to={`/organizer/events/${event.id}/edit`}
+                            className="inline-flex items-center rounded-lg bg-teal-500 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-teal-600"
+                          >
+                            Edit
+                          </Link>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
     </section>
   </PageContainer>
 }
