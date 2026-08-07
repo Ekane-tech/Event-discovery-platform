@@ -133,9 +133,9 @@ export default function OrganizerAttendeesPage() {
 
       <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
         {[
-          ['Total registrations', summary.registrations_count || 0, 'from-teal-600 to-emerald-700'],
+          ['Total registrations', summary.registrations_count || 0, 'from-blue-600 to-emerald-700'],
           ['Confirmed', summary.confirmed_count || 0, 'from-blue-600 to-indigo-700'],
-          ['Checked in', summary.checked_in_count || 0, 'from-green-600 to-teal-700'],
+          ['Checked in', summary.checked_in_count || 0, 'from-green-600 to-blue-700'],
           ['Cancelled', summary.cancelled_count || 0, 'from-rose-600 to-pink-700'],
           ['Available places', summary.available_places ?? 'Unlimited', 'from-amber-500 to-orange-700'],
         ].map(([label, value, gradient]) => (
@@ -152,7 +152,7 @@ export default function OrganizerAttendeesPage() {
             <p className="text-sm text-slate-600">Search by ticket, attendee name or email. QR codes open the ticket verification page; organizers can check in from this list.</p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
-            <input value={ticketQuery} onChange={(event) => setTicketQuery(event.target.value)} placeholder="Search ticket or attendee" className="rounded-2xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-teal-500" />
+            <input value={ticketQuery} onChange={(event) => setTicketQuery(event.target.value)} placeholder="Search ticket or attendee" className="rounded-2xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-blue-500" />
             <Button type="button" variant="secondary" onClick={handleExport} disabled={exporting || attendees.length === 0}><Download className="mr-2 h-4 w-4" />Export CSV</Button>
           </div>
         </div>
@@ -174,7 +174,7 @@ export default function OrganizerAttendeesPage() {
           ]}
           rows={rows.map((row) => ({
             ...row,
-            ticket: <span className="inline-flex items-center gap-1 font-mono text-xs"><QrCode className="h-3.5 w-3.5 text-teal-700" />{row.ticket}</span>,
+            ticket: <span className="inline-flex items-center gap-1 font-mono text-xs"><QrCode className="h-3.5 w-3.5 text-blue-700" />{row.ticket}</span>,
           }))}
         />
       )}

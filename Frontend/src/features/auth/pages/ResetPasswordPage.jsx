@@ -89,16 +89,16 @@ export default function ResetPasswordPage() {
 
   return (
     <main className="relative overflow-hidden px-4 py-12 sm:px-6 lg:px-8">
-      <div className="absolute inset-x-0 top-0 -z-10 h-72 bg-linear-to-br from-teal-100 via-white to-pink-100" />
+      <div className="absolute inset-x-0 top-0 -z-10 h-72 bg-linear-to-br from-indigo-100 via-white to-pink-100" />
       <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[.9fr_1.1fr] lg:items-center">
-        <section className="rounded-4xl bg-linear-to-br from-slate-950 to-teal-900 p-8 text-white shadow-2xl shadow-slate-200">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 text-teal-100">
+        <section className="rounded-4xl bg-linear-to-br from-slate-950 to-indigo-900 p-8 text-white shadow-2xl shadow-slate-200">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 text-indigo-100">
             <LockKeyhole className="h-7 w-7" />
           </div>
           <h2 className="mt-6 text-3xl font-black leading-tight">{t('auth.passwordResetTitle')}</h2>
           <p className="mt-3 text-sm leading-7 text-slate-200">{t('auth.passwordResetDescription')}</p>
           <div className="mt-6 rounded-3xl bg-white/10 p-5 backdrop-blur">
-            <p className="text-xs font-bold uppercase tracking-wide text-teal-100">{t('auth.resettingAccount')}</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-indigo-100">{t('auth.resettingAccount')}</p>
             <p className="mt-2 text-lg font-black">{maskEmail(email, t)}</p>
           </div>
         </section>
@@ -108,7 +108,7 @@ export default function ResetPasswordPage() {
             eyebrow={t('auth.passwordResetTitle')}
             title={t('auth.passwordResetTitle')}
             description={t('auth.passwordResetDescription')}
-            footer={<Link className="inline-flex items-center gap-1 font-bold text-teal-700" to="/login"><ArrowLeft className="h-4 w-4" /> {t('auth.backToLogin')}</Link>}
+            footer={<Link className="inline-flex items-center gap-1 font-bold text-indigo-700" to="/login"><ArrowLeft className="h-4 w-4" /> {t('auth.backToLogin')}</Link>}
           >
             {success && (
               <div className="mb-5 rounded-2xl border border-green-100 bg-green-50 p-4 text-green-800">
@@ -140,7 +140,7 @@ export default function ResetPasswordPage() {
 
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <div className="flex items-center gap-3">
-                  <ShieldCheck className="h-5 w-5 text-teal-700" />
+                  <ShieldCheck className="h-5 w-5 text-indigo-700" />
                   <div>
                     <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{t('auth.account')}</p>
                     <p className="text-sm font-bold text-slate-900">{maskEmail(email, t)}</p>

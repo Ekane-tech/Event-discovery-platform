@@ -39,10 +39,10 @@ export default function ForgotPasswordPage() {
 
   return (
     <main className="relative overflow-hidden px-4 py-12 sm:px-6 lg:px-8">
-      <div className="absolute inset-x-0 top-0 -z-10 h-72 bg-linear-to-br from-teal-100 via-white to-pink-100" />
+      <div className="absolute inset-x-0 top-0 -z-10 h-72 bg-linear-to-br from-indigo-100 via-white to-pink-100" />
       <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[.9fr_1.1fr] lg:items-center">
         <section className="rounded-4xl bg-slate-950 p-8 text-white shadow-2xl shadow-slate-200">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-400 text-slate-950">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-400 text-slate-950">
             <ShieldCheck className="h-7 w-7" />
           </div>
             <h2 className="mt-6 text-3xl font-black leading-tight">{t('auth.forgotPasswordTitle')}</h2>
@@ -59,7 +59,7 @@ export default function ForgotPasswordPage() {
             eyebrow={t('auth.forgotPasswordTitle')}
             title={t('auth.forgotPasswordTitle')}
             description={t('auth.forgotPasswordDescription')}
-            footer={<><Link className="inline-flex items-center gap-1 font-bold text-teal-700" to="/login"><ArrowLeft className="h-4 w-4" /> {t('auth.backToLogin')}</Link> <span className="text-slate-400">{t('auth.or')}</span> <Link className="font-bold text-teal-700" to="/register">{t('auth.createAccount')}</Link></>}
+            footer={<><Link className="inline-flex items-center gap-1 font-bold text-indigo-700" to="/login"><ArrowLeft className="h-4 w-4" /> {t('auth.backToLogin')}</Link> <span className="text-slate-400">{t('auth.or')}</span> <Link className="font-bold text-indigo-700" to="/register">{t('auth.createAccount')}</Link></>}
           >
             {sent && <div className="mb-5"><Alert type="success">{message || t('auth.safeResetMessage')}</Alert></div>}
             {error && <div className="mb-5"><Alert type="error">{error}</Alert></div>}
@@ -73,7 +73,7 @@ export default function ForgotPasswordPage() {
             </form>
 
             {sent && (
-              <div className="mt-5 rounded-2xl border border-teal-100 bg-teal-50 p-4 text-sm leading-6 text-teal-900">
+              <div className="mt-5 rounded-2xl border border-indigo-100 bg-indigo-50 p-4 text-sm leading-6 text-indigo-900">
                 {message || t('auth.safeResetMessage')}
               </div>
             )}

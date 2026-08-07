@@ -69,16 +69,16 @@ export default function EmailVerificationPage() {
 
   return (
     <main className="relative overflow-hidden px-4 py-12 sm:px-6 lg:px-8">
-      <div className="absolute inset-x-0 top-0 -z-10 h-72 bg-linear-to-br from-teal-100 via-white to-pink-100" />
+      <div className="absolute inset-x-0 top-0 -z-10 h-72 bg-linear-to-br from-indigo-100 via-white to-pink-100" />
       <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[.9fr_1.1fr] lg:items-center">
-        <section className="rounded-4xl bg-linear-to-br from-slate-950 to-teal-900 p-8 text-white shadow-2xl shadow-slate-200">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 text-teal-100">
+        <section className="rounded-4xl bg-linear-to-br from-slate-950 to-indigo-900 p-8 text-white shadow-2xl shadow-slate-200">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 text-indigo-100">
             <ShieldCheck className="h-7 w-7" />
           </div>
           <h2 className="mt-6 text-3xl font-black leading-tight">{t('auth.verifyEmailTitle')}</h2>
           <p className="mt-3 text-sm leading-7 text-slate-200">{t('auth.verifyEmailDescription')}</p>
           <div className="mt-6 rounded-3xl bg-white/10 p-5 backdrop-blur">
-            <p className="text-xs font-bold uppercase tracking-wide text-teal-100">{t('auth.verificationEmailSentTo')}</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-indigo-100">{t('auth.verificationEmailSentTo')}</p>
             <p className="mt-2 text-lg font-black">{maskedEmail}</p>
           </div>
         </section>
@@ -88,13 +88,13 @@ export default function EmailVerificationPage() {
             eyebrow={verified ? t('auth.emailVerifiedSuccess') : t('auth.verifyEmailTitle')}
             title={verified ? t('auth.emailVerifiedSuccess') : t('auth.verifyEmailTitle')}
             description={verified ? t('auth.emailVerifiedDescription') : t('auth.verifyEmailDescription')}
-            footer={<><Link className="font-bold text-teal-700" to="/login">{t('auth.backToLogin')}</Link>{verified && <> {t('auth.or')} <Link className="font-bold text-teal-700" to="/dashboard">{t('nav.goToDashboard')}</Link></>}</>}
+            footer={<><Link className="font-bold text-indigo-700" to="/login">{t('auth.backToLogin')}</Link>{verified && <> {t('auth.or')} <Link className="font-bold text-indigo-700" to="/dashboard">{t('nav.goToDashboard')}</Link></>}</>}
           >
             {message && <div className="mb-5"><Alert type="success">{message}</Alert></div>}
             {error && <div className="mb-5"><Alert type="error">{error}</Alert></div>}
 
             <div className="flex justify-center">
-              <div className={`flex h-24 w-24 items-center justify-center rounded-3xl ${verified ? 'bg-green-50 text-green-700' : 'bg-teal-50 text-teal-700'}`}>
+              <div className={`flex h-24 w-24 items-center justify-center rounded-3xl ${verified ? 'bg-green-50 text-green-700' : 'bg-indigo-50 text-indigo-700'}`}>
                 <MailCheck className="h-12 w-12" />
               </div>
             </div>

@@ -57,13 +57,13 @@ export default function RegistrationDetailsPage() {
   return (
     <PageContainer>
       <section className="overflow-hidden rounded-3xl bg-slate-950 bg-cover bg-center p-8 text-white" style={{ backgroundImage: `linear-gradient(90deg, rgba(2,6,23,.9), rgba(15,118,110,.68)), url(${event.coverImage?.url || event.categoryImageUrl || '/hero-events.svg'})` }}>
-        <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100"><Ticket className="h-4 w-4" /> {t('registration.badge', 'Registration')}</span>
+        <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-indigo-100"><Ticket className="h-4 w-4" /> {t('registration.badge', 'Registration')}</span>
         <h1 className="mt-5 text-4xl font-black">{event.title}</h1>
         <p className="mt-3 text-slate-200">{t('registration.ticketPrefix', 'Ticket')} {registration.ticketNumber}</p>
       </section>
 
       {registration.checkedInAt && (
-        <div className="mt-6 rounded-3xl border border-teal-100 bg-teal-50 p-5 text-teal-900">
+        <div className="mt-6 rounded-3xl border border-indigo-100 bg-indigo-50 p-5 text-indigo-900">
           <div className="flex gap-3">
             <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0" />
             <div>
@@ -80,8 +80,8 @@ export default function RegistrationDetailsPage() {
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <p><strong>{t('registration.statusLabel', 'Status:')}</strong><br />{registration.checkedInAt ? t('registrations.checkedIn', 'checked in') : registration.status}</p>
             <p><strong>{t('registration.registeredLabel', 'Registered:')}</strong><br />{formatDate(registration.registrationDate)}</p>
-            <p className="flex gap-2"><CalendarDays className="h-5 w-5 text-teal-700" /><span><strong>{t('registration.eventDateLabel', 'Event date:')}</strong><br />{formatDate(event.startDate)}</span></p>
-            <p className="flex gap-2"><MapPin className="h-5 w-5 text-teal-700" /><span><strong>{t('registration.locationLabel', 'Location:')}</strong><br />{event.venue}, {event.city}, {event.region}</span></p>
+            <p className="flex gap-2"><CalendarDays className="h-5 w-5 text-indigo-700" /><span><strong>{t('registration.eventDateLabel', 'Event date:')}</strong><br />{formatDate(event.startDate)}</span></p>
+            <p className="flex gap-2"><MapPin className="h-5 w-5 text-indigo-700" /><span><strong>{t('registration.locationLabel', 'Location:')}</strong><br />{event.venue}, {event.city}, {event.region}</span></p>
             <p><strong>{t('registration.organizerLabel', 'Organizer:')}</strong><br />{event.organizer}</p>
             <p><strong>{t('registration.priceLabel', 'Price:')}</strong><br />{formatPrice(event.price)}</p>
           </div>

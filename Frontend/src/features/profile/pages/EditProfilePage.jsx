@@ -129,8 +129,8 @@ export default function EditProfilePage() {
 
   return (
     <PageContainer>
-      <section className="overflow-hidden rounded-3xl bg-gradient-to-r from-teal-700 to-slate-950 p-8 text-white">
-        <span className="inline-flex rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100">{copy.badge}</span>
+      <section className="overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-700 to-slate-950 p-8 text-white">
+        <span className="inline-flex rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-indigo-100">{copy.badge}</span>
         <h1 className="mt-5 text-4xl font-black">{copy.title}</h1>
         <p className="mt-3 max-w-2xl text-slate-200">{copy.description}</p>
       </section>
@@ -142,7 +142,7 @@ export default function EditProfilePage() {
             <h2 className="text-xl font-black text-slate-950">{t('profile.edit.photoTitle', 'Profile photo')}</h2>
             <p className="mt-1 text-sm text-slate-600">{t('profile.edit.photoHint', 'Use a clear photo or logo for a stronger Mboa profile presence.')}</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-teal-50 hover:text-teal-700">
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-indigo-50 hover:text-indigo-700">
                 <Camera className="h-4 w-4" /> {t('profile.edit.uploadPhoto', 'Upload photo')}
                 <input name="avatarFile" type="file" accept="image/png,image/jpeg,image/jpg,image/webp" onChange={updateField} className="hidden" />
               </label>
@@ -159,8 +159,8 @@ export default function EditProfilePage() {
           <div className="grid gap-4 md:grid-cols-2">
             <FormInput label={role === 'admin' ? t('profile.edit.adminName', 'Administrator name') : t('profile.edit.fullName', 'Full name')} name="name" value={form.name} onChange={updateField} required />
             {role === 'organizer' && <FormInput label={t('profile.organizerName', 'Organizer name')} name="organizationName" value={form.organizationName} onChange={updateField} placeholder={t('profile.edit.organizerNamePlaceholder', 'Company, brand or organizer name')} />}
-            {role === 'admin' && <div className="rounded-2xl bg-slate-50 p-4"><ShieldCheck className="h-5 w-5 text-teal-700" /><p className="mt-2 text-sm font-bold text-slate-950">{t('profile.edit.adminAccessTitle', 'Administrator access')}</p><p className="mt-1 text-xs text-slate-500">{t('profile.edit.adminAccessText', 'Role changes are managed from the admin users page.')}</p></div>}
-            {role === 'organizer' && <div className="rounded-2xl bg-teal-50 p-4"><Building2 className="h-5 w-5 text-teal-700" /><p className="mt-2 text-sm font-bold text-slate-950">{t('profile.edit.organizerBrandTitle', 'Organizer brand')}</p><p className="mt-1 text-xs text-slate-600">{t('profile.edit.organizerBrandText', 'This name helps identify your events and communications.')}</p></div>}
+            {role === 'admin' && <div className="rounded-2xl bg-slate-50 p-4"><ShieldCheck className="h-5 w-5 text-indigo-700" /><p className="mt-2 text-sm font-bold text-slate-950">{t('profile.edit.adminAccessTitle', 'Administrator access')}</p><p className="mt-1 text-xs text-slate-500">{t('profile.edit.adminAccessText', 'Role changes are managed from the admin users page.')}</p></div>}
+            {role === 'organizer' && <div className="rounded-2xl bg-indigo-50 p-4"><Building2 className="h-5 w-5 text-indigo-700" /><p className="mt-2 text-sm font-bold text-slate-950">{t('profile.edit.organizerBrandTitle', 'Organizer brand')}</p><p className="mt-1 text-xs text-slate-600">{t('profile.edit.organizerBrandText', 'This name helps identify your events and communications.')}</p></div>}
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">

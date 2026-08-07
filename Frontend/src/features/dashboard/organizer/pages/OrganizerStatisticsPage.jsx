@@ -46,7 +46,7 @@ function MetricCard({ label, value, icon: Icon, gradient, description }) {
   )
 }
 
-function ProgressBar({ label, value, total, color = 'bg-teal-600' }) {
+function ProgressBar({ label, value, total, color = 'bg-blue-600' }) {
   const percent = total > 0 ? Math.round((value / total) * 100) : 0
 
   return (
@@ -71,7 +71,7 @@ function ProgressBar({ label, value, total, color = 'bg-teal-600' }) {
 function InsightItem({ children }) {
   return (
     <li className="flex gap-3 rounded-2xl bg-slate-50 p-3 text-sm leading-6 text-slate-600">
-      <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-100 text-xs font-black text-teal-700">
+      <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-black text-blue-700">
         ✓
       </span>
       <span>{children}</span>
@@ -83,9 +83,9 @@ function TopEventRow({ event, rank }) {
   const score = Number(event.registrations || 0) + Number(event.bookmarks || 0) + Number(event.views || 0)
 
   return (
-    <div className="group flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-lg md:flex-row md:items-center md:justify-between">
+    <div className="group flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg md:flex-row md:items-center md:justify-between">
       <div className="flex items-center gap-4">
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-teal-50 text-lg font-black text-teal-700">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-lg font-black text-blue-700">
           #{rank}
         </span>
 
@@ -185,14 +185,14 @@ export default function OrganizerStatisticsPage() {
       label: 'Total events',
       value: stats.events_count || totalEvents,
       icon: CalendarCheck,
-      gradient: 'from-teal-600 to-emerald-700',
+      gradient: 'from-blue-600 to-emerald-700',
       description: 'All events you created',
     },
     {
       label: 'Published',
       value: stats.published_events_count || 0,
       icon: Radio,
-      gradient: 'from-green-600 to-teal-700',
+      gradient: 'from-green-600 to-blue-700',
       description: 'Visible to attendees',
     },
     {
@@ -252,7 +252,7 @@ export default function OrganizerStatisticsPage() {
         <section className="mt-8 grid gap-6 lg:grid-cols-2">
           <Card>
             <h2 className="mb-1 flex items-center gap-2 text-xl font-black text-slate-950">
-              <BarChart3 className="h-5 w-5 text-teal-700" />
+              <BarChart3 className="h-5 w-5 text-blue-700" />
               Event status distribution
             </h2>
             <p className="mb-5 text-sm text-slate-500">
@@ -334,7 +334,7 @@ export default function OrganizerStatisticsPage() {
               </p>
             </div>
 
-            <Link to="/organizer/events" className="text-sm font-bold text-teal-700">
+            <Link to="/organizer/events" className="text-sm font-bold text-blue-700">
               View all events
             </Link>
           </div>

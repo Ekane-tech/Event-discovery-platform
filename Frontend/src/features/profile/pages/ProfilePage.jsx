@@ -16,7 +16,7 @@ import { useTranslation } from '../../../shared/i18n/useTranslation.js'
 function InfoRow({ icon: Icon, label, value, fallback }) {
   return (
     <div className="flex gap-3 rounded-2xl bg-slate-50 p-4">
-      <Icon className="h-5 w-5 shrink-0 text-teal-700" />
+      <Icon className="h-5 w-5 shrink-0 text-violet-700" />
       <div className="min-w-0">
         <p className="text-xs font-bold uppercase tracking-wide text-slate-400">{label}</p>
         <p className="mt-1 break-words font-semibold text-slate-800">{value || fallback}</p>
@@ -102,7 +102,7 @@ export default function ProfilePage() {
     if (role === 'admin') {
       return [
         [t('profile.users', 'Users'), summary.users_count || 0, Users, 'from-indigo-600 to-blue-700'],
-        [t('profile.events', 'Events'), summary.events_count || 0, CalendarCheck, 'from-teal-600 to-emerald-700'],
+        [t('profile.events', 'Events'), summary.events_count || 0, CalendarCheck, 'from-violet-600 to-emerald-700'],
         [t('profile.openReports', 'Open reports'), summary.open_reports_count || 0, ShieldCheck, 'from-rose-600 to-pink-700'],
         [t('nav.registrations', 'Registrations'), summary.registrations_count || 0, Ticket, 'from-slate-600 to-slate-800'],
       ]
@@ -110,7 +110,7 @@ export default function ProfilePage() {
 
     if (role === 'organizer') {
       return [
-        [t('profile.events', 'Events'), summary.events_count || 0, CalendarCheck, 'from-teal-600 to-emerald-700'],
+        [t('profile.events', 'Events'), summary.events_count || 0, CalendarCheck, 'from-violet-600 to-emerald-700'],
         [t('nav.registrations', 'Registrations'), summary.total_registrations || 0, Ticket, 'from-blue-600 to-indigo-700'],
         [t('profile.views', 'Views'), summary.total_views || 0, BarChart3, 'from-purple-600 to-violet-800'],
         [t('profile.revenue', 'Revenue'), Number(summary.revenue || 0) === 0 ? '0' : formatPrice(summary.revenue), Wallet, 'from-amber-500 to-orange-700'],
@@ -119,7 +119,7 @@ export default function ProfilePage() {
 
     return [
       [t('dashboard.user.interests', 'Interests'), summary.interests_count || 0, Heart, 'from-pink-600 to-rose-700'],
-      [t('bookmarks.savedEvents', 'Saved events'), summary.bookmarks_count || 0, CalendarCheck, 'from-teal-600 to-emerald-700'],
+      [t('bookmarks.savedEvents', 'Saved events'), summary.bookmarks_count || 0, CalendarCheck, 'from-violet-600 to-emerald-700'],
       [t('nav.registrations', 'Registrations'), summary.registrations_count || 0, Ticket, 'from-blue-600 to-indigo-700'],
       [t('nav.recommendations', 'Recommendations'), summary.recommendations_count || 0, Target, 'from-purple-600 to-violet-800'],
     ]
@@ -134,9 +134,9 @@ export default function ProfilePage() {
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
             <Avatar name={profile?.name} src={profile?.avatar} className="h-24 w-24 text-3xl" />
             <div>
-              <span className="inline-flex rounded-full bg-white/10 px-3 py-1 text-sm font-bold capitalize text-teal-100">{config.eyebrow}</span>
+              <span className="inline-flex rounded-full bg-white/10 px-3 py-1 text-sm font-bold capitalize text-violet-100">{config.eyebrow}</span>
               <h1 className="mt-3 text-4xl font-black">{profile?.name}</h1>
-              {role === 'organizer' && profile?.organizationName && <p className="mt-1 text-lg font-bold text-teal-100">{profile.organizationName}</p>}
+              {role === 'organizer' && profile?.organizationName && <p className="mt-1 text-lg font-bold text-violet-100">{profile.organizationName}</p>}
               <p className="mt-1 text-slate-200">{profile?.email}</p>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-200">{config.description}</p>
             </div>
