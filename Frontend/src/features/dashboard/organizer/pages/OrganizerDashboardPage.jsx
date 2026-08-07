@@ -23,7 +23,7 @@ export default function OrganizerDashboardPage() {
   useEffect(() => { async function run(){ try{ const r=await dashboardService.getOrganizerDashboard(); setDashboard(r.data) }catch(e){ setError(getApiErrorMessage(e,'Unable to load organizer dashboard.')) }finally{ setLoading(false) } } run() }, [])
   if (error) return <PageContainer><ErrorState title="Organizer dashboard error" message={error} /></PageContainer>
   const stats=dashboard?.summary||{}; const events=normalizeEvents(extractCollection(dashboard||{},'recent_events'))
-  const cards=[['Events',stats.events_count||0,CalendarCheck,'from-teal-600 to-emerald-700'],['Registrations',stats.total_registrations||0,Ticket,'from-blue-600 to-indigo-700'],['Views',stats.total_views||0,Eye,'from-purple-600 to-violet-800'],['Revenue',Number(stats.revenue||0)===0?'0':formatPrice(stats.revenue),Wallet,'from-amber-500 to-orange-700']]
+  const cards=[['Events',stats.events_count||0,CalendarCheck,'from-blue-600 to-emerald-700'],['Registrations',stats.total_registrations||0,Ticket,'from-blue-600 to-indigo-700'],['Views',stats.total_views||0,Eye,'from-purple-600 to-violet-800'],['Revenue',Number(stats.revenue||0)===0?'0':formatPrice(stats.revenue),Wallet,'from-amber-500 to-orange-700']]
   return <PageContainer>
     <div className="mb-4 flex items-center justify-between">
       <h1 className="text-2xl font-black text-slate-950">Organizer workspace</h1>
@@ -32,8 +32,8 @@ export default function OrganizerDashboardPage() {
     <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">{loading?Array.from({length:4}).map((_,i)=><StatCardSkeleton key={i}/>):cards.map(([title,value,Icon,gradient])=><StatCard key={title} title={title} value={value} icon={Icon} gradient={gradient}/>)}</div>
     <section className="mt-8">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-2xl font-black text-slate-950"><BarChart3 className="h-6 w-6 text-teal-700"/>Recent organizer events</h2>
-        <Link to="/organizer/events" className="text-sm font-bold text-teal-700">View all</Link>
+        <h2 className="flex items-center gap-2 text-2xl font-black text-slate-950"><BarChart3 className="h-6 w-6 text-blue-700"/>Recent organizer events</h2>
+        <Link to="/organizer/events" className="text-sm font-bold text-blue-700">View all</Link>
       </div>
       <div className="grid gap-4">{loading?Array.from({length:3}).map((_,i)=><Card key={i} className="h-24 animate-pulse bg-slate-100"/>):events.map(event=><Card key={event.id}><div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"><div><h3 className="font-black text-lg sm:text-xl text-slate-950">{event.title}</h3><p className="text-sm text-slate-600">{event.city}, {event.region} • {event.status}</p></div><div className="flex gap-2"><Link to={`/organizer/events/${event.id}/details`}><Button variant="secondary">Details</Button></Link>{!hasEventEnded(event) && <Link to={`/organizer/events/${event.id}/edit`}><Button>Edit</Button></Link>}</div></div></Card>)}</div>
     </section>

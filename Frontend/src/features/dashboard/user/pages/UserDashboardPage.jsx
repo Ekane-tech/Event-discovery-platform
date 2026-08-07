@@ -57,7 +57,7 @@ export default function UserDashboardPage() {
   const recommendedEvents = normalizeEvents(extractCollection(dashboard || {}, 'recommended_events')).filter(event => !hasEventEnded(event))
   const cards = [
     { title: t('dashboard.user.interests', 'Interests'), value: summary.interests_count || 0, to: '/my-interests', icon: Heart, gradient: 'bg-gradient-to-br from-pink-600 to-rose-700', iconBg: 'bg-white/20' },
-    { title: t('dashboard.user.recommendations', 'Recommendations'), value: summary.recommendations_count || 0, to: '/recommendations', icon: Heart, gradient: 'bg-gradient-to-br from-teal-600 to-emerald-700', iconBg: 'bg-white/20' },
+    { title: t('dashboard.user.recommendations', 'Recommendations'), value: summary.recommendations_count || 0, to: '/recommendations', icon: Heart, gradient: 'bg-gradient-to-br from-blue-600 to-emerald-700', iconBg: 'bg-white/20' },
     { title: t('dashboard.user.upcoming', 'Upcoming'), value: summary.upcoming_registrations_count || 0, to: '/registrations', icon: Ticket, gradient: 'bg-gradient-to-br from-blue-600 to-indigo-700', iconBg: 'bg-white/20' },
     { title: t('bookmarks.savedEvents', 'Bookmarks'), value: summary.bookmarks_count || 0, to: '/bookmarks', icon: Bookmark, gradient: 'bg-gradient-to-br from-yellow-500 to-orange-600', iconBg: 'bg-white/25' },
     { title: t('dashboard.user.unread', 'Unread'), value: summary.unread_notifications_count || 0, to: '/notifications', icon: Bell, gradient: 'bg-gradient-to-br from-purple-600 to-violet-800', iconBg: 'bg-white/20' },
@@ -67,7 +67,7 @@ export default function UserDashboardPage() {
     <PageContainer>
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-black text-slate-950">{t('dashboard.user.welcomeTitle', 'Your attendee space')}</h1>
-        <div className="flex flex-wrap gap-2"><Link to="/events"><Button variant="light">{t('browseEvents', 'Browse Events')}</Button></Link><Link to="/interests"><Button className="bg-teal-500 text-white hover:bg-teal-600">{t('dashboard.user.updateInterests', 'Update Interests')}</Button></Link></div>
+        <div className="flex flex-wrap gap-2"><Link to="/events"><Button variant="light">{t('browseEvents', 'Browse Events')}</Button></Link><Link to="/interests"><Button className="bg-blue-500 text-white hover:bg-blue-600">{t('dashboard.user.updateInterests', 'Update Interests')}</Button></Link></div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-5">
@@ -75,8 +75,8 @@ export default function UserDashboardPage() {
       </div>
 
       <section className="mt-8">
-        <div className="mb-4 flex items-center justify-between gap-3"><div><h2 className="text-2xl font-black text-slate-950">{t('dashboard.user.topRecommendations', 'Top recommendations')}</h2><p className="text-sm text-slate-600">{t('dashboard.user.topRecommendationsDesc', 'Personalized events based on your activity.')}</p></div><Link to="/recommendations" className="text-sm font-bold text-teal-700">{t('viewAll', 'View all')}</Link></div>
-        {loading ? <EventGridSkeleton count={3} /> : recommendedEvents.length > 0 ? <EventGrid events={recommendedEvents.slice(0, 3)} /> : <Card><div className="flex items-center gap-3"><CalendarCheck className="h-5 w-5 text-teal-700" /><p className="text-sm text-slate-600">{t('dashboard.user.noRecommendations', 'No recommendations yet. Select interests to improve recommendations.')}</p></div></Card>}
+        <div className="mb-4 flex items-center justify-between gap-3"><div><h2 className="text-2xl font-black text-slate-950">{t('dashboard.user.topRecommendations', 'Top recommendations')}</h2><p className="text-sm text-slate-600">{t('dashboard.user.topRecommendationsDesc', 'Personalized events based on your activity.')}</p></div><Link to="/recommendations" className="text-sm font-bold text-blue-700">{t('viewAll', 'View all')}</Link></div>
+        {loading ? <EventGridSkeleton count={3} /> : recommendedEvents.length > 0 ? <EventGrid events={recommendedEvents.slice(0, 3)} /> : <Card><div className="flex items-center gap-3"><CalendarCheck className="h-5 w-5 text-blue-700" /><p className="text-sm text-slate-600">{t('dashboard.user.noRecommendations', 'No recommendations yet. Select interests to improve recommendations.')}</p></div></Card>}
       </section>
     </PageContainer>
   )

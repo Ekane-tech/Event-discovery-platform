@@ -16,8 +16,8 @@ export default function AppearanceSettingsPage() {
 
   return (
     <PageContainer>
-      <section className="rounded-3xl bg-gradient-to-r from-slate-900 to-teal-800 p-8 text-white">
-        <Sun className="h-10 w-10 text-teal-200" />
+      <section className="rounded-3xl bg-gradient-to-r from-slate-900 to-violet-800 p-8 text-white">
+        <Sun className="h-10 w-10 text-violet-200" />
         <h1 className="mt-5 text-4xl font-black">{t('settings.appearanceTitle', 'Appearance')}</h1>
         <p className="mt-3 max-w-2xl text-white/90">
           {t('settings.appearanceDescription', 'Choose how Mboa Events looks. Dark mode is easier on the eyes at night.')}
@@ -43,8 +43,8 @@ export default function AppearanceSettingsPage() {
                 aria-pressed={active}
                 className={`flex flex-col items-center gap-2 rounded-2xl border p-4 text-sm font-bold transition ${
                   active
-                    ? 'border-teal-500 bg-teal-50 text-teal-700 ring-2 ring-teal-200'
-                    : 'border-slate-200 bg-white text-slate-600 hover:border-teal-300 hover:bg-teal-50'
+                    ? 'border-violet-500 bg-violet-50 text-violet-700 ring-2 ring-violet-200'
+                    : 'border-slate-200 bg-white text-slate-600 hover:border-violet-300 hover:bg-violet-50'
                 }`}
               >
                 <Icon className="h-6 w-6" />

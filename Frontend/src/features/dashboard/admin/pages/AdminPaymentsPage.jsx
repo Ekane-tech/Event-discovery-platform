@@ -80,7 +80,7 @@ export default function AdminPaymentsPage() {
 
       <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         {[
-          ['Total revenue', formatPrice(summary?.total_revenue || 0), 'from-teal-600 to-emerald-700'],
+          ['Total revenue', formatPrice(summary?.total_revenue || 0), 'from-emerald-600 to-emerald-700'],
           ['Pending revenue', formatPrice(summary?.pending_revenue || 0), 'from-amber-500 to-orange-700'],
           ['Paid payments', summary?.paid_payments || 0, 'from-blue-600 to-indigo-700'],
           ['Pending payments', summary?.pending_payments || 0, 'from-slate-600 to-slate-800'],
@@ -103,14 +103,14 @@ export default function AdminPaymentsPage() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input 
-                className="rounded-2xl border border-slate-200 py-2 pl-9 pr-4 text-sm outline-none focus:border-teal-500" 
+                className="rounded-2xl border border-slate-200 py-2 pl-9 pr-4 text-sm outline-none focus:border-emerald-500" 
                 value={filters.keyword} 
                 onChange={(event) => setFilters((current) => ({ ...current, keyword: event.target.value }))} 
                 placeholder={t('admin.payments.searchPlaceholder', 'Search payments')} 
               />
             </div>
             <select 
-              className="rounded-2xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-teal-500" 
+              className="rounded-2xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-emerald-500" 
               value={filters.status} 
               onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}
             >
@@ -138,7 +138,7 @@ export default function AdminPaymentsPage() {
         rows={visiblePayments.map((payment) => ({
           ...payment,
           reference: <span className="inline-flex items-center gap-1 font-mono text-xs">
-            <CreditCard className="h-3.5 w-3.5 text-teal-700" />{payment.reference}
+            <CreditCard className="h-3.5 w-3.5 text-emerald-700" />{payment.reference}
           </span>,
           status: <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black capitalize text-slate-700">
             {t(`admin.common.${payment.status}`, payment.status)}

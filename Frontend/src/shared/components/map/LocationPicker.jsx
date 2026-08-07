@@ -59,14 +59,14 @@ export default function LocationPicker({ value, onChange, height = 280 }) {
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); handleSearch(event) } }}
             placeholder="Search an address or place (e.g. Bonanjo, Douala)…"
-            className="h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm outline-none transition focus:border-teal-500 focus:bg-white"
+            className="h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm outline-none transition focus:border-indigo-500 focus:bg-white"
           />
         </div>
         <button
           type="button"
           onClick={handleSearch}
           disabled={searching}
-          className="inline-flex h-11 items-center justify-center rounded-2xl bg-teal-700 px-5 text-sm font-bold text-white transition hover:bg-teal-800 disabled:opacity-60"
+          className="inline-flex h-11 items-center justify-center rounded-2xl bg-indigo-700 px-5 text-sm font-bold text-white transition hover:bg-indigo-800 disabled:opacity-60"
         >
           {searching ? 'Searching…' : 'Search'}
         </button>

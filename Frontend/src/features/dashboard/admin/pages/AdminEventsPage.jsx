@@ -25,7 +25,7 @@ const MODERATION_CONFIG = {
   published: {
     title: 'Publish event',
     icon: CheckCircle2,
-    gradient: 'from-green-600 to-teal-700',
+    gradient: 'from-green-600 to-blue-700',
     button: 'Confirm publishing',
     note: 'This event will become visible in public search and attendees will be able to register.',
     requiresReason: false,
@@ -74,7 +74,7 @@ function ModerationModal({ moderation, submitting, onClose, onSubmit, onReasonCh
           <p className="mt-1 font-black text-slate-950">{moderation.event?.title}</p>
           <div className="mt-3 flex flex-wrap gap-2 text-sm">
             <span className="rounded-full bg-white px-3 py-1 font-semibold text-slate-700">{t('admin.common.current', 'Current')}: {moderation.event?.status}</span>
-            <span className="rounded-full bg-teal-50 px-3 py-1 font-semibold text-teal-700">{t('admin.common.new', 'New')}: {moderation.status}</span>
+            <span className="rounded-full bg-blue-50 px-3 py-1 font-semibold text-blue-700">{t('admin.common.new', 'New')}: {moderation.status}</span>
           </div>
         </div>
 
@@ -200,7 +200,7 @@ export default function AdminEventsPage() {
       <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-blue-700 p-5 text-white"><p className="text-sm text-white/80">{t('admin.events.totalEvents', 'Total events')}</p><p className="mt-2 text-2xl font-black md:text-3xl">{metrics.total}</p></div>
         <div className="rounded-3xl bg-gradient-to-br from-amber-500 to-orange-700 p-5 text-white"><p className="text-sm text-white/80">{t('admin.events.pendingEvents', 'Pending')}</p><p className="mt-2 text-2xl font-black md:text-3xl">{metrics.pending}</p></div>
-        <div className="rounded-3xl bg-gradient-to-br from-green-600 to-teal-700 p-5 text-white"><p className="text-sm text-white/80">{t('admin.events.publishedEvents', 'Published')}</p><p className="mt-2 text-2xl font-black md:text-3xl">{metrics.published}</p></div>
+        <div className="rounded-3xl bg-gradient-to-br from-green-600 to-blue-700 p-5 text-white"><p className="text-sm text-white/80">{t('admin.events.publishedEvents', 'Published')}</p><p className="mt-2 text-2xl font-black md:text-3xl">{metrics.published}</p></div>
         <div className="rounded-3xl bg-gradient-to-br from-rose-600 to-pink-700 p-5 text-white"><p className="text-sm text-white/80">{t('admin.events.reportedEvents', 'Reported')}</p><p className="mt-2 text-2xl font-black md:text-3xl">{metrics.flagged}</p></div>
       </div>
 

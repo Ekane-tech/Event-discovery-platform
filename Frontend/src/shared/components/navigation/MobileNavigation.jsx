@@ -18,10 +18,10 @@ export default function MobileNavigation({ open, groups = [], unreadCount = 0, i
     return (
       <div className="border-t border-slate-200 bg-white px-4 py-4 shadow-xl lg:hidden">
         {isAuthenticated && (
-          <div className="mb-4 rounded-2xl bg-teal-50 p-4">
+          <div className="mb-4 rounded-2xl bg-blue-50 p-4">
             <p className="font-bold text-slate-950">{user?.name}</p>
             <p className="truncate text-sm text-slate-600">{user?.email}</p>
-            <p className="mt-1 text-xs capitalize text-teal-700">{user?.role}</p>
+            <p className="mt-1 text-xs capitalize text-blue-700">{user?.role}</p>
           </div>
         )}
         <div className="grid gap-5">
@@ -35,7 +35,7 @@ export default function MobileNavigation({ open, groups = [], unreadCount = 0, i
                     to={link.to}
                     onClick={onClose}
                     className={({ isActive }) => `flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                      isActive ? 'bg-teal-50 text-teal-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950'
+                      isActive ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950'
                     }`}
                   >
                     <span className="flex min-w-0 items-center gap-3">
@@ -68,17 +68,17 @@ export default function MobileNavigation({ open, groups = [], unreadCount = 0, i
       <button type="button" aria-label={t('appshell.closeNav', 'Close navigation')} className="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px]" onClick={onClose} />
       <aside className="relative flex h-full w-[62vw] min-w-[260px] max-w-[340px] animate-[slideInLeft_.22s_ease-out] flex-col overflow-hidden border-r border-slate-200 bg-white shadow-2xl">
         <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-5">
-          <img src="/applogo.png" alt={APP_NAME} className="h-12 w-12 shrink-0 rounded-2xl object-cover shadow-lg shadow-teal-200" />
+          <img src="/applogo.png" alt={APP_NAME} className="h-12 w-12 shrink-0 rounded-2xl object-cover shadow-lg shadow-blue-200" />
           <div className="min-w-0">
             <p className="truncate text-lg font-bold text-slate-950">{APP_NAME}</p>
           </div>
         </div>
         <div className="border-b border-slate-100 p-4">
           {isAuthenticated ? (
-            <div className="rounded-2xl bg-teal-50 p-4">
+            <div className="rounded-2xl bg-blue-50 p-4">
               <p className="font-bold text-slate-950">{user?.name}</p>
               <p className="truncate text-sm text-slate-600">{user?.email}</p>
-              <p className="mt-1 text-xs capitalize text-teal-700">{user?.role}</p>
+              <p className="mt-1 text-xs capitalize text-blue-700">{user?.role}</p>
             </div>
           ) : (
             <div className="rounded-2xl bg-slate-50 p-4">
@@ -100,7 +100,7 @@ export default function MobileNavigation({ open, groups = [], unreadCount = 0, i
                       to={link.to}
                       onClick={onClose}
                       className={({ isActive }) => `flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition ${
-                        isActive ? 'bg-teal-50 text-teal-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950'
+                        isActive ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950'
                       }`}
                     >
                       <span className="flex min-w-0 items-center gap-3">

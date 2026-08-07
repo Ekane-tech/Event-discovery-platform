@@ -79,14 +79,14 @@ function imageStateFromEvent(event) {
 
 function UploadBox({ title, description, icon: Icon, multiple = false, name, onChange, selected, existing }) {
   return (
-    <label className="group block cursor-pointer rounded-3xl border-2 border-dashed border-slate-300 bg-gradient-to-br from-white to-slate-50 p-6 text-center transition hover:border-teal-400 hover:from-teal-50 hover:to-white">
-      <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-teal-700 shadow-sm">
+    <label className="group block cursor-pointer rounded-3xl border-2 border-dashed border-slate-300 bg-gradient-to-br from-white to-slate-50 p-6 text-center transition hover:border-blue-400 hover:from-blue-50 hover:to-white">
+      <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-blue-700 shadow-sm">
         <Icon className="h-6 w-6" />
       </span>
       <span className="mt-4 block font-black text-slate-950">{title}</span>
       <span className="mt-1 block text-sm text-slate-600">{description}</span>
       {existing && <span className="mt-2 block text-xs font-semibold text-slate-500">Current image available below</span>}
-      {selected && <span className="mt-3 block text-xs font-semibold text-teal-700">{selected}</span>}
+      {selected && <span className="mt-3 block text-xs font-semibold text-blue-700">{selected}</span>}
       <input name={name} type="file" accept="image/png,image/jpeg,image/jpg,image/webp" multiple={multiple} onChange={onChange} className="hidden" />
     </label>
   )
@@ -354,7 +354,7 @@ export default function EventForm({
             </div>
           ))}
         </div>
-        <div className="mt-4 rounded-2xl bg-teal-50 p-4 text-sm leading-6 text-teal-900">
+        <div className="mt-4 rounded-2xl bg-blue-50 p-4 text-sm leading-6 text-blue-900">
           {t('eventForm.ticketTypesTip')}
         </div>
       </Card>
@@ -386,7 +386,7 @@ export default function EventForm({
         </div>
 
         {form.galleryImages?.length > 0 && (
-          <div className="mt-4 rounded-2xl bg-teal-50 p-4 text-sm font-semibold text-teal-800">
+          <div className="mt-4 rounded-2xl bg-blue-50 p-4 text-sm font-semibold text-blue-800">
             <UploadCloud className="mr-2 inline h-4 w-4" /> {t('eventForm.galleryReady', { count: form.galleryImages.length })}
           </div>
         )}

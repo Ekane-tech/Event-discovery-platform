@@ -48,9 +48,9 @@ export default function FeedbackPage() {
 
   return (
     <div>
-      <section className="bg-gradient-to-r from-teal-700 to-slate-950 text-white">
+      <section className="bg-gradient-to-r from-blue-700 to-slate-950 text-white">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <MessageSquareHeart className="h-10 w-10 text-teal-200" />
+          <MessageSquareHeart className="h-10 w-10 text-blue-200" />
           <h1 className="mt-5 text-4xl font-black md:text-6xl">{t('feedbackPage.title')}</h1>
           <p className="mt-4 max-w-2xl text-slate-200">{t('feedbackPage.description')}</p>
         </div>
@@ -66,7 +66,7 @@ export default function FeedbackPage() {
             ].map((item) => (
               <Card key={item}>
                 <div className="flex gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
                     <Star className="h-5 w-5" />
                   </span>
                   <div>

@@ -21,9 +21,9 @@ export default function PrivacyPolicyPage() {
     <div>
       <section className="relative overflow-hidden bg-slate-950 text-white">
         <div className="absolute inset-0 bg-cover bg-center opacity-40" style={{ backgroundImage: 'url(/hero-events.svg)' }} />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-teal-900/70" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-blue-900/70" />
         <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100"><LockKeyhole className="h-4 w-4" /> {t('legal.privacyBadge', 'Privacy')}</span>
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-blue-100"><LockKeyhole className="h-4 w-4" /> {t('legal.privacyBadge', 'Privacy')}</span>
           <h1 className="mt-5 text-4xl font-black md:text-6xl">{t('legal.privacy.title', 'Privacy Policy')}</h1>
           <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-200">{t('legal.privacy.intro', { app: APP_NAME, defaultValue: 'This policy explains how {{app}} collects, uses and protects user information.' })}</p>
         </div>
@@ -61,10 +61,10 @@ export default function PrivacyPolicyPage() {
 
           <div className="lg:sticky lg:top-24 lg:self-start">
             <Card>
-              <ShieldCheck className="h-8 w-8 text-teal-700" />
+              <ShieldCheck className="h-8 w-8 text-blue-700" />
               <h2 className="mt-4 text-xl font-black text-slate-950">{t('legal.privacy.contactTitle', 'Contact privacy support')}</h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">{t('legal.privacy.contactText', 'For privacy questions or account data requests, contact us.')}</p>
-              <a href="mailto:support@mboaevents237.cm" className="mt-4 block font-bold text-teal-700">support@mboaevents237.cm</a>
+              <a href="mailto:support@mboaevents237.cm" className="mt-4 block font-bold text-blue-700">support@mboaevents237.cm</a>
               <div className="mt-5 grid gap-2"><Link to="/terms-of-service"><Button variant="secondary" className="w-full">{t('legal.terms.title', 'Terms of Service')}</Button></Link><Link to="/feedback"><Button className="w-full"><Mail className="mr-2 h-4 w-4" />{t('legal.privacy.sendFeedback', 'Send Feedback')}</Button></Link></div>
             </Card>
           </div>
