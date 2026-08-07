@@ -26,8 +26,8 @@ function InfoRow({ icon: Icon, label, value, fallback }) {
   )
 }
 
-function StatMetricCard({ label, value, icon: Icon }) {
-  return <StatMetricCard label={label} value={value} icon={Icon} />
+function StatMetricCard({ label, value, icon: Icon, gradient }) {
+  return <MetricCard label={label} value={value} icon={Icon} gradient={gradient} />
 }
 
 function getRoleConfig(role, t) {
