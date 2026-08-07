@@ -129,7 +129,7 @@ export default function EditProfilePage() {
 
   return (
     <PageContainer>
-      <section className="overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-700 to-slate-950 p-8 text-white">
+      <section className="overflow-hidden rounded-3xl bg-gradient-to-r from-teal-700 to-slate-950 p-8 text-white">
         <span className="inline-flex rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-indigo-100">{copy.badge}</span>
         <h1 className="mt-5 text-4xl font-black">{copy.title}</h1>
         <p className="mt-3 max-w-2xl text-slate-200">{copy.description}</p>

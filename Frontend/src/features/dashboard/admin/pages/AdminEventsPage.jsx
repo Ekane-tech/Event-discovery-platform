@@ -20,6 +20,7 @@ import AdminHero from '../components/AdminHero.jsx'
 import AdminPageActions, { AdminActionButton } from '../components/AdminPageActions.jsx'
 import AdminStatusBadge from '../components/AdminStatusBadge.jsx'
 import { adminService } from '../services/adminService.js'
+import MetricCard from '../../../../shared/components/ui/MetricCard.jsx'
 
 const MODERATION_CONFIG = {
   published: {
@@ -198,10 +199,10 @@ export default function AdminEventsPage() {
       <AdminHero title={t('admin.events.title', 'Moderate events')} description={t('admin.events.description', 'Review submitted events, publish valid listings, and block problematic content.')} />
 
       <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-        <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-blue-700 p-5 text-white"><p className="text-sm text-white/80">{t('admin.events.totalEvents', 'Total events')}</p><p className="mt-2 text-2xl font-black md:text-3xl">{metrics.total}</p></div>
-        <div className="rounded-3xl bg-gradient-to-br from-amber-500 to-orange-700 p-5 text-white"><p className="text-sm text-white/80">{t('admin.events.pendingEvents', 'Pending')}</p><p className="mt-2 text-2xl font-black md:text-3xl">{metrics.pending}</p></div>
-        <div className="rounded-3xl bg-gradient-to-br from-green-600 to-blue-700 p-5 text-white"><p className="text-sm text-white/80">{t('admin.events.publishedEvents', 'Published')}</p><p className="mt-2 text-2xl font-black md:text-3xl">{metrics.published}</p></div>
-        <div className="rounded-3xl bg-gradient-to-br from-rose-600 to-pink-700 p-5 text-white"><p className="text-sm text-white/80">{t('admin.events.reportedEvents', 'Reported')}</p><p className="mt-2 text-2xl font-black md:text-3xl">{metrics.flagged}</p></div>
+        <MetricCard label={t('admin.events.totalEvents', 'Total events')} value={metrics.total} />
+        <MetricCard label={t('admin.events.pendingEvents', 'Pending')} value={metrics.pending} />
+        <MetricCard label={t('admin.events.publishedEvents', 'Published')} value={metrics.published} />
+        <MetricCard label={t('admin.events.reportedEvents', 'Reported')} value={metrics.flagged} />
       </div>
 
       <div className="my-6 grid gap-3 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-[1fr_180px_auto]">

@@ -12,6 +12,7 @@ import { adminService } from '../services/adminService.js'
 import { extractCollection } from '../../../events/utils/normalizeEvent.js'
 import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
 import { useTranslation } from '../../../../shared/i18n/useTranslation.js'
+import MetricCard from '../../../../shared/components/ui/MetricCard.jsx'
 
 function normalizePayment(payment) {
   return {
@@ -80,16 +81,12 @@ export default function AdminPaymentsPage() {
 
       <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         {[
-          ['Total revenue', formatPrice(summary?.total_revenue || 0), 'from-emerald-600 to-emerald-700'],
-          ['Pending revenue', formatPrice(summary?.pending_revenue || 0), 'from-amber-500 to-orange-700'],
-          ['Paid payments', summary?.paid_payments || 0, 'from-blue-600 to-indigo-700'],
-          ['Pending payments', summary?.pending_payments || 0, 'from-slate-600 to-slate-800'],
-        ].map(([label, value, gradient]) => (
-          <div key={label} className={`rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm`}>
-            <WalletCards className="h-6 w-6 text-white/90" />
-            <p className="mt-3 text-sm text-white/80">{t(`admin.payments.${label.replace(/\s+/g, '')}`, label)}</p>
-            <p className="mt-1 text-2xl font-black">{value}</p>
-          </div>
+          ['Total revenue', formatPrice(summary?.total_revenue || 0)],
+          ['Pending revenue', formatPrice(summary?.pending_revenue || 0)],
+          ['Paid payments', summary?.paid_payments || 0],
+          ['Pending payments', summary?.pending_payments || 0],
+        ].map(([label, value]) => (
+          <MetricCard key={label} label={t(`admin.payments.${label.replace(/\s+/g, '')}`, label)} value={value} icon={WalletCards} />
         ))}
       </div>
 

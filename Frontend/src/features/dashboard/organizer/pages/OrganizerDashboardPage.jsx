@@ -6,14 +6,15 @@ import Card from '../../../../shared/components/ui/Card.jsx'
 import Button from '../../../../shared/components/ui/Button.jsx'
 import ErrorState from '../../../../shared/components/feedback/ErrorState.jsx'
 import StatCardSkeleton from '../../../../shared/components/feedback/StatCardSkeleton.jsx'
+import MetricCard from '../../../../shared/components/ui/MetricCard.jsx'
 import { formatPrice } from '../../../../shared/utils/currency.js'
 import { dashboardService } from '../../services/dashboardService.js'
 import { extractCollection, normalizeEvents } from '../../../events/utils/normalizeEvent.js'
 import { hasEventEnded } from '../../../events/utils/eventLifecycle.js'
 import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
 
-function StatCard({ title, value, icon: Icon, gradient }) {
-  return <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl`}><div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/15"/><span className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20"><Icon className="h-5 w-5"/></span><p className="relative mt-4 text-sm text-white/80">{title}</p><p className="relative mt-1 text-xl font-black sm:text-2xl md:text-3xl">{value}</p></div>
+function StatCard({ title, value, icon: Icon }) {
+  return <MetricCard label={title} value={value} icon={Icon} />
 }
 
 export default function OrganizerDashboardPage() {

@@ -147,9 +147,9 @@ export default function AdminFeedbackPage() {
       
       <Modal open={Boolean(selected)} title={t('admin.feedback.modal.title', 'Feedback details')} onClose={() => setSelected(null)}>
         {selected && <div className="grid gap-4">
-          <div className="rounded-3xl bg-gradient-to-br from-amber-500 to-pink-700 p-5 text-white">
-            <p className="text-sm font-bold uppercase text-white/80">{t('admin.feedback.modal.categoryLabel', 'Feedback')}</p>
-            <h3 className="mt-1 text-2xl font-black">{t(`admin.feedback.categoryFilter.${selected.category}`, selected.category)}</h3>
+          <div className="rounded-2xl border border-teal-100 bg-teal-50 p-5">
+            <p className="text-xs font-bold uppercase tracking-wide text-teal-700">{t('admin.feedback.modal.categoryLabel', 'Feedback')}</p>
+            <h3 className="mt-1 text-2xl font-black text-slate-950">{t(`admin.feedback.categoryFilter.${selected.category}`, selected.category)}</h3>
             <div className="mt-3"><Stars rating={selected.rating} t={t} /></div>
           </div>
           <div className="grid gap-2 text-sm text-slate-600">
