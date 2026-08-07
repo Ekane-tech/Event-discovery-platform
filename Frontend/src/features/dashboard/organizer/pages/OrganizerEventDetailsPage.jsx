@@ -13,6 +13,7 @@ import { eventService } from '../../../events/services/eventService.js'
 import { normalizeEvent } from '../../../events/utils/normalizeEvent.js'
 import { hasEventEnded } from '../../../events/utils/eventLifecycle.js'
 import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
+import MetricCard from '../../../../shared/components/ui/MetricCard.jsx'
 
 export default function OrganizerEventDetailsPage() {
   const { id } = useParams()
@@ -56,7 +57,7 @@ export default function OrganizerEventDetailsPage() {
       <SectionHeader title={event.title} description="Organizer event details and performance overview." action={<Link to={isAdminView ? "/admin/events" : "/organizer/events"}><Button variant="secondary">{isAdminView ? "Back to Admin Events" : "Back to My Events"}</Button></Link>} />
       {event.coverImage && <img src={event.coverImage.url} alt={event.title} className="mb-6 h-72 w-full rounded-2xl object-cover" />}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
-        {stats.map(([label, value], index) => <div key={label} className={`rounded-3xl bg-gradient-to-br ${['from-teal-600 to-emerald-700','from-blue-600 to-indigo-700','from-yellow-500 to-orange-600','from-rose-600 to-pink-700','from-slate-600 to-slate-800','from-purple-600 to-violet-800'][index]} p-5 text-white shadow-sm`}><p className="text-sm text-white/80">{label}</p><p className="mt-2 text-lg font-black">{value}</p></div>)}
+        {stats.map(([label, value]) => <MetricCard key={label} label={label} value={value} />)}
       </div>
       <Card className="mt-6">
         <h2 className="font-bold text-slate-950">Event information</h2>

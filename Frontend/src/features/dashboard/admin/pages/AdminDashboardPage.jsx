@@ -56,8 +56,8 @@ export default function AdminDashboardPage() {
       <Link to="/admin/events"><Button variant="light">{t('admin.dashboard.moderateEvents', 'Moderate Events')}</Button></Link>
     </div>
     <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-      {metrics.map(([label, value, Icon, gradient]) => 
-        <AdminMetricCard key={label} label={label} value={value} icon={Icon} gradient={gradient} />
+      {metrics.map(([label, value, Icon]) => 
+        <AdminMetricCard key={label} label={label} value={value} icon={Icon} />
       )}
     </div>
     <div className="mt-8 grid gap-6 lg:grid-cols-2">

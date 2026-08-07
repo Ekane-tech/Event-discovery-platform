@@ -13,20 +13,10 @@ import { extractCollection, normalizeEvents } from '../../../events/utils/normal
 import { hasEventEnded } from '../../../events/utils/eventLifecycle.js'
 import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
 import { useTranslation } from '../../../../shared/i18n/useTranslation.js'
+import MetricCard from '../../../../shared/components/ui/MetricCard.jsx'
 
-function StatCard({ title, value, to, icon: Icon, gradient, iconBg }) {
-  return (
-    <Link to={to}>
-      <div className={`relative h-full overflow-hidden rounded-3xl p-5 text-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl ${gradient}`}>
-        <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/15" />
-        <div className="relative flex items-center justify-between">
-          <span className={`flex h-12 w-12 items-center justify-center rounded-2xl ${iconBg}`}><Icon className="h-5 w-5" /></span>
-          <span className="text-2xl font-black md:text-3xl">{value}</span>
-        </div>
-        <h3 className="relative mt-5 font-bold text-white/95">{title}</h3>
-      </div>
-    </Link>
-  )
+function StatCard({ title, value, to, icon: Icon }) {
+  return <MetricCard label={title} value={value} icon={Icon} to={to} />
 }
 
 export default function UserDashboardPage() {
@@ -56,11 +46,11 @@ export default function UserDashboardPage() {
   const summary = dashboard?.summary || {}
   const recommendedEvents = normalizeEvents(extractCollection(dashboard || {}, 'recommended_events')).filter(event => !hasEventEnded(event))
   const cards = [
-    { title: t('dashboard.user.interests', 'Interests'), value: summary.interests_count || 0, to: '/my-interests', icon: Heart, gradient: 'bg-gradient-to-br from-pink-600 to-rose-700', iconBg: 'bg-white/20' },
-    { title: t('dashboard.user.recommendations', 'Recommendations'), value: summary.recommendations_count || 0, to: '/recommendations', icon: Heart, gradient: 'bg-gradient-to-br from-blue-600 to-emerald-700', iconBg: 'bg-white/20' },
-    { title: t('dashboard.user.upcoming', 'Upcoming'), value: summary.upcoming_registrations_count || 0, to: '/registrations', icon: Ticket, gradient: 'bg-gradient-to-br from-blue-600 to-indigo-700', iconBg: 'bg-white/20' },
-    { title: t('bookmarks.savedEvents', 'Bookmarks'), value: summary.bookmarks_count || 0, to: '/bookmarks', icon: Bookmark, gradient: 'bg-gradient-to-br from-yellow-500 to-orange-600', iconBg: 'bg-white/25' },
-    { title: t('dashboard.user.unread', 'Unread'), value: summary.unread_notifications_count || 0, to: '/notifications', icon: Bell, gradient: 'bg-gradient-to-br from-purple-600 to-violet-800', iconBg: 'bg-white/20' },
+    { title: t('dashboard.user.interests', 'Interests'), value: summary.interests_count || 0, to: '/my-interests', icon: Heart },
+    { title: t('dashboard.user.recommendations', 'Recommendations'), value: summary.recommendations_count || 0, to: '/recommendations', icon: Heart },
+    { title: t('dashboard.user.upcoming', 'Upcoming'), value: summary.upcoming_registrations_count || 0, to: '/registrations', icon: Ticket },
+    { title: t('bookmarks.savedEvents', 'Bookmarks'), value: summary.bookmarks_count || 0, to: '/bookmarks', icon: Bookmark },
+    { title: t('dashboard.user.unread', 'Unread'), value: summary.unread_notifications_count || 0, to: '/notifications', icon: Bell },
   ]
 
   return (

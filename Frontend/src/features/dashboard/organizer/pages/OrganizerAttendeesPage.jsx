@@ -17,6 +17,7 @@ import { eventService } from '../../../events/services/eventService.js'
 import { extractCollection, normalizeEvent } from '../../../events/utils/normalizeEvent.js'
 import { hasEventEnded } from '../../../events/utils/eventLifecycle.js'
 import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
+import MetricCard from '../../../../shared/components/ui/MetricCard.jsx'
 
 function normalizeAttendee(registration) {
   return {
@@ -133,15 +134,13 @@ export default function OrganizerAttendeesPage() {
 
       <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
         {[
-          ['Total registrations', summary.registrations_count || 0, 'from-blue-600 to-emerald-700'],
-          ['Confirmed', summary.confirmed_count || 0, 'from-blue-600 to-indigo-700'],
-          ['Checked in', summary.checked_in_count || 0, 'from-green-600 to-blue-700'],
-          ['Cancelled', summary.cancelled_count || 0, 'from-rose-600 to-pink-700'],
-          ['Available places', summary.available_places ?? 'Unlimited', 'from-amber-500 to-orange-700'],
-        ].map(([label, value, gradient]) => (
-          <div key={label} className={`rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm`}>
-            <p className="text-sm text-white/80">{label}</p><p className="mt-2 text-xl font-black sm:text-2xl">{value}</p>
-          </div>
+          ['Total registrations', summary.registrations_count || 0],
+          ['Confirmed', summary.confirmed_count || 0],
+          ['Checked in', summary.checked_in_count || 0],
+          ['Cancelled', summary.cancelled_count || 0],
+          ['Available places', summary.available_places ?? 'Unlimited'],
+        ].map(([label, value]) => (
+          <MetricCard key={label} label={label} value={value} />
         ))}
       </div>
 

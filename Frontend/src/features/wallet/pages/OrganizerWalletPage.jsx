@@ -15,6 +15,7 @@ import { extractCollection } from '../../events/utils/normalizeEvent.js'
 import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
 import { walletService } from '../services/walletService.js'
 import { useTranslation } from '../../../shared/i18n/useTranslation.js'
+import MetricCard from '../../../shared/components/ui/MetricCard.jsx'
 
 const PAYOUT_STATUSES = {
   requested: 'bg-amber-50 text-amber-700',
@@ -30,15 +31,8 @@ const CREDIT_STATUSES = {
   reversed: 'bg-red-50 text-red-700',
 }
 
-function StatCard({ icon: Icon, label, value, gradient }) {
-  return (
-    <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm`}>
-      <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/15" />
-      <span className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20"><Icon className="h-5 w-5" /></span>
-      <p className="relative mt-4 text-2xl font-black md:text-3xl">{value}</p>
-      <p className="relative text-sm text-white/85">{label}</p>
-    </div>
-  )
+function StatCard({ icon: Icon, label, value }) {
+  return <MetricCard label={label} value={value} icon={Icon} />
 }
 
 export default function OrganizerWalletPage() {

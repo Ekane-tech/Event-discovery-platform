@@ -46,20 +46,33 @@ export default function OrganizersPage() {
     <PageContainer>
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <span className="inline-flex items-center gap-2 rounded-full bg-violet-50 px-3 py-1 text-xs font-bold text-violet-700"><Users className="h-4 w-4" />{t('organizers.badge', 'Organizers')}</span>
+          <span className="inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700"><Users className="h-4 w-4" />{t('organizers.badge', 'Organizers')}</span>
           <h1 className="mt-2 text-2xl font-black text-slate-950">{t('organizers.title', 'Find trusted event organizers.')}</h1>
           <p className="mt-1 text-sm text-slate-600">{t('organizers.subtitle', 'Search organizer profiles, discover verified organizers and browse their public events on Mboa Events 237.')}</p>
         </div>
       </div>
-        <div className="mb-6 grid grid-cols-2 gap-4">
-          <div className="rounded-3xl bg-gradient-to-br from-violet-600 to-emerald-700 p-5 text-white"><p className="text-sm text-white/80">{t('organizers.badge', 'Organizers')}</p><p className="mt-2 text-3xl font-black">{stats.total}</p></div>
-          <div className="rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 p-5 text-white"><p className="text-sm text-white/80">{t('organizers.verified', 'Verified')}</p><p className="mt-2 text-3xl font-black">{stats.verified}</p></div>
+        <div className="mb-6 flex flex-wrap items-center gap-x-8 gap-y-4 rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-700"><Users className="h-5 w-5" /></span>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide text-slate-400">{t('organizers.badge', 'Organizers')}</p>
+              <p className="text-2xl font-black leading-tight text-slate-950">{stats.total}</p>
+            </div>
+          </div>
+          <div className="hidden h-10 w-px bg-slate-200 sm:block" />
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-700"><BadgeCheck className="h-5 w-5" /></span>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide text-slate-400">{t('organizers.verified', 'Verified')}</p>
+              <p className="text-2xl font-black leading-tight text-slate-950">{stats.verified}</p>
+            </div>
+          </div>
         </div>
 
         <form onSubmit={handleSearch} className="mb-6 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="grid gap-3 md:grid-cols-[1fr_auto_auto] md:items-center">
             <div className="relative"><Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><Input value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder={t('organizers.searchPlaceholder', 'Search organizer, company, city or region')} className="pl-10" /></div>
-            <label className="inline-flex items-center gap-2 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700"><input type="checkbox" checked={verifiedOnly} onChange={(event) => setVerifiedOnly(event.target.checked)} className="h-4 w-4" /><BadgeCheck className="h-4 w-4 text-violet-700" />{t('organizers.verifiedOnly', 'Verified only')}</label>
+            <label className="inline-flex items-center gap-2 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700"><input type="checkbox" checked={verifiedOnly} onChange={(event) => setVerifiedOnly(event.target.checked)} className="h-4 w-4" /><BadgeCheck className="h-4 w-4 text-teal-700" />{t('organizers.verifiedOnly', 'Verified only')}</label>
             <Button type="submit">{t('search', 'Search')}</Button>
           </div>
         </form>

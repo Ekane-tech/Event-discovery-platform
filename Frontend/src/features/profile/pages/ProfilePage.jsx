@@ -12,6 +12,7 @@ import { dashboardService } from '../../dashboard/services/dashboardService.js'
 import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
 import { useProfileApi } from '../hooks/useProfileApi.js'
 import { useTranslation } from '../../../shared/i18n/useTranslation.js'
+import MetricCard from '../../../shared/components/ui/MetricCard.jsx'
 
 function InfoRow({ icon: Icon, label, value, fallback }) {
   return (
@@ -25,15 +26,8 @@ function InfoRow({ icon: Icon, label, value, fallback }) {
   )
 }
 
-function MetricCard({ label, value, icon: Icon, gradient }) {
-  return (
-    <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm`}>
-      <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/15" />
-      <Icon className="relative h-6 w-6" />
-      <p className="relative mt-3 text-2xl font-black md:text-3xl">{value}</p>
-      <p className="relative text-sm text-white/85">{label}</p>
-    </div>
-  )
+function StatMetricCard({ label, value, icon: Icon }) {
+  return <StatMetricCard label={label} value={value} icon={Icon} />
 }
 
 function getRoleConfig(role, t) {
@@ -41,7 +35,6 @@ function getRoleConfig(role, t) {
     return {
       eyebrow: t('profile.adminEyebrow', 'Administrator profile'),
       description: t('profile.adminDescription', 'Manage platform trust, moderation, payments, users, reports and operational visibility for Mboa Events 237.'),
-      gradient: 'linear-gradient(90deg, rgba(15,23,42,.94), rgba(88,28,135,.72)), url(/hero-events.svg)',
       dashboardPath: '/admin/dashboard',
       dashboardLabel: t('profile.adminDashboard', 'Admin Dashboard'),
     }
@@ -51,7 +44,6 @@ function getRoleConfig(role, t) {
     return {
       eyebrow: t('profile.organizerEyebrow', 'Organizer profile'),
       description: t('profile.organizerDescription', 'Keep your organizer profile ready for attendees, event moderation and communication on Mboa Events 237.'),
-      gradient: 'linear-gradient(90deg, rgba(2,6,23,.92), rgba(15,118,110,.72)), url(/hero-events.svg)',
       dashboardPath: '/organizer/dashboard',
       dashboardLabel: t('profile.organizerDashboard', 'Organizer Dashboard'),
     }
@@ -60,7 +52,6 @@ function getRoleConfig(role, t) {
   return {
     eyebrow: t('profile.attendeeEyebrow', 'Attendee profile'),
     description: t('profile.attendeeDescription', 'Manage your contact details, interests, tickets and event activity across Cameroon.'),
-    gradient: 'linear-gradient(90deg, rgba(2,6,23,.9), rgba(15,118,110,.68)), url(/hero-events.svg)',
     dashboardPath: '/dashboard',
     dashboardLabel: t('nav.dashboard', 'Dashboard'),
   }
@@ -152,7 +143,7 @@ export default function ProfilePage() {
       {dashboardError && <div className="mt-6"><Alert type="warning">{dashboardError}</Alert></div>}
 
       <div className="mt-6 grid grid-cols-2 gap-4 xl:grid-cols-4">
-        {metrics.map(([label, value, Icon, gradient]) => <MetricCard key={label} label={label} value={value} icon={Icon} gradient={gradient} />)}
+        {metrics.map(([label, value, Icon, gradient]) => <StatMetricCard key={label} label={label} value={value} icon={Icon} gradient={gradient} />)}
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_.9fr]">
