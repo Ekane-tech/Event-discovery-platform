@@ -16,6 +16,7 @@ import { adminService } from '../services/adminService.js'
 import { extractCollection } from '../../../events/utils/normalizeEvent.js'
 import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
 import { useTranslation } from '../../../../shared/i18n/useTranslation.js'
+import MetricCard from '../../../../shared/components/ui/MetricCard.jsx'
 
 function normalizeEmailLog(log) {
   return {
@@ -118,14 +119,11 @@ export default function AdminEmailPage() {
       />
       <div className="mb-6 grid grid-cols-3 gap-3 sm:gap-4">
         {[
-          ['Total logs', stats.total, 'from-slate-700 to-slate-950'],
-          ['Sent', stats.sent, 'from-teal-600 to-emerald-700'],
-          ['Failed', stats.failed, 'from-rose-600 to-pink-700']
-        ].map(([label, value, gradient]) => 
-          <div key={label} className={`rounded-3xl bg-gradient-to-br ${gradient} p-4 text-white shadow-sm sm:p-5`}>
-            <p className="text-xs font-semibold text-white/75 sm:text-sm">{t(`admin.email.${label.replace(/\s+/g, '')}`, label)}</p>
-            <p className="mt-2 text-2xl font-black sm:text-3xl">{value}</p>
-          </div>
+          ['Total logs', stats.total],
+          ['Sent', stats.sent],
+          ['Failed', stats.failed]
+        ].map(([label, value]) => 
+          <MetricCard key={label} label={t(`admin.email.${label.replace(/\s+/g, '')}`, label)} value={value} />
         )}
       </div>
       <div className="grid gap-6 2xl:grid-cols-[520px_1fr]">

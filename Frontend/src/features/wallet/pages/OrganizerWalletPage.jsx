@@ -15,6 +15,7 @@ import { extractCollection } from '../../events/utils/normalizeEvent.js'
 import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
 import { walletService } from '../services/walletService.js'
 import { useTranslation } from '../../../shared/i18n/useTranslation.js'
+import MetricCard from '../../../shared/components/ui/MetricCard.jsx'
 
 const PAYOUT_STATUSES = {
   requested: 'bg-amber-50 text-amber-700',
@@ -30,15 +31,8 @@ const CREDIT_STATUSES = {
   reversed: 'bg-red-50 text-red-700',
 }
 
-function StatCard({ icon: Icon, label, value, gradient }) {
-  return (
-    <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm`}>
-      <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/15" />
-      <span className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20"><Icon className="h-5 w-5" /></span>
-      <p className="relative mt-4 text-2xl font-black md:text-3xl">{value}</p>
-      <p className="relative text-sm text-white/85">{label}</p>
-    </div>
-  )
+function StatCard({ icon: Icon, label, value }) {
+  return <MetricCard label={label} value={value} icon={Icon} />
 }
 
 export default function OrganizerWalletPage() {
@@ -124,14 +118,14 @@ export default function OrganizerWalletPage() {
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-black text-slate-950">{t('wallet.title', 'Your wallet')}</h1>
         <div className="flex flex-wrap gap-2 text-xs">
-          {rules.fee_percent != null && <span className="rounded-full bg-teal-50 px-3 py-1 font-semibold text-teal-700">{t('wallet.feeNote', { fee: rules.fee_percent, defaultValue: '{{fee}}% platform fee' })}</span>}
-          {rules.grace_hours != null && <span className="rounded-full bg-teal-50 px-3 py-1 font-semibold text-teal-700">{t('wallet.graceNote', { hours: rules.grace_hours, defaultValue: 'Available {{hours}}h after the event' })}</span>}
-          <span className="rounded-full bg-teal-50 px-3 py-1 font-semibold text-teal-700">{t('wallet.minNote', { min: fmt(rules.min_payout || 0), defaultValue: 'Min payout {{min}}' })}</span>
+          {rules.fee_percent != null && <span className="rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-700">{t('wallet.feeNote', { fee: rules.fee_percent, defaultValue: '{{fee}}% platform fee' })}</span>}
+          {rules.grace_hours != null && <span className="rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-700">{t('wallet.graceNote', { hours: rules.grace_hours, defaultValue: 'Available {{hours}}h after the event' })}</span>}
+          <span className="rounded-full bg-emerald-50 px-3 py-1 font-semibold text-emerald-700">{t('wallet.minNote', { min: fmt(rules.min_payout || 0), defaultValue: 'Min payout {{min}}' })}</span>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <StatCard icon={Banknote} label={t('wallet.available', 'Available')} value={fmt(wallet.available)} gradient="from-teal-600 to-emerald-700" />
+        <StatCard icon={Banknote} label={t('wallet.available', 'Available')} value={fmt(wallet.available)} gradient="from-emerald-600 to-emerald-700" />
         <StatCard icon={Clock} label={t('wallet.pending', 'Pending (held)')} value={fmt(wallet.pending)} gradient="from-amber-500 to-orange-600" />
         <StatCard icon={TrendingUp} label={t('wallet.lifetime', 'Lifetime earnings')} value={fmt(wallet.lifetime_earnings)} gradient="from-blue-600 to-indigo-700" />
         <StatCard icon={PiggyBank} label={t('wallet.totalPaidOut', 'Total paid out')} value={fmt(wallet.total_paid_out)} gradient="from-purple-600 to-violet-800" />
@@ -194,7 +188,7 @@ export default function OrganizerWalletPage() {
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block">
               <span className="mb-1 block text-sm font-medium text-slate-700">{t('wallet.method', 'Method')}</span>
-              <select value={form.method} onChange={(e) => setForm((c) => ({ ...c, method: e.target.value }))} className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-teal-500 focus:bg-white">
+              <select value={form.method} onChange={(e) => setForm((c) => ({ ...c, method: e.target.value }))} className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-emerald-500 focus:bg-white">
                 <option value="mobile_money">{t('wallet.mobileMoney', 'Mobile Money')}</option>
                 <option value="bank">{t('wallet.bank', 'Bank transfer')}</option>
               </select>
@@ -203,7 +197,7 @@ export default function OrganizerWalletPage() {
               <>
                 <label className="block">
                   <span className="mb-1 block text-sm font-medium text-slate-700">{t('wallet.operator', 'Operator')}</span>
-                  <select value={form.operator} onChange={(e) => setForm((c) => ({ ...c, operator: e.target.value }))} className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-teal-500 focus:bg-white">
+                  <select value={form.operator} onChange={(e) => setForm((c) => ({ ...c, operator: e.target.value }))} className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-emerald-500 focus:bg-white">
                     <option value="mtn">MTN</option>
                     <option value="orange">Orange</option>
                   </select>

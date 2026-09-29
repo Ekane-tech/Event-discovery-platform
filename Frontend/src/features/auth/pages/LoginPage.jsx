@@ -49,7 +49,7 @@ export default function LoginPage() {
       <section className="relative hidden overflow-hidden rounded-4xl bg-slate-950 bg-cover bg-center p-10 text-white lg:block" style={{ backgroundImage: `linear-gradient(140deg, rgba(2,6,23,.82), rgba(15,118,110,.6)), url(${Etech2})` }}>
         <div className="relative z-10 flex h-full flex-col justify-between">
           <div>
-            <span className="inline-flex rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-teal-100">{t('auth.welcomeBack')}</span>
+            <span className="inline-flex rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-indigo-100">{t('auth.welcomeBack')}</span>
             <h2 className="mt-6 max-w-xl text-5xl font-black leading-tight">{t('auth.loginHeadline')}</h2>
             <p className="mt-5 max-w-lg text-lg leading-8 text-slate-100">{t('auth.loginPanelDescription')}</p>
           </div>
@@ -61,17 +61,17 @@ export default function LoginPage() {
           eyebrow={t('auth.secureLogin')}
           title={t('auth.signIn')}
           description={t('auth.loginPanelDescription')}
-          footer={<> {t('auth.noAccount')} <Link className="font-bold text-teal-700" to="/register">{t('auth.createAccount')}</Link></>}
+          footer={<> {t('auth.noAccount')} <Link className="font-bold text-indigo-700" to="/register">{t('auth.createAccount')}</Link></>}
         >
           <form onSubmit={handleSubmit} className="grid gap-3">
             <FormInput label={t('auth.email')} name="email" type="email" value={form.email} onChange={updateField} placeholder={t('auth.emailPlaceholder')} required />
             <FormInput label={t('auth.password')} name="password" type="password" value={form.password} onChange={updateField} placeholder={t('auth.passwordPlaceholder')} required />
             <div className="flex items-center justify-between gap-3">
               <label className="flex items-center gap-2 text-sm text-slate-600">
-                <input type="checkbox" className="h-4 w-4 accent-teal-600" defaultChecked />
+                <input type="checkbox" className="h-4 w-4 accent-indigo-600" defaultChecked />
                 {t('auth.rememberMe')}
               </label>
-              <Link to="/forgot-password" className="text-sm font-bold text-teal-700">{t('auth.forgotPassword')}</Link>
+              <Link to="/forgot-password" className="text-sm font-bold text-indigo-700">{t('auth.forgotPassword')}</Link>
             </div>
             {error && <Alert type="error">{error}</Alert>}
             <Button type="submit" disabled={submitting} variant="pink" className="h-11 gap-2">
@@ -80,7 +80,7 @@ export default function LoginPage() {
             </Button>
           </form>
           <div className="mt-4 rounded-2xl bg-slate-50 p-4 text-xs leading-5 text-slate-500">
-            <ShieldCheck className="mb-2 h-4 w-4 text-teal-700" />
+            <ShieldCheck className="mb-2 h-4 w-4 text-indigo-700" />
             {t('auth.accountProtected')}
           </div>
         </AuthCard>

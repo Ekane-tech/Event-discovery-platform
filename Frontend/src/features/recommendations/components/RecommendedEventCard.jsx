@@ -78,20 +78,20 @@ export default function RecommendedEventCard({ event }) {
       </div>
 
       <div className="flex flex-1 flex-col p-5">
-        <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-teal-700">{t('recommendations.recommendedForYou')}</div>
+        <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-violet-700">{t('recommendations.recommendedForYou')}</div>
         <h3 className="text-xl font-black leading-tight text-slate-950">{event.title}</h3>
         <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">{event.description}</p>
         <RecommendationReasons reasons={event.recommendationReasons} />
         <div className="mt-4 grid gap-2 text-sm text-slate-600">
-          <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-teal-700" /> {event.city}, {event.region}</p>
-          <p className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-teal-700" /> {formatDate(event.startDate)}</p>
+          <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-violet-700" /> {event.city}, {event.region}</p>
+          <p className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-violet-700" /> {formatDate(event.startDate)}</p>
         </div>
         <div className="mt-auto flex flex-col gap-3 pt-4">
           <div className="flex items-center gap-2">
             <Link to={event.organizerId ? `/organizers/${event.organizerId}` : '#'} onClick={(clickEvent) => clickEvent.stopPropagation()} className="relative shrink-0">
               <Avatar name={event.organizerName || event.organizer} src={event.organizerAvatar} className="h-9 w-9 text-xs" />
               {event.organizerVerified && (
-                <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-teal-500 text-white shadow-md">
+                <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-violet-500 text-white shadow-md">
                   <BadgeCheck className="h-2.5 w-2.5" />
                 </div>
               )}
