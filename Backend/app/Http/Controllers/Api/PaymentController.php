@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PaymentResource;
-use App\Jobs\ProcessNotchPayWebhookJob;
+use App\Jobs\ProcessMeSombWebhookJob;
 use App\Models\AuditLog;
 use App\Models\Payment;
 use App\Models\Registration;
@@ -42,12 +42,13 @@ class PaymentController extends Controller
     /**
      * Initiate a mobile-money payment.
      *
-     * For NotchPay, this is now FAST: it only calls the /payments
-     * endpoint (1-2s), then queues the slow /payments/{ref} charge
-     * call. The user gets the response immediately and sees
+     * For MeSomb this is now FAST: no external HTTP call happens in the
+     * request at all. The payment is marked "processing" and the charge
+     * (the call that pushes the prompt to the phone) is queued as a
+     * background job. The user gets the response in <1 second and sees
      * "Check your phone and confirm the prompt".
      *
-     * The final status (paid/failed) comes from the webhook.
+     * The final status (paid/failed) comes from the async webhook.
      */
     public function initiate(Request $request, Payment $payment, MobileMoneyPaymentService $paymentService): JsonResponse
     {
@@ -100,7 +101,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * User-facing "Confirm" button. Asks NotchPay for the current
+     * User-facing "Confirm" button. Asks MeSomb for the current
      * status. Useful when the webhook is delayed or the user wants
      * an instant check.
      */
@@ -122,7 +123,7 @@ class PaymentController extends Controller
             ], 422);
         }
 
-        if ($payment->provider === 'notchpay') {
+        if (in_array($payment->provider, ['mesomb', 'notchpay'], true)) {
             $payment = $paymentService->refreshStatus($payment);
 
             return response()->json([
@@ -163,7 +164,8 @@ class PaymentController extends Controller
     {
         $this->authorizePaymentOwner($request, $payment);
 
-        if ($payment->provider === 'notchpay' && in_array($payment->status, ['pending', 'processing'], true)) {
+        if (in_array($payment->provider, ['mesomb', 'notchpay'], true)
+            && in_array($payment->status, ['pending', 'processing'], true)) {
             $payment = $paymentService->refreshStatus($payment);
         }
 
@@ -173,58 +175,61 @@ class PaymentController extends Controller
     }
 
     /**
-     * NotchPay webhook receiver.
+     * MeSomb webhook receiver.
      *
      * Deliberately tiny so the response stays sub-100ms:
-     *   1. Verify the X-Notch-Signature HMAC.
-     *   2. Extract the event type + reference.
-     *   3. Enqueue ProcessNotchPayWebhookJob.
+     *   1. Verify the X-MeSomb-Webhook-Signature HMAC (timestamp + raw body,
+     *      5-minute tolerance).
+     *   2. Extract the event type + payment reference.
+     *   3. Enqueue ProcessMeSombWebhookJob.
      *   4. Return 200.
      *
      * All DB work and email side-effects happen in the queued job.
      */
-    public function notchpayCallback(Request $request): JsonResponse
+    public function mesombCallback(Request $request): JsonResponse
     {
-        if (! $this->validNotchPayCallback($request)) {
-            Log::warning('NotchPay webhook rejected: invalid signature.', [
+        if (! $this->validMeSombCallback($request)) {
+            Log::warning('MeSomb webhook rejected: invalid signature.', [
                 'ip' => $request->ip(),
-                'has_header' => (bool) $request->header('X-Notch-Signature'),
-                'has_body_field' => (bool) $request->input('signature'),
+                'has_header' => (bool) $request->header('X-MeSomb-Webhook-Signature'),
             ]);
             return response()->json(['message' => 'Invalid callback signature.'], 403);
         }
 
-        $eventType = (string) ($request->input('type') ?? '');
-        $data = (array) $request->input('data', []);
+        $payload = $request->all();
+        $eventType = (string) ($payload['type'] ?? $payload['event_type'] ?? '');
+        $object = (array) ($payload['data']['object'] ?? []);
 
-        $reference = $data['reference']
-            ?? $data['id']
-            ?? $request->input('external_reference')
-            ?? $request->input('reference')
-            ?? $request->input('merchant_reference');
+        // The webhook object carries our trxID/reference tag plus MeSomb's
+        // own ids — match on any of them.
+        $reference = $object['trxID']
+            ?? $object['reference']
+            ?? $object['pk']
+            ?? $object['id']
+            ?? $object['fin_trx_id'];
 
         if (! $reference) {
-            Log::warning('NotchPay webhook rejected: missing payment reference.', [
+            Log::warning('MeSomb webhook rejected: missing payment reference.', [
                 'event' => $eventType,
-                'payload_keys' => array_keys($request->all()),
+                'payload_keys' => array_keys($payload),
             ]);
             return response()->json(['message' => 'Missing payment reference.'], 422);
         }
 
         if ($eventType !== '' && ! str_starts_with($eventType, 'payment.')) {
-            Log::info('NotchPay webhook ignored: non-payment event.', ['event' => $eventType]);
+            Log::info('MeSomb webhook ignored: non-payment event.', ['event' => $eventType]);
             return response()->json(['message' => 'Event ignored.'], 200);
         }
 
         try {
-            ProcessNotchPayWebhookJob::dispatch(
+            ProcessMeSombWebhookJob::dispatch(
                 (string) $reference,
-                $request->all(),
+                $payload,
                 $eventType,
             );
         } catch (\Throwable $e) {
-            // Queue is down — fail loud so NotchPay retries.
-            Log::error('NotchPay webhook: failed to enqueue process job.', [
+            // Queue is down — fail loud so MeSomb retries.
+            Log::error('MeSomb webhook: failed to enqueue process job.', [
                 'reference' => $reference,
                 'event' => $eventType,
                 'error' => $e->getMessage(),
@@ -263,33 +268,59 @@ class PaymentController extends Controller
     }
 
     /**
-     * Verify the NotchPay webhook signature.
+     * Verify the MeSomb webhook signature.
      *
-     * Official header: X-Notch-Signature (HMAC-SHA256 of the raw
-     * request body, hex-encoded, signed with the webhook secret).
+     * Official scheme (docs.mesomb.com/development/webhooks/verifying-signatures):
+     *   header:  X-MeSomb-Webhook-Signature: t=<timestamp>,v1=<hmac>
+     *   payload: <timestamp>.<raw request body>
+     *   hmac:    HMAC-SHA256(webhook_secret, payload), lowercase hex
+     *   tolerance: 5 minutes (replay protection)
      *
-     * In production the secret MUST be set or we reject the request.
+     * The secret is generated once per webhook endpoint in the MeSomb
+     * dashboard (whsec_...) and set as MESOMB_WEBHOOK_SECRET. In production
+     * the secret MUST be set or we reject the request.
      */
-    private function validNotchPayCallback(Request $request): bool
+    private function validMeSombCallback(Request $request): bool
     {
-        $secret = env('NOTCHPAY_WEBHOOK_SECRET');
+        $secret = config('payments.mesomb.webhook_secret');
 
         if (! $secret) {
             $env = app()->environment();
             return in_array($env, ['local', 'testing'], true);
         }
 
-        $signature = $request->header('X-Notch-Signature')
-            ?? $request->header('X-Notchpay-Signature')
-            ?? $request->header('X-Signature')
-            ?? $request->input('signature');
+        $signatureHeader = (string) $request->header('X-MeSomb-Webhook-Signature', '');
 
-        if (! $signature) {
+        if ($signatureHeader === '') {
             return false;
         }
 
-        $expected = hash_hmac('sha256', $request->getContent(), (string) $secret);
+        $timestamp = null;
+        $signature = null;
 
-        return hash_equals($expected, (string) $signature);
+        foreach (explode(',', $signatureHeader) as $part) {
+            if (str_starts_with($part, 't=')) {
+                $timestamp = substr($part, 2);
+            } elseif (str_starts_with($part, 'v1=')) {
+                $signature = substr($part, 3);
+            }
+        }
+
+        if ($timestamp === null || $signature === null || ! ctype_digit($timestamp)) {
+            return false;
+        }
+
+        // Reject replays older than 5 minutes.
+        if (abs(time() - (int) $timestamp) > 300) {
+            Log::warning('MeSomb webhook rejected: signature timestamp outside tolerance.', [
+                'timestamp' => $timestamp,
+            ]);
+            return false;
+        }
+
+        $signedPayload = $timestamp.'.'.$request->getContent();
+        $expected = hash_hmac('sha256', $signedPayload, (string) $secret);
+
+        return hash_equals($expected, strtolower((string) $signature));
     }
 }

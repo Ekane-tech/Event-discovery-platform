@@ -13,8 +13,9 @@ import { eventService } from '../services/eventService.js'
 import { extractCollection, normalizeEvents } from '../utils/normalizeEvent.js'
 import { getApiErrorMessage } from '../../auth/utils/normalizeAuthUser.js'
 import { useTranslation } from '../../../shared/i18n/useTranslation.js'
+import MetricCard from '../../../shared/components/ui/MetricCard.jsx'
 
-function StatusCard({ label, value, icon: Icon, gradient }) { return <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm`}><div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/15"/><Icon className="relative h-6 w-6"/><p className="relative mt-3 text-xl font-black sm:text-2xl md:text-3xl">{value}</p><p className="relative text-sm text-white/85 sm:text-base">{label}</p></div> }
+function StatusCard({ label, value, icon: Icon }) { return <MetricCard label={label} value={value} icon={Icon} /> }
 
 export default function MyEventsPage() {
   const { t } = useTranslation()

@@ -51,9 +51,22 @@ export default function OrganizersPage() {
           <p className="mt-1 text-sm text-slate-600">{t('organizers.subtitle', 'Search organizer profiles, discover verified organizers and browse their public events on Mboa Events 237.')}</p>
         </div>
       </div>
-        <div className="mb-6 grid grid-cols-2 gap-4">
-          <div className="rounded-3xl bg-gradient-to-br from-teal-600 to-emerald-700 p-5 text-white"><p className="text-sm text-white/80">{t('organizers.badge', 'Organizers')}</p><p className="mt-2 text-3xl font-black">{stats.total}</p></div>
-          <div className="rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 p-5 text-white"><p className="text-sm text-white/80">{t('organizers.verified', 'Verified')}</p><p className="mt-2 text-3xl font-black">{stats.verified}</p></div>
+        <div className="mb-6 flex flex-wrap items-center gap-x-8 gap-y-4 rounded-2xl border border-slate-200 bg-white px-6 py-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-700"><Users className="h-5 w-5" /></span>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide text-slate-400">{t('organizers.badge', 'Organizers')}</p>
+              <p className="text-2xl font-black leading-tight text-slate-950">{stats.total}</p>
+            </div>
+          </div>
+          <div className="hidden h-10 w-px bg-slate-200 sm:block" />
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-700"><BadgeCheck className="h-5 w-5" /></span>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide text-slate-400">{t('organizers.verified', 'Verified')}</p>
+              <p className="text-2xl font-black leading-tight text-slate-950">{stats.verified}</p>
+            </div>
+          </div>
         </div>
 
         <form onSubmit={handleSearch} className="mb-6 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">

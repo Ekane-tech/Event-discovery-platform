@@ -187,10 +187,10 @@ export default function AdminCategoriesPage() {
       />
 
       <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <AdminMetricCard label={t('admin.categories.totalCategories')} value={metrics.total} icon={FolderTree} gradient="from-indigo-600 to-blue-700" />
-        <AdminMetricCard label={t('admin.categories.activeCategories')} value={metrics.active} icon={Tags} gradient="from-slate-600 to-slate-800" />
-        <AdminMetricCard label={t('admin.categories.disabledCategories')} value={metrics.disabled} icon={Tags} gradient="from-slate-600 to-slate-800" />
-        <AdminMetricCard label={t('admin.categories.usedByEvents')} value={metrics.used} icon={Tags} gradient="from-amber-500 to-orange-700" />
+        <AdminMetricCard label={t('admin.categories.totalCategories')} value={metrics.total} icon={FolderTree} />
+        <AdminMetricCard label={t('admin.categories.activeCategories')} value={metrics.active} icon={Tags} />
+        <AdminMetricCard label={t('admin.categories.disabledCategories')} value={metrics.disabled} icon={Tags} />
+        <AdminMetricCard label={t('admin.categories.usedByEvents')} value={metrics.used} icon={Tags} />
       </div>
 
       {error && <div className="mt-6"><Alert type="error">{error}</Alert></div>}
@@ -235,10 +235,10 @@ export default function AdminCategoriesPage() {
 
       <Modal open={modal.open} title={modal.category ? t('admin.categories.form.editTitle', 'Edit category') : t('admin.categories.form.createTitle', 'Create category')} onClose={closeModal}>
         <form onSubmit={handleSubmit} className="grid gap-2">
-          <div className="rounded-3xl bg-gradient-to-br from-indigo-600 to-teal-700 p-3 text-white sm:p-3">
-            <p className="text-xs font-bold uppercase tracking-wide text-white/80 sm:text-sm">{t('admin.categories.form.setupBadge', 'Category setup')}</p>
-            <h3 className="mt-1 text-xl font-black sm:text-2xl">{modal.category ? t('admin.categories.form.updateCategory', 'Update category') : t('admin.categories.form.newCategory', 'New category')}</h3>
-            <p className="mt-2 text-xs leading-5 text-white/90 sm:mt-2 sm:text-sm sm:leading-6">{t('admin.categories.form.setupDescription', 'Use short, recognizable names that help attendees filter events quickly.')}</p>
+          <div className="rounded-2xl border border-teal-100 bg-teal-50 p-4">
+            <p className="text-xs font-bold uppercase tracking-wide text-teal-700 sm:text-sm">{t('admin.categories.form.setupBadge', 'Category setup')}</p>
+            <h3 className="mt-1 text-xl font-black text-slate-950 sm:text-2xl">{modal.category ? t('admin.categories.form.updateCategory', 'Update category') : t('admin.categories.form.newCategory', 'New category')}</h3>
+            <p className="mt-2 text-xs leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-6">{t('admin.categories.form.setupDescription', 'Use short, recognizable names that help attendees filter events quickly.')}</p>
           </div>
 
           <label className="block">

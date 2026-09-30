@@ -12,6 +12,7 @@ import { adminService } from '../services/adminService.js'
 import { extractCollection } from '../../../events/utils/normalizeEvent.js'
 import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
 import { useTranslation } from '../../../../shared/i18n/useTranslation.js'
+import MetricCard from '../../../../shared/components/ui/MetricCard.jsx'
 
 function normalizePayment(payment) {
   return {
@@ -80,16 +81,12 @@ export default function AdminPaymentsPage() {
 
       <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         {[
-          ['Total revenue', formatPrice(summary?.total_revenue || 0), 'from-teal-600 to-emerald-700'],
-          ['Pending revenue', formatPrice(summary?.pending_revenue || 0), 'from-amber-500 to-orange-700'],
-          ['Paid payments', summary?.paid_payments || 0, 'from-blue-600 to-indigo-700'],
-          ['Pending payments', summary?.pending_payments || 0, 'from-slate-600 to-slate-800'],
-        ].map(([label, value, gradient]) => (
-          <div key={label} className={`rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm`}>
-            <WalletCards className="h-6 w-6 text-white/90" />
-            <p className="mt-3 text-sm text-white/80">{t(`admin.payments.${label.replace(/\s+/g, '')}`, label)}</p>
-            <p className="mt-1 text-2xl font-black">{value}</p>
-          </div>
+          ['Total revenue', formatPrice(summary?.total_revenue || 0)],
+          ['Pending revenue', formatPrice(summary?.pending_revenue || 0)],
+          ['Paid payments', summary?.paid_payments || 0],
+          ['Pending payments', summary?.pending_payments || 0],
+        ].map(([label, value]) => (
+          <MetricCard key={label} label={t(`admin.payments.${label.replace(/\s+/g, '')}`, label)} value={value} icon={WalletCards} />
         ))}
       </div>
 
@@ -103,14 +100,14 @@ export default function AdminPaymentsPage() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input 
-                className="rounded-2xl border border-slate-200 py-2 pl-9 pr-4 text-sm outline-none focus:border-teal-500" 
+                className="rounded-2xl border border-slate-200 py-2 pl-9 pr-4 text-sm outline-none focus:border-emerald-500" 
                 value={filters.keyword} 
                 onChange={(event) => setFilters((current) => ({ ...current, keyword: event.target.value }))} 
                 placeholder={t('admin.payments.searchPlaceholder', 'Search payments')} 
               />
             </div>
             <select 
-              className="rounded-2xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-teal-500" 
+              className="rounded-2xl border border-slate-200 px-4 py-2 text-sm outline-none focus:border-emerald-500" 
               value={filters.status} 
               onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}
             >
@@ -138,7 +135,7 @@ export default function AdminPaymentsPage() {
         rows={visiblePayments.map((payment) => ({
           ...payment,
           reference: <span className="inline-flex items-center gap-1 font-mono text-xs">
-            <CreditCard className="h-3.5 w-3.5 text-teal-700" />{payment.reference}
+            <CreditCard className="h-3.5 w-3.5 text-emerald-700" />{payment.reference}
           </span>,
           status: <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black capitalize text-slate-700">
             {t(`admin.common.${payment.status}`, payment.status)}

@@ -25,10 +25,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/public/notifications', [NotificationController::class, 'publicAnnouncements'])->middleware('throttle:public-read');
 Route::post('/feedback', [FeedbackController::class, 'store'])->middleware('throttle:feedback-submit');
-// NotchPay webhook — NOT throttled. NotchPay can legitimately burst events
-// and throttling would drop real payment callbacks. Backpressure is handled
-// by the queue worker instead.
-Route::post('/payments/callback/notchpay', [PaymentController::class, 'notchpayCallback']);
+// MeSomb webhook — NOT throttled. MeSomb can legitimately burst events
+// (and retries deliveries for up to 72h) and throttling would drop real
+// payment callbacks. Backpressure is handled by the queue worker instead.
+// Signature verification + deduplication happen in the callback + job.
+Route::post('/payments/callback/mesomb', [PaymentController::class, 'mesombCallback']);
 
 Route::get('/img', [ImageVariantController::class, 'show'])->middleware('throttle:public-read');
 

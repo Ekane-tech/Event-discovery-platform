@@ -9,12 +9,12 @@ class MigrateStorageToS3 extends Command
 {
     protected $signature = 'storage:migrate-s3';
 
-    protected $description = 'Copy existing uploads from the local Railway volume (local-uploads disk) into the S3 public disk. Skips the regeneratable thumbnail cache. Idempotent.';
+    protected $description = 'Copy existing uploads from the local Railway volume (local-uploads disk) into the public disk (Cloudflare R2 once R2_* env vars are configured, local otherwise). Skips the regeneratable thumbnail cache. Idempotent.';
 
     public function handle(): int
     {
         $source = Storage::disk('local-uploads');
-        $dest = Storage::disk('public'); // S3
+        $dest = Storage::disk('public'); // R2 when configured, local otherwise
 
         $files = $source->allFiles();
         $copied = 0;
@@ -27,14 +27,14 @@ class MigrateStorageToS3 extends Command
                 continue;
             }
 
-            // Idempotent: skip files already present on S3.
+            // Idempotent: skip files already present on the destination.
             try {
                 if ($dest->exists($file)) {
                     $skipped++;
                     continue;
                 }
             } catch (\Throwable $e) {
-                $this->error('Cannot reach S3 (check AWS_* env): '.$e->getMessage());
+                $this->error('Cannot reach destination storage (check R2_* / AWS_* env): '.$e->getMessage());
 
                 return self::FAILURE;
             }
@@ -51,7 +51,7 @@ class MigrateStorageToS3 extends Command
             }
         }
 
-        $this->info("Migration complete — copied: {$copied}, skipped (already on S3): {$skipped}, failed: {$failed}.");
+        $this->info("Migration complete — copied: {$copied}, skipped (already present): {$skipped}, failed: {$failed}.");
 
         return $failed > 0 ? self::FAILURE : self::SUCCESS;
     }

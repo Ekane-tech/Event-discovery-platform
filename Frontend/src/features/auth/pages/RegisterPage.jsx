@@ -83,13 +83,13 @@ export default function RegisterPage() {
           <img src={Etech2} alt="Event crowd" className="h-162.5 w-full object-cover opacity-80" />
           <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/50 to-transparent" />
           <div className="absolute bottom-0 p-10 text-white">
-            <Users className="mb-4 h-10 w-10 text-teal-300" />
+            <Users className="mb-4 h-10 w-10 text-indigo-300" />
             <h2 className="text-4xl font-black">{t('auth.registerPageTitle')}</h2>
             <p className="mt-4 max-w-lg text-slate-200">{t('auth.registerPageDescription')}</p>
             <div className="mt-6 grid gap-3 text-sm text-slate-100">
-              <p className="flex gap-2"><CheckCircle2 className="h-5 w-5 text-teal-300" /> {t('auth.bullet1')}</p>
-              <p className="flex gap-2"><CheckCircle2 className="h-5 w-5 text-teal-300" /> {t('auth.bullet2')}</p>
-              <p className="flex gap-2"><CheckCircle2 className="h-5 w-5 text-teal-300" /> {t('auth.registerBenefit2')}</p>
+              <p className="flex gap-2"><CheckCircle2 className="h-5 w-5 text-indigo-300" /> {t('auth.bullet1')}</p>
+              <p className="flex gap-2"><CheckCircle2 className="h-5 w-5 text-indigo-300" /> {t('auth.bullet2')}</p>
+              <p className="flex gap-2"><CheckCircle2 className="h-5 w-5 text-indigo-300" /> {t('auth.registerBenefit2')}</p>
             </div>
           </div>
         </div>
@@ -100,7 +100,7 @@ export default function RegisterPage() {
           eyebrow={t('auth.createAccount')}
           title={t('auth.registerFormTitle')}
           description={t('auth.registerFormDescription')}
-          footer={<>{t('auth.alreadyAccount')} <Link className="font-bold text-teal-700" to="/login">{t('auth.signIn')}</Link></>}
+          footer={<>{t('auth.alreadyAccount')} <Link className="font-bold text-indigo-700" to="/login">{t('auth.signIn')}</Link></>}
         >
           {error && <div className="mb-4"><Alert type="error">{error}</Alert></div>}
           <div className="mb-5 grid gap-3 sm:grid-cols-2">
@@ -108,8 +108,8 @@ export default function RegisterPage() {
               const Icon = item.icon
               const active = form.accountType === item.value
               return (
-                <button key={item.value} type="button" onClick={() => chooseAccountType(item.value)} className={`rounded-2xl border p-4 text-left transition ${active ? 'border-teal-600 bg-teal-50 ring-2 ring-teal-100' : 'border-slate-200 hover:border-teal-200 hover:bg-slate-50'}`}>
-                  <Icon className="h-6 w-6 text-teal-700" />
+                <button key={item.value} type="button" onClick={() => chooseAccountType(item.value)} className={`rounded-2xl border p-4 text-left transition ${active ? 'border-indigo-600 bg-indigo-50 ring-2 ring-indigo-100' : 'border-slate-200 hover:border-indigo-200 hover:bg-slate-50'}`}>
+                  <Icon className="h-6 w-6 text-indigo-700" />
                   <h3 className="mt-3 font-bold text-slate-950">{t(`auth.${item.value === 'user' ? 'attendEvents' : 'provideServices'}`)}</h3>
                   <p className="mt-1 text-xs leading-5 text-slate-600">{t(`auth.${item.value === 'user' ? 'attendeeDescription' : 'organizerDescription'}`)}</p>
                 </button>
@@ -132,10 +132,10 @@ export default function RegisterPage() {
 
               <label className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700">
                 <span className="flex gap-3">
-                  <input type="checkbox" name="termsAccepted" checked={form.termsAccepted} onChange={updateField} className="mt-1 h-4 w-4 rounded border-slate-300 text-teal-700 focus:ring-teal-500" />
+                  <input type="checkbox" name="termsAccepted" checked={form.termsAccepted} onChange={updateField} className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-700 focus:ring-indigo-500" />
                   <span>
                     {t('auth.chooseAccountType')}{' '}
-                    <a href={TERMS_URL} target="_blank" rel="noreferrer" className="font-bold text-teal-700 underline">{t('footer.terms')}</a> {t('auth.and')} <a href={PRIVACY_URL} target="_blank" rel="noreferrer" className="font-bold text-teal-700 underline">{t('footer.privacy')}</a>.
+                    <a href={TERMS_URL} target="_blank" rel="noreferrer" className="font-bold text-indigo-700 underline">{t('footer.terms')}</a> {t('auth.and')} <a href={PRIVACY_URL} target="_blank" rel="noreferrer" className="font-bold text-indigo-700 underline">{t('footer.privacy')}</a>.
                   </span>
                 </span>
               </label>

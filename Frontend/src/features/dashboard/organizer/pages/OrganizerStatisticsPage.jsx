@@ -22,31 +22,13 @@ import { dashboardService } from '../../services/dashboardService.js'
 import { eventService } from '../../../events/services/eventService.js'
 import { extractCollection, normalizeEvents } from '../../../events/utils/normalizeEvent.js'
 import { getApiErrorMessage } from '../../../auth/utils/normalizeAuthUser.js'
+import MetricCard from '../../../../shared/components/ui/MetricCard.jsx'
 
-function MetricCard({ label, value, icon: Icon, gradient, description }) {
-  return (
-    <div
-      className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl`}
-    >
-      <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/15" />
-      <div className="absolute -bottom-10 left-4 h-24 w-24 rounded-full bg-black/10" />
-
-      <div className="relative flex items-center justify-between">
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20">
-          <Icon className="h-5 w-5" />
-        </span>
-        <span className="text-xl font-black sm:text-2xl md:text-3xl">{value}</span>
-      </div>
-
-      <p className="relative mt-5 text-sm font-bold text-white/90 sm:text-base">{label}</p>
-      {description && (
-        <p className="relative mt-1 text-xs text-white/75">{description}</p>
-      )}
-    </div>
-  )
+function StatMetricCard({ label, value, icon: Icon, description }) {
+  return <MetricCard label={label} value={value} icon={Icon} description={description} />
 }
 
-function ProgressBar({ label, value, total, color = 'bg-teal-600' }) {
+function ProgressBar({ label, value, total, color = 'bg-blue-600' }) {
   const percent = total > 0 ? Math.round((value / total) * 100) : 0
 
   return (
@@ -71,7 +53,7 @@ function ProgressBar({ label, value, total, color = 'bg-teal-600' }) {
 function InsightItem({ children }) {
   return (
     <li className="flex gap-3 rounded-2xl bg-slate-50 p-3 text-sm leading-6 text-slate-600">
-      <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-100 text-xs font-black text-teal-700">
+      <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-black text-blue-700">
         ✓
       </span>
       <span>{children}</span>
@@ -83,9 +65,9 @@ function TopEventRow({ event, rank }) {
   const score = Number(event.registrations || 0) + Number(event.bookmarks || 0) + Number(event.views || 0)
 
   return (
-    <div className="group flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-lg md:flex-row md:items-center md:justify-between">
+    <div className="group flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg md:flex-row md:items-center md:justify-between">
       <div className="flex items-center gap-4">
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-teal-50 text-lg font-black text-teal-700">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-lg font-black text-blue-700">
           #{rank}
         </span>
 
@@ -185,42 +167,36 @@ export default function OrganizerStatisticsPage() {
       label: 'Total events',
       value: stats.events_count || totalEvents,
       icon: CalendarCheck,
-      gradient: 'from-teal-600 to-emerald-700',
       description: 'All events you created',
     },
     {
       label: 'Published',
       value: stats.published_events_count || 0,
       icon: Radio,
-      gradient: 'from-green-600 to-teal-700',
       description: 'Visible to attendees',
     },
     {
       label: 'Registrations',
       value: stats.total_registrations || 0,
       icon: Ticket,
-      gradient: 'from-blue-600 to-indigo-700',
       description: 'Total attendee signups',
     },
     {
       label: 'Views',
       value: stats.total_views || 0,
       icon: Eye,
-      gradient: 'from-purple-600 to-violet-800',
       description: 'Unique event views',
     },
     {
       label: 'Revenue',
       value: Number(stats.revenue || 0) === 0 ? '0' : formatPrice(stats.revenue),
       icon: Wallet,
-      gradient: 'from-amber-500 to-orange-700',
       description: 'Paid confirmed registrations',
     },
     {
       label: 'Attendance rate',
       value: `${stats.attendance_rate || 0}%`,
       icon: Activity,
-      gradient: 'from-pink-600 to-rose-700',
       description: 'Checked-in vs confirmed',
     },
   ]
@@ -242,7 +218,7 @@ export default function OrganizerStatisticsPage() {
         ) : (
           <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
             {metrics.map((metric) => (
-              <MetricCard key={metric.label} {...metric} />
+              <StatMetricCard key={metric.label} {...metric} />
             ))}
           </div>
         )}
@@ -252,7 +228,7 @@ export default function OrganizerStatisticsPage() {
         <section className="mt-8 grid gap-6 lg:grid-cols-2">
           <Card>
             <h2 className="mb-1 flex items-center gap-2 text-xl font-black text-slate-950">
-              <BarChart3 className="h-5 w-5 text-teal-700" />
+              <BarChart3 className="h-5 w-5 text-blue-700" />
               Event status distribution
             </h2>
             <p className="mb-5 text-sm text-slate-500">
@@ -334,7 +310,7 @@ export default function OrganizerStatisticsPage() {
               </p>
             </div>
 
-            <Link to="/organizer/events" className="text-sm font-bold text-teal-700">
+            <Link to="/organizer/events" className="text-sm font-bold text-blue-700">
               View all events
             </Link>
           </div>

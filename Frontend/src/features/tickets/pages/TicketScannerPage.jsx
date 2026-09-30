@@ -160,8 +160,8 @@ export default function TicketScannerPage() {
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_.9fr]">
         <Card className="overflow-hidden">
-          <div className="rounded-3xl bg-gradient-to-br from-slate-950 to-teal-800 p-5 text-white">
-            <QrCode className="h-9 w-9 text-teal-100" />
+          <div className="rounded-3xl bg-gradient-to-br from-slate-950 to-emerald-800 p-5 text-white">
+            <QrCode className="h-9 w-9 text-emerald-100" />
             <h2 className="mt-4 text-2xl font-black">Scan QR code</h2>
             <p className="mt-2 text-sm leading-6 text-slate-200">Use a phone or laptop camera. If the browser does not support camera QR detection, enter the ticket number manually.</p>
           </div>
@@ -186,7 +186,7 @@ export default function TicketScannerPage() {
           <form onSubmit={handleManualSubmit} className="mt-5 rounded-3xl border border-slate-200 bg-slate-50 p-4">
             <label className="block">
               <span className="mb-2 flex items-center gap-2 text-sm font-black text-slate-800"><Keyboard className="h-4 w-4" /> Manual ticket entry</span>
-              <input value={manualTicket} onChange={(event) => setManualTicket(event.target.value)} placeholder="CM-EVT-3-AB12CD34 or full verification URL" className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-teal-500" />
+              <input value={manualTicket} onChange={(event) => setManualTicket(event.target.value)} placeholder="CM-EVT-3-AB12CD34 or full verification URL" className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-emerald-500" />
             </label>
             <div className="mt-3"><Button type="submit" disabled={verifying}>{verifying ? 'Verifying...' : 'Verify ticket'}</Button></div>
           </form>
@@ -201,7 +201,7 @@ export default function TicketScannerPage() {
             </div>
           ) : (
             <div className="mt-5">
-              <div className={`rounded-3xl p-5 text-white ${valid ? 'bg-gradient-to-br from-green-600 to-teal-700' : 'bg-gradient-to-br from-red-600 to-rose-700'}`}>
+              <div className={`rounded-3xl p-5 text-white ${valid ? 'bg-gradient-to-br from-green-600 to-emerald-700' : 'bg-gradient-to-br from-red-600 to-rose-700'}`}>
                 <StatusIcon className="h-9 w-9" />
                 <h3 className="mt-3 text-2xl font-black">{valid ? 'Valid ticket' : 'Invalid ticket'}</h3>
                 <p className="mt-1 text-sm text-white/90">{verification.message}</p>

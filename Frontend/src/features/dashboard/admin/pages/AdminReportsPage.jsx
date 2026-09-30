@@ -17,15 +17,11 @@ import { useTranslation } from '../../../../shared/i18n/useTranslation.js'
 import AdminHero from '../components/AdminHero.jsx'
 import AdminPageActions, { AdminActionButton } from '../components/AdminPageActions.jsx'
 import AdminStatusBadge from '../components/AdminStatusBadge.jsx'
+import MetricCard from '../../../../shared/components/ui/MetricCard.jsx'
 import { adminService } from '../services/adminService.js'
 
-function ReportMetric({ label, value, icon: Icon, gradient, t }) {
-  return <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} p-5 text-white shadow-sm`}>
-    <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/15"/>
-    <Icon className="relative h-6 w-6"/>
-    <p className="relative mt-3 text-2xl font-black md:text-3xl">{value}</p>
-    <p className="relative text-sm text-white/85">{label}</p>
-  </div>
+function ReportMetric({ label, value, icon: Icon }) {
+  return <MetricCard label={label} value={value} icon={Icon} />
 }
 
 export default function AdminReportsPage() {
@@ -131,10 +127,10 @@ export default function AdminReportsPage() {
       description={t('admin.reports.description', 'Review user reports and resolve trust or quality issues.')} 
     />
     <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-      <ReportMetric label={t('admin.reports.totalReports', 'Total reports')} value={metrics.total} icon={FileSearch} gradient="from-indigo-600 to-blue-700" t={t}/>
-      <ReportMetric label={t('admin.reports.openReports', 'Open')} value={metrics.open} icon={AlertTriangle} gradient="from-rose-600 to-pink-700" t={t}/>
-      <ReportMetric label={t('admin.reports.reviewingReports', 'Reviewing')} value={metrics.reviewing} icon={Eye} gradient="from-amber-500 to-orange-700" t={t}/>
-      <ReportMetric label={t('admin.reports.resolvedReports', 'Resolved')} value={metrics.resolved} icon={ShieldCheck} gradient="from-teal-600 to-emerald-700" t={t}/>
+      <ReportMetric label={t('admin.reports.totalReports', 'Total reports')} value={metrics.total} icon={FileSearch} t={t}/>
+      <ReportMetric label={t('admin.reports.openReports', 'Open')} value={metrics.open} icon={AlertTriangle} t={t}/>
+      <ReportMetric label={t('admin.reports.reviewingReports', 'Reviewing')} value={metrics.reviewing} icon={Eye} t={t}/>
+      <ReportMetric label={t('admin.reports.resolvedReports', 'Resolved')} value={metrics.resolved} icon={ShieldCheck} t={t}/>
     </div>
     <Card className="my-6">
       <div className="grid gap-3 md:grid-cols-[1fr_180px_190px_auto_auto]">
@@ -185,10 +181,10 @@ export default function AdminReportsPage() {
     
     <Modal open={Boolean(selected)} title={t('admin.reports.modal.title', 'Report details')} onClose={() => setSelected(null)}>
       {selected && <div className="grid gap-4">
-        <div className="rounded-3xl bg-gradient-to-br from-rose-600 to-amber-600 p-5 text-white">
-          <p className="text-sm font-bold uppercase text-white/80">{t('admin.reports.modal.badge', 'Report')}</p>
-          <h3 className="mt-1 text-2xl font-black">{t(`admin.reports.typeFilter.${selected.type}`, selected.type)}</h3>
-          <p className="mt-2 text-sm text-white/90">{t('admin.reports.modal.statusLabel', 'Status')}: {selected.status}</p>
+        <div className="rounded-2xl border border-teal-100 bg-teal-50 p-5">
+          <p className="text-xs font-bold uppercase tracking-wide text-teal-700">{t('admin.reports.modal.badge', 'Report')}</p>
+          <h3 className="mt-1 text-2xl font-black text-slate-950">{t(`admin.reports.typeFilter.${selected.type}`, selected.type)}</h3>
+          <p className="mt-2 text-sm text-slate-600">{t('admin.reports.modal.statusLabel', 'Status')}: {selected.status}</p>
         </div>
         <div className="grid gap-2 text-sm text-slate-600">
           <p><strong>{t('admin.reports.modal.eventLabel', 'Event')}:</strong> {selected.event?.title || '—'}</p>

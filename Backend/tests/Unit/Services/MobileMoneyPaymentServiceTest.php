@@ -19,16 +19,18 @@ class MobileMoneyPaymentServiceTest extends TestCase
     /**
      * @dataProvider successStatusProvider
      */
-    public function test_map_campay_status_returns_paid_for_success_values(string $status): void
+    public function test_map_mesomb_status_returns_paid_for_success_values(string $status): void
     {
-        $this->assertSame('paid', $this->invokePrivate('mapCampayStatus', [$status]));
+        $this->assertSame('paid', $this->invokePrivate('mapMeSombStatus', [$status]));
     }
 
     public static function successStatusProvider(): array
     {
         return [
-            ['SUCCESSFUL'],
+            ['SUCCESS'],
             ['success'],
+            ['succeeded'],
+            ['SUCCESSFUL'],
             ['Completed'],
             ['paid'],
         ];
@@ -37,9 +39,9 @@ class MobileMoneyPaymentServiceTest extends TestCase
     /**
      * @dataProvider failureStatusProvider
      */
-    public function test_map_campay_status_returns_failed_for_failure_values(string $status): void
+    public function test_map_mesomb_status_returns_failed_for_failure_values(string $status): void
     {
-        $this->assertSame('failed', $this->invokePrivate('mapCampayStatus', [$status]));
+        $this->assertSame('failed', $this->invokePrivate('mapMeSombStatus', [$status]));
     }
 
     public static function failureStatusProvider(): array
@@ -53,54 +55,80 @@ class MobileMoneyPaymentServiceTest extends TestCase
         ];
     }
 
-    public function test_map_campay_status_falls_back_based_on_request_acceptance(): void
+    /**
+     * @dataProvider pendingStatusProvider
+     */
+    public function test_map_mesomb_status_returns_processing_for_pending_values(string $status): void
     {
-        $this->assertSame('processing', $this->invokePrivate('mapCampayStatus', ['PENDING', true]));
-        $this->assertSame('failed', $this->invokePrivate('mapCampayStatus', ['PENDING', false]));
-        $this->assertSame('failed', $this->invokePrivate('mapCampayStatus', [null]));
+        $this->assertSame('processing', $this->invokePrivate('mapMeSombStatus', [$status]));
+    }
+
+    public static function pendingStatusProvider(): array
+    {
+        return [
+            ['PENDING'],
+            ['pending'],
+            ['PROCESSING'],
+        ];
+    }
+
+    public function test_map_mesomb_status_returns_null_for_unknown_values(): void
+    {
+        $this->assertNull($this->invokePrivate('mapMeSombStatus', ['WEIRD']));
+        $this->assertNull($this->invokePrivate('mapMeSombStatus', [null]));
+    }
+
+    /**
+     * @dataProvider payerProvider
+     */
+    public function test_mesomb_payer_strips_country_code_and_non_digits(string $input, string $expected): void
+    {
+        $this->assertSame($expected, $this->invokePrivate('mesombPayer', [$input]));
+    }
+
+    public static function payerProvider(): array
+    {
+        return [
+            ['+237 6 77 12 34 56', '677123456'],
+            ['(237)677-123-456', '677123456'],
+            ['677123456', '677123456'],
+            ['+237677123456', '677123456'],
+        ];
     }
 
     /**
      * @dataProvider phoneProvider
      */
-    public function test_campay_phone_strips_non_digits_and_leading_plus(string $input, string $expected): void
+    public function test_normalize_cameroon_phone_returns_plus_237_format(string $input, string $expected): void
     {
-        $this->assertSame($expected, $this->invokePrivate('campayPhone', [$input]));
+        $this->assertSame($expected, $this->invokePrivate('normalizeCameroonPhone', [$input]));
     }
 
     public static function phoneProvider(): array
     {
         return [
-            ['+237 6 77 12 34 56', '237677123456'],
-            ['(237)677-123-456', '237677123456'],
-            ['677123456', '677123456'],
-            ['+237677123456', '237677123456'],
+            ['+237 6 77 12 34 56', '+237677123456'],
+            ['677123456', '+237677123456'],
+            ['+237677123456', '+237677123456'],
         ];
     }
 
-    public function test_campay_base_url_uses_explicit_override(): void
+    /**
+     * @dataProvider serviceProvider
+     */
+    public function test_mesomb_service_maps_operator(string $input, string $expected): void
     {
-        putenv('CAMPAY_BASE_URL=https://custom.example.com/');
-        putenv('CAMPAY_ENV');
-
-        try {
-            $this->assertSame('https://custom.example.com', $this->invokePrivate('campayBaseUrl', []));
-        } finally {
-            putenv('CAMPAY_BASE_URL');
-        }
+        $this->assertSame($expected, $this->invokePrivate('mesombService', [$input]));
     }
 
-    public function test_campay_base_url_switches_on_environment(): void
+    public static function serviceProvider(): array
     {
-        putenv('CAMPAY_BASE_URL');
-
-        putenv('CAMPAY_ENV=PROD');
-        $this->assertSame('https://www.campay.net', $this->invokePrivate('campayBaseUrl', []));
-
-        putenv('CAMPAY_ENV=DEV');
-        $this->assertSame('https://demo.campay.net', $this->invokePrivate('campayBaseUrl', []));
-
-        putenv('CAMPAY_ENV');
-        $this->assertSame('https://demo.campay.net', $this->invokePrivate('campayBaseUrl', []));
+        return [
+            ['mtn', 'MTN'],
+            ['MTN', 'MTN'],
+            ['orange', 'ORANGE'],
+            ['Orange', 'ORANGE'],
+            ['unknown', 'MTN'],
+        ];
     }
 }

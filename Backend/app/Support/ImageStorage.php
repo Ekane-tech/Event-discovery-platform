@@ -10,6 +10,15 @@ use Throwable;
 
 class ImageStorage
 {
+    /**
+     * Disk used for every image the app stores.
+     *
+     * This is intentionally the 'public' disk and never changes: the disk
+     * itself is env-switchable (see config/filesystems.php). When R2_BUCKET
+     * + R2_ENDPOINT + R2_* credentials are set on Railway, 'public' IS
+     * Cloudflare R2 (S3-compatible, no egress fees) and all images go there
+     * automatically — no operator-side code changes needed.
+     */
     public const DISK = 'public';
 
     /**

@@ -49,7 +49,7 @@ class Payment extends Model
     /**
      * Credit the organizer's wallet when a payment flips to 'paid', and reverse
      * it on refund/cancellation. Centralised here so every payment path
-     * (controller + NotchPay service) is covered, idempotently.
+     * (controller + payment service) is covered, idempotently.
      */
     protected static function booted(): void
     {

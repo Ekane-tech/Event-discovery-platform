@@ -105,7 +105,7 @@ export default function PaymentPage() {
 
   const OPERATORS = useMemo(() => OPERATOR_DEFS.map((item) => ({ ...item, hint: t(item.hintKey, item.hintDefault) })), [t])
   const selectedOperator = useMemo(() => OPERATORS.find((item) => item.value === operator), [OPERATORS, operator])
-  const providerIsLive = payment?.provider === 'notchpay'
+  const providerIsLive = ['mesomb', 'notchpay'].includes(payment?.provider)
   const canCheckStatus = payment && ['pending', 'processing'].includes(payment.status)
   const paymentLocked = payment && ['processing', 'paid'].includes(payment.status)
 

@@ -146,7 +146,7 @@ export default function AdminPayoutsPage() {
     <PageContainer>
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <span className="inline-flex rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700">{t('admin.payouts.badge', 'Finance')}</span>
+          <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">{t('admin.payouts.badge', 'Finance')}</span>
           <h1 className="mt-2 text-2xl font-black text-slate-950">{t('admin.payouts.title', 'Payouts')}</h1>
           <p className="mt-1 text-sm text-slate-600">{t('admin.payouts.subtitle', 'Review organizer withdrawal requests, approve them, and record manual payments.')}</p>
         </div>
@@ -181,7 +181,7 @@ export default function AdminPayoutsPage() {
             key={f} 
             type="button" 
             onClick={() => setFilter(f)} 
-            className={`rounded-full px-4 py-2 text-sm font-bold transition ${filter === f ? 'bg-teal-700 text-white' : 'bg-slate-100 text-slate-600 hover:bg-teal-50 hover:text-teal-700'}`}
+            className={`rounded-full px-4 py-2 text-sm font-bold transition ${filter === f ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700'}`}
           >
             {t(`admin.payouts.filter_${f}`, f)}
           </button>
@@ -202,7 +202,7 @@ export default function AdminPayoutsPage() {
       {settings && (
         <Card className="mt-6">
           <h2 className="mb-4 flex items-center gap-2 text-xl font-black text-slate-950">
-            <SettingsIcon className="h-5 w-5 text-teal-700" /> 
+            <SettingsIcon className="h-5 w-5 text-emerald-700" /> 
             {t('admin.payouts.settingsTitle', 'Platform settings')}
           </h2>
           <form onSubmit={saveSettings} className="grid gap-4 sm:grid-cols-3">
