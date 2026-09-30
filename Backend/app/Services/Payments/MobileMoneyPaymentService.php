@@ -146,6 +146,21 @@ class MobileMoneyPaymentService
                 'error' => $e->getMessage(),
             ]);
             throw $e;
+        } catch (\App\Services\Payments\MeSomb\MeSombApiException $e) {
+            // TEMPORAIRE: Logger les détails de l'erreur MeSomb pour le débogage
+            Log::error('MeSomb API error details.', [
+                'payment_id' => $payment->id,
+                'message' => $e->getMessage(),
+                'http_status' => $e->httpStatus,
+                'api_code' => $e->apiCode,
+            ]);
+            
+            // Échouer le paiement avec le message détaillé
+            return $this->failPayment(
+                $payment,
+                'MeSomb error: '.$e->getMessage().' (HTTP '.$e->httpStatus.', Code: '.$e->apiCode.')',
+                $e
+            );
         } catch (\Throwable $e) {
             Log::error('MeSomb collect: unexpected failure, will retry.', [
                 'payment_id' => $payment->id,
