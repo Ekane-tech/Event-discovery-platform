@@ -21,12 +21,14 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        // Never leak database internals (SQL, host, credentials, schema) to API
-        // clients, even when APP_DEBUG is enabled.
+        // TEMPORAIRE: Exposer les erreurs SQL pour le débogage
+        // À remettre à false une fois le problème résolu
         $exceptions->render(function (QueryException $e, Request $request) {
             if ($request->is('api/*') || $request->expectsJson()) {
                 return response()->json([
-                    'message' => 'A database error occurred while processing your request.',
+                    'message' => 'Database error: '.$e->getMessage(),
+                    'sql' => $e->getSql(),
+                    'bindings' => $e->getBindings(),
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
 
