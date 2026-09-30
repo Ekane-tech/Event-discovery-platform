@@ -60,21 +60,26 @@ class RegistrationController extends Controller
         $this->ensureCapacityIsAvailable($event, $quantity);
         $this->ensureTicketTypeCapacityIsAvailable($ticketType, $quantity);
 
-        $pendingRegistration = Registration::query()
+        $existingRegistrations = Registration::query()
             ->where('user_id', $request->user()->id)
             ->where('event_id', $event->id)
-            ->where('status', 'pending_payment')
-            ->latest()
-            ->first();
+            ->whereIn('status', ['confirmed', 'pending_payment'])
+            ->get();
 
-        if ($pendingRegistration) {
+        $existingTicketCount = $existingRegistrations->count();
+        $pendingPaymentCount = $existingRegistrations->where('status', 'pending_payment')->count();
+
+        if ($pendingPaymentCount > 0) {
             return response()->json([
-                'message' => 'You already have a pending payment for this event.',
+                'message' => 'You already have a pending payment for this event. Please complete or cancel it before buying more tickets.',
                 'registration' => new RegistrationResource(
-                    $pendingRegistration->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
+                    $existingRegistrations->first()->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
                 ),
             ], 202);
         }
+
+        // Allow multiple registrations but inform user about existing tickets
+        $hasExistingTickets = $existingTicketCount > 0;
 
         $isPaidEvent = $totalPrice > 0;
         $payment = null;
@@ -129,9 +134,17 @@ class RegistrationController extends Controller
         }
 
         return response()->json([
-            'message' => $isPaidEvent ? 'Payment is required to complete this registration.' : 'Registered for event successfully.',
+            'message' => $isPaidEvent 
+                ? ($hasExistingTickets 
+                    ? 'Additional tickets purchased successfully. You now have '.($existingTicketCount + $quantity).' tickets for this event.' 
+                    : 'Payment is required to complete this registration.')
+                : ($hasExistingTickets 
+                    ? 'Additional tickets registered successfully. You now have '.($existingTicketCount + $quantity).' tickets for this event.' 
+                    : 'Registered for event successfully.'),
             'payment_required' => $isPaidEvent,
             'quantity' => $quantity,
+            'existing_ticket_count' => $existingTicketCount,
+            'total_ticket_count' => $existingTicketCount + $quantity,
             'registration' => new RegistrationResource(
                 $primaryRegistration->fresh()->load(['event.organizer.role', 'event.organizer.profile', 'event.category', 'event.region', 'event.division', 'event.city', 'event.images', 'payment', 'ticketType', 'checkedInBy.role', 'checkedInBy.profile'])
             ),
